@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Role } from '../../common/enums/role.enum';
 
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -27,8 +28,8 @@ export class User extends Document {
   @Prop({ type: Types.ObjectId, default: null })
   manager_id!: Types.ObjectId;
 
-  @Prop({ default: 'EMPLOYEE' })
-  role!: string;
+  @Prop({ enum: Role, default: Role.EMPLOYEE })
+  role!: Role;
 
   @Prop({ default: 'active' })
   status!: string;

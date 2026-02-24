@@ -4,8 +4,10 @@ import {
   IsOptional,
   IsDate,
   IsBoolean,
+  IsEnum,
 } from 'class-validator';
 import { Types } from 'mongoose';
+import { Role } from '../../common/enums/role.enum';
 
 export class CreateUserDto {
   @IsString()
@@ -32,8 +34,8 @@ export class CreateUserDto {
   manager_id?: Types.ObjectId;
 
   @IsOptional()
-  @IsString()
-  role?: string;
+  @IsEnum(Role)
+  role?: Role;
 
   @IsOptional()
   @IsString()
