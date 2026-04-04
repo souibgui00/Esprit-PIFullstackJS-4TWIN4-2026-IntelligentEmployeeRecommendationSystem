@@ -1,0 +1,141 @@
+{
+  "auth": {
+    "login": {
+      "description": "POST /auth/login",
+      "body": {
+        "email": "admin@test.com",
+        "password": "admin123"
+      }
+    },
+    "register": {
+      "description": "POST /auth/register",
+      "body": {
+        "name": "New Employee",
+        "email": "newuser@company.com",
+        "password": "SecurePass123!",
+        "matricule": "EMP-2026-5001",
+        "telephone": "+1-555-0100",
+        "date_embauche": "2026-02-24",
+        "department_id": "507f1f77bcf86cd799439011",
+        "role": "EMPLOYEE",
+        "status": "active"
+      }
+    }
+  },
+  "users": {
+    "create": {
+      "description": "POST /users (HR Only)",
+      "body": {
+        "name": "John Smith",
+        "email": "john.smith@company.com",
+        "password": "SecurePass123!",
+        "matricule": "EMP-2026-5001",
+        "telephone": "+1-555-0123",
+        "date_embauche": "2026-02-24",
+        "department_id": "507f1f77bcf86cd799439011",
+        "role": "MANAGER",
+        "status": "active"
+      }
+    },
+    "update": {
+      "description": "PUT /users/:id (HR/MANAGER)",
+      "body": {
+        "name": "John Smith Updated",
+        "telephone": "+1-555-9999",
+        "status": "inactive"
+      }
+    },
+    "updatePartial": {
+      "description": "PUT /users/:id (Update Only Some Fields)",
+      "body": {
+        "name": "Jane Doe",
+        "telephone": "+1-555-0199"
+      }
+    }
+  },
+  "skills": {
+    "create": {
+      "description": "POST /skills (HR/ADMIN)",
+      "body": {
+        "name": "TypeScript",
+        "description": "Advanced TypeScript and strong typing concepts",
+        "level": "Advanced"
+      }
+    },
+    "create_alternative": {
+      "description": "POST /skills - Alternative Example",
+      "body": {
+        "name": "React.js",
+        "description": "Modern Frontend Development with React",
+        "level": "Intermediate"
+      }
+    },
+    "update": {
+      "description": "PUT /skills/:id (HR/ADMIN)",
+      "body": {
+        "name": "TypeScript Expert",
+        "level": "Expert"
+      }
+    },
+    "update_full": {
+      "description": "PUT /skills/:id - Full Update",
+      "body": {
+        "name": "Advanced TypeScript",
+        "description": "Master TypeScript with advanced patterns and generics",
+        "level": "Expert"
+      }
+    }
+  },
+  "activities": {
+    "create": {
+      "description": "POST /activities (HR/ADMIN)",
+      "body": {
+        "name": "NestJS Advanced Workshop",
+        "description": "Learn advanced NestJS patterns and best practices",
+        "date": "2026-03-15T09:00:00Z",
+        "location": "Conference Room A",
+        "capacity": 30
+      }
+    },
+    "create_alternative": {
+      "description": "POST /activities - Alternative Example",
+      "body": {
+        "name": "TypeScript Fundamentals",
+        "description": "Introduction to TypeScript for beginners",
+        "date": "2026-03-20T14:00:00Z",
+        "location": "Training Room B",
+        "capacity": 25
+      }
+    },
+    "create_fullday": {
+      "description": "POST /activities - Full Day Event",
+      "body": {
+        "name": "Team Building Event",
+        "description": "Annual company team building and networking event",
+        "date": "2026-04-10T08:00:00Z",
+        "location": "Outdoor Park",
+        "capacity": 100
+      }
+    },
+    "update": {
+      "description": "PUT /activities/:id (HR/ADMIN)",
+      "body": {
+        "name": "NestJS Advanced Workshop - Updated",
+        "capacity": 50
+      }
+    },
+    "update_full": {
+      "description": "PUT /activities/:id - Full Update",
+      "body": {
+        "name": "NestJS Mastery Course",
+        "description": "Complete NestJS mastery with real-world projects",
+        "date": "2026-03-22T10:00:00Z",
+        "location": "Main Conference Hall",
+        "capacity": 60
+      }
+    }
+  },
+  "departments": {
+    "note": "GET /departments - No body required"
+  }
+}
