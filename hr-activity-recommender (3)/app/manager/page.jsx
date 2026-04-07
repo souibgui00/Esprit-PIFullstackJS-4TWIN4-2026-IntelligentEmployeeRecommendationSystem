@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { useData } from "@/lib/data-store"
 import { useAuth } from "@/lib/auth-context"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DashboardHeader } from "@/components/dashboard/header"
+import { PendingValidationsPanel } from "@/components/dashboard/PendingValidationsPanel"
+
 
 import { useNavigate } from "react-router-dom"
 import {
@@ -17,7 +20,9 @@ import {
   ArrowRight,
   BarChart3,
   Activity,
-  Eye
+  Eye,
+  ClipboardList,
+  Trophy
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +31,8 @@ export default function ManagerDashboard() {
   const { employees, activities, enrollments, departments } = useData()
   const { user } = useAuth()
   const navigate = useNavigate()
+
+  const [validationKey, setValidationKey] = useState(0) // incremented to refresh pending validations
 
   // Helper to extract a string ID from various formats
   const getDeptId = (d) => {
@@ -192,6 +199,14 @@ export default function ManagerDashboard() {
           </div>
         </div>
 
+        {/* ─── Pending Validations ────────────────────────────────────────── */}
+        <div className="card-premium p-8 space-y-2">
+          <PendingValidationsPanel
+            key={validationKey}
+            onValidated={() => setValidationKey(k => k + 1)}
+          />
+        </div>
+
         {/* Quick Actions */}
         <div className="space-y-6">
           <div className="flex items-center gap-3">
@@ -270,7 +285,8 @@ export default function ManagerDashboard() {
           </div>
         </div>
       </div>
+
+
     </div>
   )
 }
-

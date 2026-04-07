@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { SkillDistributionChart } from "@/components/dashboard/skill-distribution-chart"
 import { UpcomingActivities } from "@/components/dashboard/upcoming-activities"
+import { HrParticipationStats } from "@/components/dashboard/HrParticipationStats"
 import { 
   Users, 
   Calendar, 
@@ -104,6 +105,7 @@ export default function HRDashboard() {
         {/* HR TALENT MATRICES */}
         <div className="grid gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-10">
+            <HrParticipationStats />
             <div className="bg-white rounded-[3rem] p-8 shadow-premium border border-slate-50 overflow-hidden">
                 <div className="flex items-center gap-3 mb-8">
                     <Brain className="w-6 h-6 text-orange-500" />

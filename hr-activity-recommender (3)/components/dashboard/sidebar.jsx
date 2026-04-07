@@ -1,7 +1,6 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
@@ -25,18 +24,19 @@ import {
 } from "@/components/ui/tooltip"
 import { useState } from "react"
 
-const navItems = [
-  { href, label, icon },
-  { href, label, icon },
-  { href, label, icon },
-  { href, label, icon },
-  { href, label, icon },
-  { href, label, icon },
-]
-
 export function Sidebar() {
-  const pathname = usePathname()
+  const location = useLocation()
+  const pathname = location.pathname
   const [collapsed, setCollapsed] = useState(false)
+
+  const navItems = [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/employees", label: "Employees", icon: Users },
+    { href: "/admin/skills", label: "Skills", icon: Sparkles },
+    { href: "/admin/activities", label: "Activities", icon: Calendar },
+    { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+    { href: "/admin/settings", label: "Settings", icon: Settings },
+  ]
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -67,7 +67,7 @@ export function Sidebar() {
 
             const linkContent = (
               <Link
-                href={item.href}
+                to={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive

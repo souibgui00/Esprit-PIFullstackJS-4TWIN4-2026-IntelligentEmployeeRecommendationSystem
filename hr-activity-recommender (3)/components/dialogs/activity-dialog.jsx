@@ -36,6 +36,7 @@ export function ActivityDialog({ open, onOpenChange, activity, mode }) {
     capacity: 20,
     status: "open",
     level: "beginner",
+    intent: "development",
   })
   const [selectedSkillIds, setSelectedSkillIds] = useState([])
   const [addSkillValue, setAddSkillValue] = useState("")
@@ -62,6 +63,7 @@ export function ActivityDialog({ open, onOpenChange, activity, mode }) {
         capacity: activity.capacity ?? 20,
         status: activity.status || "open",
         level: activity.level || "beginner",
+        intent: activity.intent || "development",
       })
       setSelectedSkillIds(skills)
     } else {
@@ -74,6 +76,7 @@ export function ActivityDialog({ open, onOpenChange, activity, mode }) {
         capacity: 20,
         status: "open",
         level: "beginner",
+        intent: "development",
       })
       setSelectedSkillIds([])
     }
@@ -109,6 +112,7 @@ export function ActivityDialog({ open, onOpenChange, activity, mode }) {
         status: formData.status,
         skillsCovered: selectedSkillIds,
         level: formData.level,
+        intent: formData.intent,
       }
 
       if (mode === "create") {
@@ -225,18 +229,34 @@ export function ActivityDialog({ open, onOpenChange, activity, mode }) {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="form-label">Level</Label>
-              <Select value={formData.level} onValueChange={(v) => setFormData((p) => ({ ...p, level: v }))}>
-                <SelectTrigger className="form-input h-12">
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="form-label">Level</Label>
+                <Select value={formData.level} onValueChange={(v) => setFormData((p) => ({ ...p, level: v }))}>
+                  <SelectTrigger className="form-input h-12">
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="form-label">Recommendation Intent</Label>
+                <Select value={formData.intent} onValueChange={(v) => setFormData((p) => ({ ...p, intent: v }))}>
+                  <SelectTrigger className="form-input h-12">
+                    <SelectValue placeholder="Select intent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development (Find skill gaps)</SelectItem>
+                    <SelectItem value="performance">Performance (Find experts)</SelectItem>
+                    <SelectItem value="balanced">Balanced (Mix of both)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-4 pt-4 border-t border-slate-100">

@@ -3,31 +3,32 @@
 import React from "react"
 
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/lib/auth-context"
-
-
-
 
 export function AuthGuard({ children, allowedRoles }) {
   const { user, isAuthenticated } = useAuth()
-  const router = useRouter()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/login")
+      navigate("/login")
       return
     }
 
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {
       // Redirect to appropriate dashboard based on role
-      if (user.role === "employee") {
-        router.push("/employee")
+      const lowerRole = (user.role || "").toLowerCase()
+      if (lowerRole === "employee") {
+        navigate("/employee")
+      } else if (lowerRole === "manager") {
+         navigate("/manager")
       } else {
-        router.push("/admin")
+        navigate("/admin")
       }
     }
-  }, [isAuthenticated, user, allowedRoles, router])
+  }, [isAuthenticated, user, allowedRoles, navigate])
+
 
   if (!isAuthenticated) {
     return (

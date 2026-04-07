@@ -1,0 +1,423 @@
+{
+  "fixedCount": 0,
+  "mohamedSkills": [
+    {
+      "skillId": "69a65d1524df5f8ade495ffa",
+      "level": "beginner",
+      "score": 40,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:57.710Z",
+      "_id": "69c66ea95588db0dddaf83cd"
+    },
+    {
+      "skillId": "69a65d1524df5f8ade495ffb",
+      "level": "beginner",
+      "score": 39,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:57.855Z",
+      "_id": "69c66ea95588db0dddaf83d5"
+    },
+    {
+      "skillId": "69a65d1524df5f8ade495ffc",
+      "level": "beginner",
+      "score": 38,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:58.001Z",
+      "_id": "69c66eaa5588db0dddaf83df"
+    },
+    {
+      "skillId": "69a65d1524df5f8ade495ffd",
+      "level": "beginner",
+      "score": 37,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:58.148Z",
+      "_id": "69c66eaa5588db0dddaf83eb"
+    },
+    {
+      "skillId": "69a65d1524df5f8ade495ffe",
+      "level": "beginner",
+      "score": 36,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:58.327Z",
+      "_id": "69c66eaa5588db0dddaf83f9"
+    },
+    {
+      "skillId": "69a65d1524df5f8ade496001",
+      "level": "beginner",
+      "score": 30,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:58.473Z",
+      "_id": "69c66eaa5588db0dddaf8409"
+    },
+    {
+      "skillId": "69a65d1624df5f8ade496004",
+      "level": "beginner",
+      "score": 40,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:58.613Z",
+      "_id": "69c66eaa5588db0dddaf841b"
+    },
+    {
+      "skillId": "69a65d1624df5f8ade496006",
+      "level": "beginner",
+      "score": 42,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:58.760Z",
+      "_id": "69c66eaa5588db0dddaf842f"
+    },
+    {
+      "skillId": "69a7ef50da43838dcf027775",
+      "level": "beginner",
+      "score": 41,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:58.906Z",
+      "_id": "69c66eaa5588db0dddaf8445"
+    },
+    {
+      "skillId": "69c35744938667ce6c56f6f5",
+      "level": "beginner",
+      "score": 35,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:59.058Z",
+      "_id": "69c66eab5588db0dddaf845d"
+    },
+    {
+      "skillId": "69c35744938667ce6c56f6f6",
+      "level": "beginner",
+      "score": 36,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:59.210Z",
+      "_id": "69c66eab5588db0dddaf8477"
+    },
+    {
+      "skillId": "69c35744938667ce6c56f6f7",
+      "level": "beginner",
+      "score": 37,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:59.357Z",
+      "_id": "69c66eab5588db0dddaf8493"
+    },
+    {
+      "skillId": "69c35744938667ce6c56f6f9",
+      "level": "beginner",
+      "score": 39,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:59.502Z",
+      "_id": "69c66eab5588db0dddaf84b1"
+    },
+    {
+      "skillId": "69c35744938667ce6c56f6fb",
+      "level": "beginner",
+      "score": 35,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:59.661Z",
+      "_id": "69c66eab5588db0dddaf84d1"
+    },
+    {
+      "skillId": "69c59177ec671da99c220529",
+      "level": "beginner",
+      "score": 43,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:59.803Z",
+      "_id": "69c66eab5588db0dddaf84f3"
+    },
+    {
+      "skillId": "69c653b47e89ef7640c18373",
+      "level": "beginner",
+      "score": 40,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:48:59.953Z",
+      "_id": "69c66eab5588db0dddaf8517"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18375",
+      "level": "beginner",
+      "score": 33,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:00.106Z",
+      "_id": "69c66eac5588db0dddaf853d"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18377",
+      "level": "beginner",
+      "score": 35,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:00.719Z",
+      "_id": "69c66eac5588db0dddaf8565"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18379",
+      "level": "beginner",
+      "score": 37,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:00.863Z",
+      "_id": "69c66eac5588db0dddaf858f"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c1837b",
+      "level": "beginner",
+      "score": 33,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:01.009Z",
+      "_id": "69c66ead5588db0dddaf85bb"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c1837d",
+      "level": "beginner",
+      "score": 35,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:01.577Z",
+      "_id": "69c66ead5588db0dddaf85e9"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c1837f",
+      "level": "beginner",
+      "score": 37,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:01.722Z",
+      "_id": "69c66ead5588db0dddaf8619"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18381",
+      "level": "beginner",
+      "score": 30,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:02.183Z",
+      "_id": "69c66eae5588db0dddaf864b"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18383",
+      "level": "beginner",
+      "score": 32,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:02.724Z",
+      "_id": "69c66eae5588db0dddaf867f"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18385",
+      "level": "beginner",
+      "score": 34,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:02.933Z",
+      "_id": "69c66eae5588db0dddaf86b5"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18387",
+      "level": "beginner",
+      "score": 36,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:03.077Z",
+      "_id": "69c66eaf5588db0dddaf86ed"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c18389",
+      "level": "beginner",
+      "score": 38,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:03.217Z",
+      "_id": "69c66eaf5588db0dddaf8727"
+    },
+    {
+      "skillId": "69c653b57e89ef7640c1838b",
+      "level": "beginner",
+      "score": 34,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 0,
+      "etat": "draft",
+      "lastUpdated": "2026-03-27T11:49:03.356Z",
+      "_id": "69c66eaf5588db0dddaf8763"
+    },
+    {
+      "level": "beginner",
+      "score": 25,
+      "auto_eval": 0,
+      "hierarchie_eval": 0,
+      "progression": 10,
+      "etat": "draft",
+      "lastUpdated": "2026-04-07T22:08:00.140Z",
+      "_id": "69d58040b9e491b5743a35fe"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T20:10:55.313Z",
+      "_id": "69d564cff123dd8347c44aea"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T20:10:56.180Z",
+      "_id": "69d564d0f123dd8347c44b6f"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 5,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T20:22:47.556Z",
+      "_id": "69d56797f484a94ba5c0c57a"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 5,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T20:22:48.499Z",
+      "_id": "69d56798f484a94ba5c0c607"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T20:45:20.025Z",
+      "_id": "69d56ce013fbaba29cc40186"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T20:45:21.264Z",
+      "_id": "69d56ce113fbaba29cc40379"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T22:13:15.573Z",
+      "_id": "69d5817bb9e491b5743ebe30"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T22:13:16.298Z",
+      "_id": "69d5817cb9e491b5743ec1d6"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T22:19:17.028Z",
+      "_id": "69d582e5ee118b08760d732f"
+    },
+    {
+      "level": "beginner",
+      "score": 0,
+      "auto_eval": 0,
+      "hierarchie_eval": 4,
+      "progression": 0,
+      "etat": "validated",
+      "lastUpdated": "2026-04-07T22:19:17.720Z",
+      "_id": "69d582e5ee118b08760d75e3"
+    }
+  ]
+}

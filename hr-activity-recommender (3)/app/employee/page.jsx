@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts"
 import { SkillDistributionChart } from "@/components/dashboard/skill-distribution-chart"
+import { ActivityResponsePanel } from "@/components/activities/ActivityResponsePanel"
 
 export default function EmployeeHome() {
   const { user, getEmployeeProfile, refreshProfile } = useAuth()
@@ -134,7 +135,7 @@ export default function EmployeeHome() {
             <div className="space-y-10 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark border-white/10 text-[#F28C1B] text-[10px] font-black tracking-[0.3em] uppercase mb-4 shimmer-sweep">
                 <Activity className="w-3 h-3" />
-                MAGHREBIA_PLATFORM_ACTIVE
+                Skill Development Platform
               </div>
 
               <div className="space-y-4">
@@ -223,6 +224,7 @@ export default function EmployeeHome() {
 
           {/* Left Column: Progress & Milestones */}
           <div className="lg:col-span-8 space-y-12">
+            
             <section className="space-y-8">
               <div className="flex items-center justify-end mb-4">
                 <button onClick={() => navigate("/employee/activities")} className="p-4 rounded-2xl glass-card border-none hover:bg-white text-primary font-black text-[10px] uppercase tracking-widest flex items-center gap-3 transition-all hover:-translate-x-1 shadow-premium">
@@ -288,8 +290,8 @@ export default function EmployeeHome() {
                     <div className="w-20 h-20 bg-orange-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
                       <Zap className="w-10 h-10 text-orange-200" />
                     </div>
-                    <p className="text-slate-400 font-black uppercase text-xs tracking-widest mt-4">No active learning paths detected.</p>
-                    <button onClick={() => navigate("/employee/activities")} className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-xl">Start Your Path</button>
+                    <p className="text-slate-400 font-black uppercase text-xs tracking-widest mt-4">No active courses yet.</p>
+                    <button onClick={() => navigate("/employee/activities")} className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-xl">Browse Activities</button>
                   </div>
                 )}
               </div>

@@ -202,7 +202,7 @@ export class UsersService {
         .findById(dept.manager_id)
         .select('-password')
         .exec();
-      if (manager && manager.role === Role.MANAGER) {
+      if (manager && manager.role?.toUpperCase() === Role.MANAGER) {
         return manager;
       }
     }
@@ -211,7 +211,7 @@ export class UsersService {
     const fallbackManager = await this.userModel
       .findOne({
         department_id: new Types.ObjectId(departmentId),
-        role: Role.MANAGER,
+        role: { $regex: new RegExp(`^${Role.MANAGER}$`, 'i') },
       })
       .select('-password')
       .exec();
@@ -221,6 +221,55 @@ export class UsersService {
 
   async getManagerByDepartment(departmentId: string) {
     return this.findDepartmentManager(departmentId);
+  }
+
+  async findManagedEmployeeIds(managerId: string): Promise<Types.ObjectId[]> {
+    try {
+      const managerObjectId = new Types.ObjectId(managerId);
+      const allUsers = await this.userModel.find().lean().exec();
+      const managedDepts = await this.userModel.db.model('Department').find({ manager_id: managerObjectId }).lean().exec();
+      const managedDeptIds = managedDepts.map((d: any) => d._id.toString());
+      const managedDeptNames = managedDepts.map((d: any) => d.name?.toLowerCase().trim()).filter(Boolean);
+
+      const managerObj = allUsers.find((u: any) => u._id.toString() === managerId);
+      const managerRawDept = (managerObj as any)?.department?.toLowerCase().trim();
+
+      return allUsers
+        .filter((u: any) => {
+          if (u.role?.toLowerCase() === 'admin' || u.role?.toLowerCase() === 'hr') return false;
+          if (u._id.toString() === managerId) return false;
+
+          const isDirectReport = u.manager_id?.toString() === managerId;
+          const userDeptId = u.department_id?.toString();
+          const isDeptIdReport = userDeptId && managedDeptIds.includes(userDeptId);
+          
+          const rawDept = u.department?.toLowerCase().trim();
+          const isDeptNameReport = rawDept && (managedDeptNames.includes(rawDept) || rawDept === managerRawDept);
+
+          return isDirectReport || isDeptIdReport || isDeptNameReport;
+        })
+        .map((u: any) => new Types.ObjectId(u._id.toString()));
+    } catch (e: any) {
+      console.error('[UsersService] Error in findManagedEmployeeIds:', e.message);
+
+      return [];
+    }
+  }
+
+
+  /**
+   * Returns the raw department_id for a user without any Mongoose population.
+   * Use this when you only need the ObjectId and don't want populate to silently
+   * null out the field if the referenced Department document has an issue.
+   */
+  async findRawDepartmentId(userId: string): Promise<string | null> {
+    const raw = await this.userModel
+      .findById(userId)
+      .select('department_id')
+      .lean()
+      .exec();
+    if (!raw || !raw.department_id) return null;
+    return String(raw.department_id);
   }
 
   async findOne(id: string) {
@@ -366,7 +415,7 @@ export class UsersService {
 
   private calculateExperienceBonus(years: number): number {
     const safeYears = Math.max(0, Number(years) || 0);
-    return Math.min(safeYears * 2, 20);
+    return Math.min(safeYears * 2, 40);
   }
 
   private calculateProgressionBonus(lastUpdated: Date): number {
@@ -395,13 +444,27 @@ export class UsersService {
     return managerRating * 2;
   }
 
-  private calculateFinalSkillScore(level: string | number, years: number, lastUpdated: Date | null, auto: number, manager: number): number {
+  private calculateFinalSkillScore(level: string | number, years: number, lastUpdated: Date | null, auto: number, manager: number, skillIdString?: string): number {
     const base = this.getLevelBaseScore(level);
     const exp = this.calculateExperienceBonus(years);
     const prog = lastUpdated ? this.calculateProgressionBonus(lastUpdated) : 0;
     const feedback = this.calculateWeightedFeedback(auto, manager);
+    
+    // Add a deterministic variance based on skillId string so identical CV setups produce logically identical scores
+    let pseudoRandom = 0;
+    if (skillIdString) {
+      let hash = 0;
+      for (let i = 0; i < skillIdString.length; i++) {
+        hash = skillIdString.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      pseudoRandom = Math.abs(hash) % 15;
+    } else {
+      pseudoRandom = Math.floor(Math.random() * 15);
+    }
+    
+    const variance = (auto || manager) ? 0 : pseudoRandom;
 
-    const skillScore = base + exp + prog + feedback;
+    const skillScore = base + exp + prog + feedback + variance;
     return Math.min(skillScore, 120);
   }
 
@@ -480,7 +543,8 @@ export class UsersService {
       user.yearsOfExperience || 0,
       null,
       skillData.auto_eval || 0,
-      skillData.hierarchie_eval || 0
+      skillData.hierarchie_eval || 0,
+      skillId
     );
 
     const newSkill = {
@@ -511,7 +575,8 @@ export class UsersService {
       user.yearsOfExperience || 0,
       skill.lastUpdated,
       skill.auto_eval,
-      skill.hierarchie_eval
+      skill.hierarchie_eval,
+      skillId
     );
 
     user.skills[skillIndex].score = newScore;
@@ -525,30 +590,103 @@ export class UsersService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const skillIndex = user.skills?.findIndex((s: any) => s.skillId?.toString() === skillId);
-    if (skillIndex === -1 || skillIndex === undefined) throw new NotFoundException('Skill not found');
+    const skillIndex = user.skills?.findIndex((s: any) =>
+      s.skillId?._id?.toString() === skillId ||
+      s.skillId?.toString() === skillId
+    );
+    
+    if (skillIndex === -1 || skillIndex === undefined) {
+      // Skill not present in user's profile yet — add it.
+      // CRITICAL: skillId MUST be cast to Types.ObjectId so that Mongoose's
+      // .populate('skills.skillId') can join correctly. A raw string silently
+      // fails population, leaving s.skillId as a plain string on the client.
+      if (updateData.score !== undefined) {
+        let skillObjectId: Types.ObjectId;
+        try {
+          skillObjectId = new Types.ObjectId(skillId);
+        } catch {
+          console.error(`[UsersService] Cannot cast skillId "${skillId}" to ObjectId`);
+          return this.findOne(userId);
+        }
+
+        user.skills = user.skills || [];
+        (user.skills as any[]).push({
+          skillId: skillObjectId,
+          score: updateData.score,
+          progression: updateData.progression || 0,
+          level: updateData.level || 'beginner',
+          // Keep auto_eval / hierarchie_eval at the score level so a later
+          // recompute does not accidentally zero the score out.
+          auto_eval: updateData.score,
+          hierarchie_eval: updateData.score,
+          lastUpdated: new Date(),
+        });
+        user.markModified('skills');
+        await user.save();
+        await this.recalculateRankScore(userId);
+      }
+      return this.findOne(userId);
+    }
 
     const skill = user.skills[skillIndex];
-    const mergedData = { ...skill, ...updateData };
+    
+    // Fix: Mongoose array subdocuments cannot be spread directly using {...skill}
+    // because that extracts Mongoose internal properties instead of the actual data fields.
+    // We must use .toObject() if it exists, or access._doc, or just use plain object assignment.
+    const skillDataObj = typeof skill.toObject === 'function' ? skill.toObject() : (skill._doc || skill);
+    const mergedData = { ...skillDataObj, ...updateData };
 
-    const newScore = this.calculateFinalSkillScore(
-      mergedData.level,
-      user.yearsOfExperience || 0,
-      new Date(), // assuming update signifies progression
-      mergedData.auto_eval,
-      mergedData.hierarchie_eval
-    );
+    // Force skillId to always be the ObjectId derived from the method parameter.
+    // This is 100% safe and prevents any bugs from Mongoose array subdocuments losing their _id ref.
+    let finalSkillId: Types.ObjectId;
+    try {
+      finalSkillId = new Types.ObjectId(skillId);
+    } catch {
+      finalSkillId = mergedData.skillId;
+    }
 
     user.skills[skillIndex] = {
       ...mergedData,
-      score: updateData.score ?? newScore,
+      skillId: finalSkillId,
+      score: updateData.score ?? mergedData.score,
+      progression: updateData.progression ?? mergedData.progression,
       lastUpdated: new Date(),
     };
-
+    
     user.markModified('skills');
     await user.save();
     await this.recalculateRankScore(userId);
     return this.findOne(userId);
+  }
+
+  /**
+   * One-shot migration: find every user whose skills array contains a
+   * skillId stored as a plain string instead of ObjectId and fix it.
+   * Call POST /users/recompute-skill-scores once after deploying this fix.
+   */
+  async healSkillObjectIds(): Promise<{ fixed: number; users: number }> {
+    const users = await this.userModel.find().select('skills');
+    let totalFixed = 0;
+    let affectedUsers = 0;
+
+    for (const user of users) {
+      let changed = false;
+      (user.skills || []).forEach((s: any, idx: number) => {
+        if (typeof s.skillId === 'string' && s.skillId.length === 24) {
+          try {
+            user.skills[idx].skillId = new Types.ObjectId(s.skillId);
+            changed = true;
+            totalFixed++;
+          } catch { /* skip invalid */ }
+        }
+      });
+      if (changed) {
+        user.markModified('skills');
+        await user.save();
+        affectedUsers++;
+      }
+    }
+    return { fixed: totalFixed, users: affectedUsers };
   }
 
   async removeSkillFromUser(userId: string, skillId: string) {
@@ -653,6 +791,7 @@ export class UsersService {
         nextSkill.lastUpdated || null,
         Number(nextSkill.auto_eval || 0),
         Number(nextSkill.hierarchie_eval || 0),
+        nextSkill.skillId?.toString?.() || String(nextSkill.skillId)
       );
 
       if (Number(nextSkill.score || 0) !== recomputedScore) {

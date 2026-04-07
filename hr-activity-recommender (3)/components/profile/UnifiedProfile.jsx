@@ -36,7 +36,7 @@ export default function UnifiedProfile() {
     const role = user?.role?.toLowerCase() || "employee"
 
     // Role-specific data resolution
-    const employeeProfile = employees.find(e => e.userId === user?.id) || user
+    const employeeProfile = employees.find(e => e.id === user?.id || e._id === user?.id) || user
 
     return (
         <div className="flex flex-col bg-[#F8FAFC] min-h-screen">
@@ -142,6 +142,7 @@ export default function UnifiedProfile() {
                                 activities={activities} 
                                 user={user} 
                                 departments={departments} 
+                                skills={skills}
                                 onEvalClick={(skill) => {
                                     setSelectedSkill(skill)
                                     setEvalScore(skill.score || skill.proficiencyScore || 50)
@@ -166,9 +167,18 @@ export default function UnifiedProfile() {
                             </div>
                         </div>
 
-                        {evaluations?.filter(e => e.employeeId === (user?.userId || user?.id)).map(ev => {
-                            const act = ev.activityId ? activities.find(a => a.id === ev.activityId) : null
-                            const skill = skills.find(s => s.id === ev.skillId)
+                        {evaluations?.filter(e => {
+                            const eId = String(e.employeeId?._id || e.employeeId || "");
+                            const uId = String(user?.userId || user?.id || "");
+                            return eId === uId;
+                        }).map(ev => {
+                            const actId = ev.activityId?._id || ev.activityId;
+                            const act = actId ? activities.find(a => a.id === actId) : null;
+                            
+                            // Get the most relevant skill from the evaluation if available
+                            const firstSkillId = ev.skillEvaluations?.[0]?.skillId?._id || ev.skillEvaluations?.[0]?.skillId || ev.skillId;
+                            const skill = skills.find(s => s.id === firstSkillId);
+
                             return (
                                 <Card key={ev.id || ev._id} className="p-8 border-none shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/[0.02] rounded-full -mr-16 -mt-16 group-hover:bg-primary/[0.05] transition-all"></div>
@@ -185,14 +195,14 @@ export default function UnifiedProfile() {
                                                 )}
                                             </div>
                                             <p className="text-slate-600 font-medium leading-relaxed">
-                                                "{ev.comment || "No additional comments provided."}"
+                                                "{ev.feedback || ev.comment || "No additional comments provided."}"
                                             </p>
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                 {new Date(ev.createdAt || ev.date).toLocaleDateString()} • Evaluated by Manager
                                             </p>
                                         </div>
                                         <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-6 min-w-[120px] border border-slate-100/50">
-                                            <span className="text-4xl font-black font-display text-slate-900 tracking-tighter">{ev.score}%</span>
+                                            <span className="text-4xl font-black font-display text-slate-900 tracking-tighter">{ev.overallScore ?? ev.score}%</span>
                                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Score</span>
                                         </div>
                                     </div>
@@ -200,7 +210,11 @@ export default function UnifiedProfile() {
                             )
                         })}
 
-                        {evaluations?.filter(e => e.employeeId === (user?.userId || user?.id)).length === 0 && (
+                        {evaluations?.filter(e => {
+                            const eId = String(e.employeeId?._id || e.employeeId || "");
+                            const uId = String(user?.userId || user?.id || "");
+                            return eId === uId;
+                        }).length === 0 && (
                             <div className="py-20 flex flex-col items-center justify-center text-center bg-white rounded-3xl border border-slate-100 shadow-sm">
                                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                                     <Shield className="w-8 h-8 text-slate-300" />
@@ -392,7 +406,7 @@ function RoleSummaryCard({ role, employees, activities, user, departments }) {
     }
 
     if (role === "employee") {
-        const employee = employees.find(e => e.userId === user?.id)
+        const employee = employees.find(e => e.id === user?.id || e._id === user?.id)
         const nodes = employee?.skills?.length || 0
         const calibration = nodes > 0
             ? Math.round(employee.skills.reduce((acc, s) => acc + (s.score || s.proficiencyScore || 0), 0) / nodes)
@@ -424,7 +438,7 @@ function RoleSummaryCard({ role, employees, activities, user, departments }) {
     return null
 }
 
-function RoleSpecificContent({ role, employees, activities, user, departments, onEvalClick }) {
+function RoleSpecificContent({ role, employees, activities, user, departments, skills = [], onEvalClick }) {
     if (role === "admin") {
         return (
             <div className="space-y-8">
@@ -568,7 +582,7 @@ function RoleSpecificContent({ role, employees, activities, user, departments, o
     }
 
     if (role === "employee") {
-        const employee = employees.find(e => e.userId === user?.id)
+        const employee = employees.find(e => e.id === user?.id || e._id === user?.id)
         
         return (
             <div className="space-y-10">
@@ -585,23 +599,49 @@ function RoleSpecificContent({ role, employees, activities, user, departments, o
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                    {employee?.skills?.map((s, idx) => (
+                    {employee?.skills?.map((s, idx) => {
+                        // Resolve skill name + category — handles both populated objects
+                        // and raw-string skillIds (created during manager validation).
+                        const rawSkillId = typeof s.skillId === 'object'
+                            ? String(s.skillId?._id || s.skillId?.id || '')
+                            : String(s.skillId || '')
+
+                        // Priority: populated sub-doc → skill field → catalogue lookup
+                        const catalogue = skills.find(sk => String(sk._id || sk.id) === rawSkillId)
+                        const skillName =
+                            (typeof s.skillId === 'object' ? s.skillId?.name : null) ||
+                            s.skill?.name ||
+                            catalogue?.name ||
+                            `Skill ${idx + 1}`
+
+                        const skillCategory =
+                            (typeof s.skillId === 'object' ? s.skillId?.category : null) ||
+                            s.skill?.category ||
+                            catalogue?.category ||
+                            catalogue?.type ||
+                            null
+
+                        const proficiency = Math.min(Math.round(s.score || s.proficiencyScore || 0), 100)
+
+                        return (
                         <Card key={idx} className="bg-white border-none shadow-sm p-8 group hover:shadow-xl hover:translate-y-[-4px] transition-all relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/[0.02] rounded-full -mr-12 -mt-12 group-hover:bg-primary/[0.05] transition-all"></div>
                             <div className="flex items-center justify-between mb-8">
                                 <div className="space-y-1">
-                                    <h4 className="text-xl font-black text-slate-900 tracking-tight capitalize">{s.skillId?.name || s.skill?.name || `Skill ${idx + 1}`}</h4>
-                                    <p className="text-[9px] font-black text-[#F28C1B] tracking-widest uppercase">{s.skillId?.category || s.skill?.category || "General Core"}</p>
+                                    <h4 className="text-xl font-black text-slate-900 tracking-tight capitalize">{skillName}</h4>
+                                    {skillCategory && (
+                                        <p className="text-[9px] font-black text-[#F28C1B] tracking-widest uppercase">{skillCategory}</p>
+                                    )}
                                 </div>
                                 <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center">
-                                    <Star className={cn("w-5 h-5", (s.score || s.proficiencyScore) > 70 ? "fill-[#F28C1B] text-[#F28C1B]" : "text-slate-300")} />
+                                    <Star className={cn("w-5 h-5", proficiency > 70 ? "fill-[#F28C1B] text-[#F28C1B]" : "text-slate-300")} />
                                 </div>
                             </div>
 
                             <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                                 <div>
                                     <p className="text-[7px] font-black text-slate-300 tracking-[0.2em] uppercase mb-1">Proficiency</p>
-                                    <p className="text-2xl font-black text-slate-900 tracking-tighter italic">{s.score || s.proficiencyScore || 0}%</p>
+                                    <p className="text-2xl font-black text-slate-900 tracking-tighter italic">{proficiency}%</p>
                                 </div>
                                 <Button 
                                     onClick={() => onEvalClick(s)}
@@ -613,7 +653,8 @@ function RoleSpecificContent({ role, employees, activities, user, departments, o
                                 </Button>
                             </div>
                         </Card>
-                    ))}
+                        )
+                    })}
                     
                     {/* Ghost Slot for New Skills */}
                     <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-primary/20 hover:bg-primary/[0.02] transition-all group cursor-pointer h-full min-h-[160px]">

@@ -6,6 +6,7 @@ import { Assignment } from './schema/assignment.schema';
 import { ActivitiesService } from '../activities/activities.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
+import { ParticipationsService } from '../participations/participations.service';
 import { ForwardToManagerDto } from './dto/forward-to-manager.dto';
 import { ForwardToDepartmentManagerDto } from './dto/forward-to-department-manager.dto';
 import { UsersService } from '../users/users.service';
@@ -21,6 +22,7 @@ export class AssignmentsService {
         private notificationsService: NotificationsService,
         private usersService: UsersService,
         private notificationsGateway: NotificationsGateway,
+        private participationsService: ParticipationsService,
     ) { }
 
     async create(userId: string, activityId: string, assignedBy: string): Promise<Assignment> {
@@ -193,45 +195,49 @@ export class AssignmentsService {
             } catch {
                 skippedCandidates.push({ candidateId, reason: 'Candidate not found' });
                 skippedBreakdown.candidateNotFound += 1;
-                this.logger.warn(`[ForwardToDepartmentManagers] Employee skipped: candidate not found candidateId=${candidateId}`);
+                this.logger.warn(`[ForwardToDepartmentManagers] Skipped: candidate not found candidateId=${candidateId}`);
                 continue;
             }
 
-            const rawDepartmentId = candidate?.department_id?._id || candidate?.department_id || candidate?.departmentId;
-            const departmentId = rawDepartmentId ? String(rawDepartmentId) : '';
+            // Use a raw lean query to get department_id – NOT the populated value from findOne.
+            // Mongoose silently returns null for department_id when populate can't resolve
+            // the referenced document, even if the raw ObjectId is stored correctly.
+            const departmentId = await this.usersService.findRawDepartmentId(candidateId);
+
+            this.logger.debug(
+                `[ForwardToDepartmentManagers] Candidate: "${candidate.name}" (${candidateId}) → departmentId=${departmentId}`,
+            );
+
             if (!departmentId || !Types.ObjectId.isValid(departmentId)) {
-                skippedCandidates.push({ candidateId, reason: 'Invalid or missing departmentId' });
+                skippedCandidates.push({ candidateId, reason: `"${candidate.name}" has no department assigned` });
                 skippedBreakdown.invalidDepartmentId += 1;
-                this.logger.warn(
-                    `[ForwardToDepartmentManagers] Employee skipped: invalid/missing departmentId candidateId=${candidateId} rawDepartmentId=${rawDepartmentId}`,
-                );
+                this.logger.warn(`[ForwardToDepartmentManagers] Skipped: no valid departmentId for candidateId=${candidateId}`);
                 continue;
             }
 
             const manager = await this.usersService.getManagerByDepartment(departmentId);
-            if (!manager || manager.role !== Role.MANAGER) {
-                skippedCandidates.push({ candidateId, reason: 'No valid department manager found' });
+            if (!manager) {
+                skippedCandidates.push({ candidateId, reason: `No manager found for "${candidate.name}"'s department (deptId: ${departmentId})` });
                 skippedBreakdown.managerNotFoundOrInvalidRole += 1;
-                this.logger.warn(
-                    `[ForwardToDepartmentManagers] Employee skipped: manager not found/invalid candidateId=${candidateId} departmentId=${departmentId} managerId=${manager?._id?.toString?.()} managerRole=${manager?.role}`,
-                );
+                this.logger.warn(`[ForwardToDepartmentManagers] Skipped: no manager for departmentId=${departmentId}`);
+                continue;
+            }
+
+            if (manager.role?.toUpperCase() !== Role.MANAGER) {
+                skippedCandidates.push({ candidateId, reason: `Found ${manager.name} but role is "${manager.role}", not MANAGER` });
+                skippedBreakdown.managerNotFoundOrInvalidRole += 1;
+                this.logger.warn(`[ForwardToDepartmentManagers] Skipped: role mismatch role=${manager.role}`);
                 continue;
             }
 
             const managerId = String(manager._id || '');
             if (!managerId || managerId === 'undefined') {
-                skippedCandidates.push({ candidateId, reason: 'Resolved managerId is undefined' });
+                skippedCandidates.push({ candidateId, reason: 'Manager _id is invalid' });
                 skippedBreakdown.managerNotFoundOrInvalidRole += 1;
-                this.logger.warn(
-                    `[ForwardToDepartmentManagers] Employee skipped: managerId undefined candidateId=${candidateId} departmentId=${departmentId}`,
-                );
                 continue;
             }
 
-            this.logger.debug(
-                `[ForwardToDepartmentManagers] Manager associated candidateId=${candidateId} departmentId=${departmentId} managerId=${managerId}`,
-            );
-
+            this.logger.log(`[ForwardToDepartmentManagers] Linked "${candidate.name}" → Manager "${manager.name}" (${managerId})`);
             candidateToManager.set(candidateId, managerId);
         }
 
@@ -246,7 +252,7 @@ export class AssignmentsService {
                 activityId: activityObjectId,
                 managerId: { $in: managerObjectIds },
                 type: 'recommendation',
-            }).select('userId managerId')
+            }).select('userId managerId status')
             : [];
 
         const existingPairSet = new Set(
@@ -262,8 +268,9 @@ export class AssignmentsService {
         for (const [candidateId, managerId] of candidateToManager.entries()) {
             const pairKey = `${candidateId}::${managerId}`;
             if (existingPairSet.has(pairKey)) {
+                const existing = existingAssignments.find(a => `${a.userId.toString()}::${a.managerId?.toString?.() || ''}` === pairKey);
                 skippedBreakdown.assignmentAlreadyExists += 1;
-                skippedCandidates.push({ candidateId, reason: 'Assignment already exists for employee+manager+activity' });
+                skippedCandidates.push({ candidateId, reason: `Recommendation already exists (Status: ${existing?.status || 'Active'})` });
                 this.logger.debug(
                     `[ForwardToDepartmentManagers] Duplicate assignment filtered candidateId=${candidateId} managerId=${managerId} pairKey=${pairKey}`,
                 );
@@ -296,7 +303,7 @@ export class AssignmentsService {
             const notification = await this.notificationsService.create({
                 recipientId: managerId,
                 title: 'New Skill Recommendations',
-                message: `You have 1 recommended candidate for "${activity.title}"`,
+                message: `Action Required: New recommendation for "${activity.title}". Please validate the candidate list.`,
                 type: 'recommendations_received',
                 metadata: {
                     activityId,
@@ -314,6 +321,7 @@ export class AssignmentsService {
                 candidateIds: singleCandidateIds,
                 aiScore: aiScore ?? null,
                 metadata: notification.metadata,
+                url: `/manager/recommendations`
             };
 
             const emitted = this.notificationsGateway.emitToUser(managerId, 'newNotification', notificationPayload);
@@ -423,17 +431,25 @@ export class AssignmentsService {
             return savedAssignment;
         }
 
-        const message = `You have been accepted to ${activityTitle}!`;
+        // IMPORTANT MODIFICATION: 
+        // When manager accepts, we don't finalize the assignment yet.
+        // We move it to 'notified' status so the employee can then Choice (Accept/Reject).
+        assignment.status = 'notified';
+        await assignment.save();
+
+        const managerName = (assignment.managerId as any)?.name || 'Your Manager';
+        const message = `Manager ${managerName} has recommended the activity "${activityTitle}" for you. Click to view details and join.`;
 
         try {
             const notification = await this.notificationsService.create({
                 recipientId: candidateId,
-                title: 'Recommendation Accepted',
+                title: 'Training Opportunity Identified',
                 message,
                 type: 'recommendation_accepted',
                 metadata: {
                     activityId,
                     assignmentId: id,
+                    managerId: requesterManagerId
                 },
             }, { emitRealtime: false });
 
@@ -461,5 +477,92 @@ export class AssignmentsService {
 
     async remove(id: string): Promise<void> {
         await this.assignmentModel.findByIdAndDelete(id).exec();
+    }
+
+    async employeeAccept(id: string, employeeId: string): Promise<Assignment> {
+        const assignment = await this.assignmentModel.findById(id)
+            .populate('activityId');
+        if (!assignment) throw new NotFoundException('Assignment not found');
+
+        if (assignment.userId.toString() !== employeeId) {
+            throw new ForbiddenException('You can only accept assignments meant for you');
+        }
+
+        if (assignment.status !== 'accepted') {
+            assignment.status = 'accepted';
+            await assignment.save();
+        }
+
+        const activityIdString = String((assignment.activityId as any)?._id || assignment.activityId);
+
+        // Create a real Participation record for the employee.
+        // participationsService.create() creates the DB record AND increments the seat counter.
+        try {
+            await this.participationsService.create(employeeId, activityIdString);
+            this.logger.log(`[EmployeeAccept] Participation created for user=${employeeId} activity=${activityIdString}`);
+        } catch (err: any) {
+            // If it's a MongoDB duplicate key error (11000) or explicitly 'already exists'
+            if (err?.code === 11000 || err?.message?.includes('already exists') || err?.message?.includes('Cannot re-enroll')) {
+                this.logger.log(`[EmployeeAccept] Participation already exists (or forbidden) for user=${employeeId}.`);
+            } else {
+                this.logger.error(`[EmployeeAccept] Failed to create participation: ${err.message}`);
+                throw new BadRequestException(`Failed to enroll: ${err.message}`);
+            }
+        }
+
+        // Notify the manager that the employee accepted
+        if (assignment.managerId) {
+            try {
+                const activityTitle = (assignment.activityId as any)?.title || 'the activity';
+                const employee = await this.usersService.findOne(employeeId);
+                await this.notificationsService.create({
+                    recipientId: assignment.managerId.toString(),
+                    title: '✅ Employee Accepted Training',
+                    message: `${employee?.name || 'An employee'} has accepted your recommendation for "${activityTitle}" and is now enrolled.`,
+                    type: 'activity_accepted',
+                    metadata: { assignmentId: id, activityId: activityIdString }
+                });
+            } catch (err: any) {
+                this.logger.error(`[EmployeeAccept] Failed to notify manager: ${err.message}`);
+            }
+        }
+
+        return assignment;
+    }
+
+    async employeeReject(id: string, employeeId: string, reason?: string): Promise<Assignment> {
+        const assignment = await this.assignmentModel.findById(id).populate('userId', 'name');
+        if (!assignment) throw new NotFoundException('Assignment not found');
+
+        if (assignment.userId.toString() !== employeeId) {
+            throw new ForbiddenException('You can only decline assignments meant for you');
+        }
+
+        assignment.status = 'declined';
+        assignment.reason = reason || 'Declined by employee';
+        const saved = await assignment.save();
+
+        // Notify the manager about the decline
+        if (assignment.managerId) {
+            try {
+                const activity = await this.activitiesService.findOne(assignment.activityId.toString());
+                const empName = (assignment.userId as any)?.name || 'An employee';
+                await this.notificationsService.create({
+                    recipientId: assignment.managerId.toString(),
+                    title: 'Recommendation Declined',
+                    message: `${empName} has declined the recommendation for "${activity?.title || 'Activity'}".`,
+                    type: 'activity_rejected',
+                    metadata: {
+                        assignmentId: id,
+                        activityId: assignment.activityId.toString(),
+                        reason: assignment.reason
+                    }
+                });
+            } catch (err: any) {
+                this.logger.error(`[EmployeeReject] Failed to notify manager about decline: ${err.message}`);
+            }
+        }
+
+        return saved;
     }
 }

@@ -36,6 +36,16 @@ export class Activity extends Document {
     @Prop({ default: 'beginner', enum: ['beginner', 'intermediate', 'advanced'] })
     level!: string;
 
+    /**
+     * Recommendation intent — controls who gets recommended:
+     * - 'development': recommend employees who LACK the skills (workshop, training)
+     * - 'performance': recommend employees who HAVE the skills (delivery, expert tasks)
+     * - 'balanced': recommend mid-range employees (mentoring, webinars)
+     * Auto-inferred from `type` if not explicitly set.
+     */
+    @Prop({ default: 'development', enum: ['development', 'performance', 'balanced'] })
+    intent!: string;
+
     @Prop({ default: 'pending_approval', enum: ['pending_approval', 'approved', 'rejected'] })
     workflowStatus!: string;
 
@@ -59,6 +69,9 @@ export class Activity extends Document {
 
     @Prop({ type: [String], default: [] })
     targetDepartments?: string[];
+
+    @Prop({ type: Types.ObjectId, ref: 'User', default: null })
+    organizerId?: Types.ObjectId;
 
     @Prop({
       type: [{

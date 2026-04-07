@@ -22,6 +22,12 @@ export class ParticipationsController {
         return this.participationsService.findByUser(userId);
     }
 
+    @Get(':activityId/organizer-panel')
+    async getOrganizerPanel(@Param('activityId') activityId: string) {
+        return this.participationsService.getOrganizerPanel(activityId);
+    }
+
+
     @Post(':activityId')
     async enroll(
       @Req() req: any, 
@@ -53,5 +59,61 @@ export class ParticipationsController {
     ) {
         const targetUserId = userId || req.user.userId;
         return this.participationsService.remove(targetUserId, activityId);
+    }
+
+    @Patch(':participationId/mark-complete-employee')
+    async markCompleteByEmployee(
+        @Req() req: any,
+        @Param('participationId') participationId: string
+    ) {
+        return this.participationsService.markCompleteByEmployee(participationId, req.user.userId);
+    }
+
+    @Get(':participationId/mark-complete-employee')
+    async markCompleteByEmployeeGet(
+        @Req() req: any,
+        @Param('participationId') participationId: string
+    ) {
+        return this.participationsService.markCompleteByEmployee(participationId, req.user.userId);
+    }
+
+    @Get('manager/pending-validations')
+    async getPendingValidations(@Req() req: any) {
+        return this.participationsService.getPendingManagerValidations(req.user.userId);
+    }
+
+
+
+    @Post(':activityId/organizer-report')
+    async submitOrganizerReport(
+        @Param('activityId') activityId: string,
+        @Body('report') report: any[]
+    ) {
+        return this.participationsService.submitOrganizerReport(activityId, report);
+    }
+
+
+    @Get(':participationId/validation-report')
+    async getValidationReportData(@Param('participationId') participationId: string) {
+        return this.participationsService.getValidationReportData(participationId);
+    }
+
+    @Post(':participationId/validate-report')
+    async submitManagerValidation(
+        @Req() req: any,
+        @Param('participationId') participationId: string,
+        @Body('isApproved') isApproved: boolean,
+        @Body('rating') rating: number,
+        @Body('comment') comment: string,
+        @Body('skillAssessments') skillAssessments: Record<string, boolean>
+    ) {
+        return this.participationsService.submitManagerValidation(
+            participationId,
+            req.user.userId,
+            isApproved,
+            rating,
+            comment,
+            skillAssessments || {}
+        );
     }
 }

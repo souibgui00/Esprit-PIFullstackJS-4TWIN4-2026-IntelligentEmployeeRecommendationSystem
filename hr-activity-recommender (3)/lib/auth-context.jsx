@@ -186,13 +186,12 @@ export function AuthProvider({ children }) {
       "Unassigned"
 
     const normalizeSkill = (s, index) => {
-      const skillData = (s?.skillId && typeof s.skillId === 'object') ? s.skillId : s?.skill;
-      const skillObj = skillData || {
-        name: s?.name || `Skill ${index + 1}`,
-        type: s?.type || "core",
-      }
+      const skillId = s?.skillId?._id || s?.skillId || s?._id || s?.id;
+      
+      let skillObj = (s?.skillId && typeof s.skillId === 'object') ? s.skillId : s?.skill;
 
-      const skillId =
+      const resolvedSkillId =
+        s?.skillId?._id ||
         s?.skillId ||
         s?._id ||
         s?.id ||
@@ -204,7 +203,7 @@ export function AuthProvider({ children }) {
 
       return {
         ...s,
-        skillId,
+        skillId: resolvedSkillId,
         skill: skillObj,
         level: s?.level || "beginner",
         score: s?.score ?? baseScore,

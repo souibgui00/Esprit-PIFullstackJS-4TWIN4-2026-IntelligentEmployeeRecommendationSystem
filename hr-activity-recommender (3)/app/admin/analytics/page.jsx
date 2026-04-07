@@ -62,15 +62,16 @@ export default function AdminAnalyticsPage() {
     const activeTrainings = activities?.filter(a => a.status === 'active').length || 0
     
     const skillTypes = skills?.reduce((acc, s) => {
-        const type = (s.type || 'knowledge').toLowerCase()
+        const type = (s.type || 'technique').toLowerCase()
         acc[type] = (acc[type] || 0) + 1
         return acc
-    }, { knowledge: 0, softskill: 0, knowhow: 0 })
+    }, { technique: 0, comportementale: 0, opérationnelle: 0, transverse: 0 })
 
     const pieData = [
-        { name: 'Theory', value: skillTypes.knowledge || 0 },
-        { name: 'Soft Skills', value: skillTypes.softskill || 0 },
-        { name: 'Practical', value: skillTypes.knowhow || 0 }
+        { name: 'Theory', value: skillTypes.technique || 0 },
+        { name: 'Soft Skills', value: skillTypes.comportementale || 0 },
+        { name: 'Practical', value: skillTypes.opérationnelle || 0 },
+        { name: 'Transversal', value: skillTypes.transverse || 0 }
     ]
 
     return { avgScore, skillsAtRisk, activeTrainings, pieData, totalEmps, totalSectors }

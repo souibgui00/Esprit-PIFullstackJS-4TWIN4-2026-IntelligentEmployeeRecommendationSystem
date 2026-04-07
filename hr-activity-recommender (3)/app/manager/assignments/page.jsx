@@ -321,6 +321,14 @@ export default function ManagerAssignmentsPage() {
                 const activity = findActivity(activityId)
                 if (!activity) return null
 
+                // Filter out employees who withdrew (declined) or were rejected by the manager
+                const activeAssignments = activityAssignments.filter(a => {
+                  const s = String(a.status || '').toLowerCase();
+                  return s !== 'declined' && s !== 'rejected';
+                });
+
+                if (activeAssignments.length === 0) return null; // Hide if no active participants left
+
                 return (
                   <div key={activityId} className="card-premium p-6 flex flex-col md:flex-row items-center justify-between gap-8 opacity-80 group hover:opacity-100">
                     <div className="flex items-center gap-8">
@@ -330,7 +338,7 @@ export default function ManagerAssignmentsPage() {
                       <div>
                         <h3 className="text-lg font-bold text-slate-900 leading-tight m-0">{activity.title}</h3>
                         <div className="flex items-center gap-3 mt-1.5 px-0.5">
-                          <span className="text-[10px] font-bold text-slate-500 tracking-widest">{activityAssignments.length} Units Assigned</span>
+                          <span className="text-[10px] font-bold text-slate-500 tracking-widest">{activeAssignments.length} Unit{activeAssignments.length !== 1 ? 's' : ''} Assigned</span>
                           <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
                           <span className="text-[10px] font-bold text-orange-500 tracking-widest">
                             {activity.startDate
@@ -341,19 +349,19 @@ export default function ManagerAssignmentsPage() {
                       </div>
                     </div>
                     <div className="flex -space-x-3">
-                      {activityAssignments.slice(0, 5).map((a, i) => {
+                      {activeAssignments.slice(0, 5).map((a, i) => {
                         const empId = String(a.employeeId || a.userId?._id || a.userId || "")
                         const emp = findEmployee(empId)
                         return (
-                          <Avatar key={i} className="w-11 h-11 border-[3px] border-white rounded-xl shadow-sm grayscale group-hover:grayscale-0 transition-all duration-500">
+                          <Avatar key={i} className="w-11 h-11 border-[3px] border-white rounded-xl shadow-sm grayscale group-hover:grayscale-0 transition-all duration-500" title={emp?.name}>
                             <AvatarImage src={emp?.avatar} className="object-cover" />
                             <AvatarFallback>{emp?.name?.[0] || "?"}</AvatarFallback>
                           </Avatar>
                         )
                       })}
-                      {activityAssignments.length > 5 && (
+                      {activeAssignments.length > 5 && (
                         <div className="w-11 h-11 rounded-xl bg-slate-900 text-white text-[10px] font-bold flex items-center justify-center border-[3px] border-white shadow-sm">
-                          +{activityAssignments.length - 5}
+                          +{activeAssignments.length - 5}
                         </div>
                       )}
                     </div>

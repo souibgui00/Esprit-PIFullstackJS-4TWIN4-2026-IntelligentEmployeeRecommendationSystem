@@ -13,7 +13,7 @@ import { Zap, Shield, Cpu, UserCheck } from "lucide-react"
 function RecommendationsContent() {
   const [searchParams] = useSearchParams()
   const activityId = searchParams.get("activity")
-  const { activities: storeActivities } = useData()
+  const { activities: storeActivities, employees } = useData()
 
   const [selectedActivity, setSelectedActivity] = useState(null)
   const [recommendations, setRecommendations] = useState([])
@@ -31,7 +31,7 @@ function RecommendationsContent() {
     }
   }, [activityId, storeActivities])
 
-  const handleGenerateRecommendations = async () => {
+  const handleGenerateRecommendations = async (options = {}) => {
     if (!selectedActivity) return
 
     setIsGenerating(true)
@@ -44,7 +44,8 @@ function RecommendationsContent() {
       const response = await api.get(`/activities/${selectedActivityId}/recommendations`)
       const candidates = Array.isArray(response?.candidates) ? response.candidates : []
 
-      const mappedResults = candidates.map((candidate) => {
+      // 1. Initial Mapping
+      let mappedResults = candidates.map((candidate) => {
         const normalizedScore = Math.max(0, Math.min(1, Number(candidate.score || 0)))
         return {
           id: candidate.userId,
@@ -52,14 +53,62 @@ function RecommendationsContent() {
           role: candidate.role,
           overallScore: Math.round(normalizedScore * 100),
           gap: Array.isArray(candidate.gap) ? candidate.gap : [],
+          recommendation_reason: candidate.recommendation_reason || "",
         }
       })
+
+      // 2. Post-Filtering & Re-Ranking based on Engine Options
+      if (options) {
+        // Apply Minimum Experience Filter
+        if (options.experienceFilter > 0) {
+          mappedResults = mappedResults.filter((rec) => {
+             const emp = employees?.find((e) => (e.id || e._id) === rec.id)
+             const years = emp?.yearsOfExperience || 0
+             return years >= options.experienceFilter
+          })
+        }
+
+        // Apply Logic Priorities
+        mappedResults = mappedResults.map((rec) => {
+            const emp = employees?.find((e) => (e.id || e._id) === rec.id)
+            let adjustedScore = rec.overallScore
+            const gapCount = rec.gap.length
+
+            if (options.skillPriority === 'skills') {
+                if (gapCount === 0) adjustedScore += 15
+                else adjustedScore -= (gapCount * 5)
+            } else if (options.skillPriority === 'experience') {
+                const years = emp?.yearsOfExperience || 0
+                if (years > 5) adjustedScore += 10
+                if (years > 10) adjustedScore += 10
+            } else if (options.skillPriority === 'growth') {
+                if (gapCount > 0) adjustedScore += (gapCount * 8)
+            }
+
+            // Apply priority weights globally if we want to scale expectations
+            if (options.priorityWeight > 0) {
+               // A high priority weight gives a small baseline bump to ensure high numbers get pulled up faster
+               adjustedScore += (options.priorityWeight * 0.1)
+            }
+
+            adjustedScore = Math.max(0, Math.min(100, Math.round(adjustedScore)))
+            return { ...rec, overallScore: adjustedScore }
+        })
+
+        // Sort Highest to Lowest
+        mappedResults.sort((a, b) => b.overallScore - a.overallScore)
+
+        // Trim to "Seats To Fill" limit
+        if (options.seatsToFill > 0) {
+            mappedResults = mappedResults.slice(0, options.seatsToFill)
+        }
+      }
 
       setRecommendations(mappedResults)
       setHasGenerated(true)
 
       toast.success("Analysis Complete", {
-        description: `${mappedResults.length} candidates ranked for ${selectedActivity.title}.`
+        description: `${mappedResults.length} candidates optimally ranked for ${selectedActivity.title}.`
       })
     } catch (error) {
       const message = error?.message || "Unable to generate recommendations."
@@ -110,9 +159,22 @@ function RecommendationsContent() {
         setIsForwarded(true)
         const totalForwarded = response.totalForwarded || 0
         const skipped = response.skipped || 0
-        toast.success("Suggestions Sent!", {
-          description: `Sent ${totalForwarded} people to their managers${skipped ? ` (${skipped} skipped)` : ''}.`
-        })
+        const skippedDetails = response.skippedDetails || []
+
+        if (totalForwarded > 0) {
+            toast.success("Suggestions Sent!", {
+                description: `Successfully sent ${totalForwarded} people to their managers.${skipped > 0 ? ` Note: ${skipped} candidates were skipped.` : ''}`
+            })
+        }
+
+        if (skipped > 0) {
+            skippedDetails.forEach(skip => {
+                const empName = selectedRecs.find(r => r.id === skip.candidateId)?.name || 'Unknown Candidate';
+                toast.warning(`Candidate Skipped: ${empName}`, {
+                   description: skip.reason
+                });
+            });
+        }
       } else {
         throw new Error('Could not connect to the server.')
       }
