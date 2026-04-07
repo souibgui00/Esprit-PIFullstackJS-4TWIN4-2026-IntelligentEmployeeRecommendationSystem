@@ -242,8 +242,15 @@ export default function RecommendationResults({
                   </div>
 
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-2 text-slate-400 min-h-[24px]">
-                      <Info className="h-4 w-4 mt-0.5" />
+                    <div className="flex flex-col gap-3 min-h-[24px]">
+                      {rec.recommendation_reason && (
+                        <div className="flex items-start gap-2 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                          <Brain className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+                          <p className="text-sm font-medium text-slate-700 leading-snug">{rec.recommendation_reason}</p>
+                        </div>
+                      )}
+                      <div className="flex items-start gap-2 text-slate-400">
+                        <Info className="h-4 w-4 mt-0.5" />
                       {Array.isArray(rec.skillGaps || rec.gap) && (rec.skillGaps || rec.gap).length > 0 ? (
                         <div className="text-sm font-medium text-slate-500 space-y-2">
                           <p className="font-bold text-slate-600">Needs to learn:</p>
@@ -265,6 +272,7 @@ export default function RecommendationResults({
                       ) : (
                         <p className="text-sm font-medium text-emerald-600">This person has everything needed!</p>
                       )}
+                      </div>
                     </div>
                     <Badge variant="outline" className="text-[10px] font-bold tracking-widest uppercase border-slate-200">
                       {(rec.overallScore || 0) > 85 ? "Excellent Match" : (rec.overallScore || 0) > 70 ? "Good Fit" : "Recommended"}

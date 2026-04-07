@@ -59,6 +59,14 @@ export class CreateActivityDto {
     @IsArray()
     @IsString({ each: true })
     targetDepartments?: string[];
+
+    @IsOptional()
+    @IsString()
+    organizerId?: string;
+
+    @IsOptional()
+    @IsEnum(['development', 'performance', 'balanced'])
+    intent?: string;
 }
 
 export class UpdateActivityDto {
@@ -113,4 +121,12 @@ export class UpdateActivityDto {
     @IsArray()
     @IsString({ each: true })
     targetDepartments?: string[];
+
+    @IsOptional()
+    @IsString()
+    organizerId?: string;
+
+    @IsOptional()
+    @IsEnum(['development', 'performance', 'balanced'])
+    intent?: string;
 }

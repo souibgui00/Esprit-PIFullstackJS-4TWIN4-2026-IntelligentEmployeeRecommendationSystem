@@ -9,6 +9,7 @@ import ActivityDetailsView from "../app/manager/activities/ActivityDetailsView"
 import ActivityEnrollmentView from "../app/manager/activities/ActivityEnrollmentView"
 import ManagerEvaluationsPage from "../app/manager/evaluations/page"
 import ManagerProfilePage from "../app/manager/profile/page"
+import ManagerValidationReportPage from "../app/manager/validation/[participationId]/page"
 
 export default function ManagerApp() {
     return (
@@ -19,6 +20,8 @@ export default function ManagerApp() {
                 <Route path="skills" element={<ManagerSkillsPage />} />
                 <Route path="assignments" element={<ManagerAssignmentsPage />} />
                 <Route path="activities" element={<ManagerActivitiesPage />} />
+                <Route path="validation/:participationId" element={<ManagerValidationReportPage />} />
+
                 <Route path="program-analysis/:activityId" element={<ActivityDetailsView />} />
                 <Route path="program-enroll/:activityId" element={<ActivityEnrollmentView />} />
                 <Route path="activities/program-analysis/:activityId" element={<ActivityDetailsView />} />

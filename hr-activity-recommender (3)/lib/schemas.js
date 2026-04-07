@@ -26,6 +26,7 @@ export const activitySchema = z.object({
   status: z.enum(["open", "closed", "completed"]).default("open"),
   skillsCovered: z.array(z.string()).optional(),
   level: z.enum(["beginner", "intermediate", "advanced"]).default("beginner"),
+  intent: z.enum(["development", "performance", "balanced"]).default("development"),
   location: z.string().optional(),
 });
 

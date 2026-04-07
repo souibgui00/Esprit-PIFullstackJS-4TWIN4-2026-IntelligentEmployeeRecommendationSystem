@@ -296,43 +296,89 @@ export class PrioritizationService {
   }
 
   /**
-   * Apply context profile rules to filter and score candidates
+   * Apply INTENT-AWARE scoring to candidate pool.
+   *
+   * development → reward skill GAPS (who NEEDS this activity)
+   * performance → reward skill MATCH (who CAN perform in this activity)
+   * balanced    → reward mid-range candidates (who GROWS most from this activity)
+   */
+  applyIntentAwareScoring(candidates: any[], activity: any): any[] {
+    const intent = activity.intent || this.inferIntent(activity.type);
+    const level  = activity.level  || 'beginner';
+    const totalRequired = (activity.requiredSkills || []).length;
+
+    return candidates.map(c => {
+      let contextScore = 0;
+      let reason = '';
+
+      if (intent === 'development') {
+        // Reward candidates who LACK the skills: more gaps = higher priority
+        // Also reward junior/mid ranks for beginner activities, senior for advanced
+        const gapRatio = totalRequired > 0
+          ? c.skillGaps.length / totalRequired
+          : (c.globalScore < 40 ? 1 : 0.2);
+        const progressionBonus = this.getProgressionPotential(c.rank, level);
+        contextScore = (gapRatio * 70) + (progressionBonus * 0.3);
+        reason = c.skillGaps.length > 0
+          ? `Needs development in: ${c.skillGaps.slice(0, 2).map((g: any) => g.skillName).join(', ')}`
+          : 'Profile suggests learning potential for this activity';
+
+      } else if (intent === 'performance') {
+        // Reward candidates who HAVE the skills: high score + high match
+        contextScore = (c.globalScore * 0.65) + (c.matchPercentage * 0.35);
+        reason = c.skillGaps.length === 0
+          ? 'Fully qualified — all required skills met'
+          : `Strong match with ${totalRequired - c.skillGaps.length}/${totalRequired} required skills`;
+
+      } else {
+        // Balanced: prefer candidates in the mid-range (not too weak, not over-qualified)
+        const midBonus = this.getMidRangeBonus(c.globalScore);
+        contextScore = (midBonus * 0.5) + (c.globalScore * 0.5);
+        reason = 'Balanced profile — good development/contribution mix';
+      }
+
+      return { ...c, contextScore, intent, recommendation_reason: reason };
+    });
+  }
+
+  /** Infer intent from activity type when not explicitly set */
+  inferIntent(type: string): string {
+    if (['training', 'workshop'].includes(type)) return 'development';
+    if (['mentoring', 'webinar'].includes(type)) return 'balanced';
+    return 'balanced';
+  }
+
+  /**
+   * How well does an employee's rank align with the activity level?
+   * Junior + beginner activity = 100 (perfect fit for development)
+   * Senior + beginner activity = 25 (over-qualified, someone else needs it more)
+   */
+  private getProgressionPotential(rank: string, activityLevel: string): number {
+    const rankScore  = { Junior: 1, Mid: 2, Senior: 3, Expert: 4 }[rank] ?? 1;
+    const levelScore = { beginner: 1, intermediate: 2, advanced: 3 }[activityLevel] ?? 1;
+    const diff = Math.abs(rankScore - levelScore);
+    return Math.max(0, 100 - diff * 25);
+  }
+
+  /**
+   * Bell-curve bonus centred at globalScore=50.
+   * Employees at 50% benefit most from a balanced activity.
+   * Extremes (very high or very low) score lower.
+   */
+  private getMidRangeBonus(globalScore: number): number {
+    const deviation = Math.abs(globalScore - 50);
+    return Math.max(0, 100 - deviation * 1.5);
+  }
+
+  /**
+   * @deprecated Use applyIntentAwareScoring instead.
+   * Kept for backward compatibility with any direct calls.
    */
   private applyContextProfile(candidates: any[], context: 'low' | 'medium' | 'expert'): any[] {
-    let filtered = [...candidates];
-
-    switch (context) {
-      case 'low':
-        // Low profile: Include everyone, learning focus
-        // Score based on potential to learn (inverse of skill gaps)
-        filtered = filtered.map(c => ({
-          ...c,
-          contextScore: c.globalScore * 0.5 + (100 - c.skillGaps.length * 10) * 0.5,
-        }));
-        break;
-
-      case 'medium':
-        // Medium profile: Balanced selection, exclude only very weak candidates
-        filtered = filtered
-          .filter(c => c.globalScore > 0 || c.matchPercentage > 0)
-          .map(c => ({
-            ...c,
-            contextScore: c.globalScore,
-          }));
-        break;
-
-      case 'expert':
-        // Expert profile: Only top performers, high standards
-        filtered = filtered
-          .filter(c => c.globalScore >= 60 && c.matchPercentage >= 60)
-          .map(c => ({
-            ...c,
-            contextScore: c.globalScore * 0.6 + c.matchPercentage * 0.4,
-          }));
-        break;
-    }
-
-    return filtered;
+    // Map old context names to new intent names
+    const intentMap: Record<string, string> = { low: 'development', medium: 'balanced', expert: 'performance' };
+    const fakeActivity = { intent: intentMap[context] || 'balanced', requiredSkills: [], level: 'intermediate' };
+    return this.applyIntentAwareScoring(candidates, fakeActivity);
   }
 
   /**

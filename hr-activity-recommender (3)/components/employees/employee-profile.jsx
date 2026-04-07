@@ -117,11 +117,11 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['knowHow', 'softSkill', 'knowledge'].map(cat => {
+            {['opérationnelle', 'comportementale', 'technique'].map(cat => {
               const catSkills = employee.skills?.filter(s => {
                 const skillObj = (s.skillId && typeof s.skillId === 'object') ? s.skillId : s.skill;
-                const type = (skillObj?.type || 'knowledge').toLowerCase();
-                return type === cat.toLowerCase() || (cat === 'knowHow' && type === 'knowhow') || (cat === 'softSkill' && type === 'softskill');
+                const type = (skillObj?.type || 'technique').toLowerCase();
+                return type === cat.toLowerCase();
               }) || [];
 
               if (catSkills.length === 0) return null;
@@ -131,10 +131,10 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
                   <div className="flex items-center gap-3 mb-2">
                     <div className={cn(
                       "w-3 h-3 rounded-full shadow-sm",
-                      cat === 'knowHow' ? "bg-slate-950" : cat === 'softSkill' ? "bg-emerald-500" : "bg-[#F28C1B]"
+                      cat === 'opérationnelle' ? "bg-slate-950" : cat === 'comportementale' ? "bg-emerald-500" : "bg-[#F28C1B]"
                     )}></div>
                     <h5 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
-                      {cat === 'knowHow' ? "Practical" : cat === 'softSkill' ? "Interpersonal" : "Theoretical"}
+                      {cat === 'opérationnelle' ? "Operational" : cat === 'comportementale' ? "Behavioral" : "Technical"}
                     </h5>
                   </div>
 

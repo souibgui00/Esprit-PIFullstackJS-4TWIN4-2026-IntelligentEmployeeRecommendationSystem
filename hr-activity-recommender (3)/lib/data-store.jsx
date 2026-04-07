@@ -62,6 +62,10 @@ export function DataProvider({ children }) {
         data.forEach(p => {
           if (!p.activityId || !p.userId) return // Skip orphans
 
+          // Only consider active/enrolled statuses for the manager's view
+          const activeStatuses = ['accepted', 'in_progress', 'awaiting_organizer', 'organizer_submitted', 'awaiting_manager', 'validated'];
+          if (!activeStatuses.includes(p.status)) return;
+
           // `activityId` is populated in backend (`populate('activityId')`), but `userId` often comes back as a raw ObjectId.
           // Handle both cases safely.
           const aId = (p.activityId?._id ?? p.activityId?.id ?? p.activityId)
@@ -92,25 +96,57 @@ export function DataProvider({ children }) {
     }
   }, [refreshProfile])
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = useCallback(async (preloadedSkills) => {
     try {
       const data = await api.get("/users")
       if (Array.isArray(data)) {
-        // Map backend users to frontend employees
+        // Use passed-in skills list first (avoids stale-closure race with fetchSkills),
+        // then fall back to the current skills state.
+        const skillsRef = (preloadedSkills && preloadedSkills.length > 0) ? preloadedSkills : skills
+
         const mappedEmployees = data.map(u => {
           const id = u._id || u.id
+
+          // Decorate each skill entry with a resolved name/category/type so the
+          // profile card never falls back to generic placeholders.
+          const decoratedSkills = (u.skills || []).map(us => {
+            // skillId can be:
+            //  a) A fully-populated Mongoose sub-document { _id, name, type, category, … }
+            //  b) A raw ObjectId string (happens for skills added via manager validation)
+            const isPopulated = us.skillId && typeof us.skillId === 'object' && us.skillId.name
+            const rawId = isPopulated
+              ? String(us.skillId._id || us.skillId.id || '')
+              : String(us.skillId || '')
+
+            // Always try to resolve from the skills catalogue so we get the
+            // canonical name even for newly-inserted skill entries.
+            let skillObj = isPopulated ? us.skillId : (us.skill || null)
+
+            if ((!skillObj || !skillObj.name) && rawId && skillsRef.length > 0) {
+              const found = skillsRef.find(s => String(s._id || s.id) === rawId)
+              if (found) skillObj = found
+            }
+
+            return {
+              ...us,
+              // Normalise skillId so UnifiedProfile's `s.skillId?.name` always works
+              skillId: skillObj || us.skillId,
+              skill: skillObj,
+            }
+          })
+
           return {
             ...u,
-            id: id,
-            _id: id, // Keep both for compatibility
-            userId: id, // Ensure compatibility with existing components
+            id,
+            _id: id,
+            userId: id,
             department: (u.department_id && typeof u.department_id === 'object' ? u.department_id.name : null) || u.department || u.department_id,
             position: u.role,
             avatar: u.avatar,
-            skills: u.skills || [],
+            skills: decoratedSkills,
             yearsOfExperience: u.yearsOfExperience,
             rank: u.rank,
-            rankScore: u.rankScore
+            rankScore: u.rankScore,
           }
         })
         setEmployees(mappedEmployees)
@@ -163,10 +199,14 @@ export function DataProvider({ children }) {
     try {
       const data = await api.get("/skills")
       if (Array.isArray(data)) {
-        setSkills(data.map(s => ({ ...s, id: s._id || s.id })))
+        const mapped = data.map(s => ({ ...s, id: s._id || s.id }))
+        setSkills(mapped)
+        return mapped // return so callers don't need to wait for state to settle
       }
+      return []
     } catch (error) {
       console.error("Failed to fetch skills:", error)
+      return []
     }
   }, [])
 
@@ -191,8 +231,6 @@ export function DataProvider({ children }) {
       console.error("Failed to fetch posts:", error)
     }
   }, [])
-
-
 
   // Notification operations
   const fetchNotifications = useCallback(async () => {
@@ -235,7 +273,7 @@ export function DataProvider({ children }) {
     } catch (error) {
       console.error("Failed to mark notification read:", error)
     }
-  }, [])
+  }, [skills])
 
   const markAllNotificationsRead = useCallback(async () => {
     try {
@@ -244,7 +282,7 @@ export function DataProvider({ children }) {
     } catch (error) {
       console.error("Failed to mark all notifications read:", error)
     }
-  }, [])
+  }, [skills])
 
   const getNotificationsForUser = useCallback((userId) => {
     return notifications.filter(n => (n.recipientId || n.userId) === userId)
@@ -257,7 +295,7 @@ export function DataProvider({ children }) {
     } catch (error) {
       console.error("Failed to delete notification:", error)
     }
-  }, [])
+  }, [skills])
 
   const getUnreadCount = useCallback((userId) => {
     return notifications.filter(n => (n.recipientId || n.userId) === userId && !n.read).length
@@ -273,7 +311,6 @@ export function DataProvider({ children }) {
       notificationListenersRef.current.delete(listener)
     }
   }, [notificationListenersRef])
-
 
   // Activity operations
   const addActivity = useCallback(async (activityData) => {
@@ -537,7 +574,7 @@ export function DataProvider({ children }) {
       console.error("Failed to add evaluation:", error)
       throw error
     }
-  }, [])
+  }, [skills])
 
   const updateEvaluation = useCallback(async (id, data) => {
     try {
@@ -548,7 +585,7 @@ export function DataProvider({ children }) {
     } catch (error) {
       console.error("Failed to update evaluation:", error)
     }
-  }, [])
+  }, [skills])
 
   const deleteEvaluation = useCallback(async (id) => {
     try {
@@ -557,7 +594,7 @@ export function DataProvider({ children }) {
     } catch (error) {
       console.error("Failed to delete evaluation:", error)
     }
-  }, [])
+  }, [skills])
 
   // Department operations (backend)
   const addDepartment = useCallback(async (data) => {
@@ -627,7 +664,7 @@ export function DataProvider({ children }) {
       console.error("Failed to add assignment:", error)
       throw error
     }
-  }, [])
+  }, [skills])
 
   const updateAssignmentStatus = useCallback(async (id, status) => {
     try {
@@ -640,7 +677,31 @@ export function DataProvider({ children }) {
       console.error("Failed to update assignment status:", error)
       throw error
     }
-  }, [])
+  }, [skills])
+
+  const acceptRecommendation = useCallback(async (id) => {
+    try {
+      const response = await api.post(`/assignments/${id}/accept`)
+      await fetchAssignments()
+      await fetchParticipations()
+      await fetchActivities()
+      return response
+    } catch (error) {
+      console.error("Failed to accept recommendation:", error)
+      throw error
+    }
+  }, [fetchAssignments, fetchParticipations, fetchActivities])
+
+  const rejectRecommendation = useCallback(async (id, reason) => {
+    try {
+      const response = await api.post(`/assignments/${id}/reject`, { reason })
+      await fetchAssignments()
+      return response
+    } catch (error) {
+      console.error("Failed to reject recommendation:", error)
+      throw error
+    }
+  }, [fetchAssignments])
 
   const getAssignmentsForActivity = useCallback((activityId) => {
     return assignments.filter(a => String(a.activityId?._id || a.activityId) === String(activityId))
@@ -722,7 +783,7 @@ export function DataProvider({ children }) {
       console.error("Failed to update settings:", error)
       throw error
     }
-  }, [])
+  }, [skills])
 
   // Social Feed Operations
   const addPost = useCallback(async (postData) => {
@@ -735,7 +796,7 @@ export function DataProvider({ children }) {
       console.error("Failed to add post:", error)
       throw error
     }
-  }, [])
+  }, [skills])
 
   const likePost = useCallback(async (postId, userId) => {
     try {
@@ -748,7 +809,7 @@ export function DataProvider({ children }) {
     } catch (error) {
       console.error("Failed to like post:", error)
     }
-  }, [])
+  }, [skills])
 
   const addComment = useCallback(async (postId, commentData) => {
     try {
@@ -762,7 +823,7 @@ export function DataProvider({ children }) {
       console.error("Failed to add comment:", error)
       throw error
     }
-  }, [])
+  }, [skills])
 
   // Core lists: run once auth has finished hydrating from storage (do not require `user` here).
   // Child effects run before parent Auth's effect on the first paint; gating only on `user` skipped the load entirely.
@@ -776,17 +837,19 @@ export function DataProvider({ children }) {
 
     let cancelled = false
     setLoading(true)
-    Promise.all([
-      fetchUsers(),
-      fetchDepartments(),
-      fetchActivities(),
-      fetchSkills(),
-      fetchPosts(),
-      fetchNotifications(),
-      fetchAssignments(),
-      fetchEvaluations(),
-      fetchSettings(),
-    ]).finally(() => {
+    // Load skills FIRST so fetchUsers can resolve skill names without a race
+    fetchSkills().then(loadedSkills => {
+      return Promise.all([
+        fetchUsers(loadedSkills),
+        fetchDepartments(),
+        fetchActivities(),
+        fetchPosts(),
+        fetchNotifications(),
+        fetchAssignments(),
+        fetchEvaluations(),
+        fetchSettings(),
+      ])
+    }).finally(() => {
       if (!cancelled) setLoading(false)
     })
 
@@ -900,11 +963,12 @@ export function DataProvider({ children }) {
     if (!isAuthenticated) return
     setLoading(true)
     try {
+      // Skills must resolve first so fetchUsers can decorate skill names correctly
+      const loadedSkills = await fetchSkills()
       await Promise.all([
-        fetchUsers(),
+        fetchUsers(loadedSkills),
         fetchDepartments(),
         fetchActivities(),
-        fetchSkills(),
         fetchPosts(),
         fetchNotifications(),
         fetchAssignments(),
@@ -1000,6 +1064,8 @@ export function DataProvider({ children }) {
       assignments,
       addAssignment,
       updateAssignmentStatus,
+      acceptRecommendation,
+      rejectRecommendation,
       getAssignmentsForActivity,
       getAssignmentsForEmployee,
       getAssignmentsForManager,
@@ -1022,8 +1088,10 @@ export function DataProvider({ children }) {
       notificationSocketConnected,
       fetchCombinedScore,
       fetchGlobalSkillsDashboard,
-      refreshData: refreshGlobalData
+      refreshData: refreshGlobalData,
+      refreshParticipations: fetchParticipations
     }}>
+
       {children}
     </DataContext.Provider>
   )

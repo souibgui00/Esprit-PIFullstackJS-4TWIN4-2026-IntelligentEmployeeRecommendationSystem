@@ -50,7 +50,6 @@ function PortalLayoutInner({ children, role = "admin" }) {
                 { name: "Users", href: "/admin/employees", icon: Users },
                 { name: "Activities", href: "/admin/activities", icon: Calendar },
                 { name: "Skills", href: "/admin/skills", icon: Brain },
-                { name: "Evaluations", href: "/admin/evaluations", icon: BarChart3 },
                 { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
                 { name: "Activity Logs", href: "/admin/audit", icon: Shield },
             ]
@@ -66,7 +65,6 @@ function PortalLayoutInner({ children, role = "admin" }) {
                 { name: "Activities", href: "/hr/activities", icon: Calendar },
                 { name: "Skills", href: "/hr/skills", icon: Brain },
                 { name: "Recommendations", href: "/hr/recommendations", icon: Target },
-                { name: "Evaluations", href: "/hr/evaluations", icon: BarChart3 },
                 { name: "Analytics", href: "/hr/analytics", icon: BarChart3 },
             ]
         },

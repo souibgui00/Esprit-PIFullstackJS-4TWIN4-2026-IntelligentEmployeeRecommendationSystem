@@ -10,7 +10,6 @@ import AdminSkillsPage from "../app/admin/skills/page"
 import AdminSkillAddPage from "../app/admin/skills/add-page"
 import AdminSkillEditPage from "../app/admin/skills/edit-page"
 import AdminGlobalSkillsDashboard from "../app/admin/skills/dashboard/page"
-import AdminEvaluationsPage from "../app/admin/evaluations/page"
 import AdminDashboardPage from "../app/hr/page"
 import AdminEmployeeAddPage from "../app/admin/employees/add-page"
 import AdminEmployeeEditPage from "../app/admin/employees/edit-page"
@@ -37,7 +36,6 @@ export default function HRApp() {
         <Route path="skills/:id/edit" element={<AdminSkillEditPage />} />
         <Route path="skills/dashboard" element={<AdminGlobalSkillsDashboard />} />
         <Route path="recommendations" element={<AdminRecommendationsPage />} />
-        <Route path="evaluations" element={<AdminEvaluationsPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
         <Route path="profile" element={<AdminProfilePage />} />
         <Route path="settings" element={<AdminSettingsPage />} />

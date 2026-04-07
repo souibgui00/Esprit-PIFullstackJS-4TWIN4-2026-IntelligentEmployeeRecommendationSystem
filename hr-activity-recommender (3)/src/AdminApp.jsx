@@ -15,7 +15,6 @@ import AdminAnalyticsPage from "../app/admin/analytics/page"
 import AdminDashboardPage from "../app/admin/page"
 import AdminProfilePage from "../app/admin/profile/page"
 import AdminDepartmentsPage from "../app/admin/departments/page"
-import AdminEvaluationsPage from "../app/admin/evaluations/page"
 import AdminAuditLogsPage from "../app/admin/audit/page"
 import ActivityDetailsView from "../app/manager/activities/ActivityDetailsView"
 import { PortalLayout } from "@/components/PortalLayout"
@@ -46,8 +45,8 @@ export default function AdminApp() {
         <Route path="profile" element={<AdminProfilePage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
-        <Route path="evaluations" element={<AdminEvaluationsPage />} />
         <Route path="audit" element={<AdminAuditLogsPage />} />
+
         <Route path="*" element={<Navigate to={`/${role}`} replace />} />
       </Routes>
     </PortalLayout>

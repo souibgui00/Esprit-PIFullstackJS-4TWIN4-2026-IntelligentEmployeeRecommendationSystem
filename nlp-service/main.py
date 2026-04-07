@@ -49,6 +49,7 @@ class ActivityData(BaseModel):
 class RecommendRequest(BaseModel):
     activity: ActivityData
     employees: List[EmployeeData]
+    intent: str = "balanced"  # 'development' | 'performance' | 'balanced'
 
 class EmployeeScore(BaseModel):
     userId: str
@@ -154,10 +155,22 @@ def recommend(request: RecommendRequest):
         employee_text = build_employee_text(employee)
         if employee_text.strip():
             emp_embedding = nlp_model.encode(employee_text)
-            nlp_score = max(0.0, min(1.0, cosine_similarity(activity_embedding, emp_embedding)))
+            raw_nlp_score = max(0.0, min(1.0, cosine_similarity(activity_embedding, emp_embedding)))
         else:
-            nlp_score = 0.0
+            raw_nlp_score = 0.0
 
+        # Intent-aware NLP score adjustment:
+        # development → invert NLP score (low match = high need for this training)
+        # performance → keep NLP score as-is (high match = best fit)
+        # balanced    → soft inversion (slight preference for developing employees)
+        if request.intent == "development":
+            nlp_score = 1.0 - raw_nlp_score
+        elif request.intent == "balanced":
+            nlp_score = 0.5 + (0.5 - raw_nlp_score) * 0.4  # mild inversion
+        else:
+            nlp_score = raw_nlp_score  # performance: keep high = good
+
+        nlp_score = max(0.0, min(1.0, nlp_score))
         rf_score = get_rf_score(employee, nlp_score)
         final_score = round((0.5 * nlp_score) + (0.5 * rf_score), 4)
 
@@ -194,7 +207,7 @@ def extract_skills(request: SkillExtractionRequest):
     for skill in KNOWN_SKILLS:
         skill_embedding = nlp_model.encode(skill.lower())
         similarity = cosine_similarity(text_embedding, skill_embedding)
-        if similarity > 0.30:  # threshold for relevance
+        if similarity > 0.45:  # Strict confidence threshold to prevent false-positive grouping
             matched_skills.append(skill)
             skill_scores.append(similarity)
     

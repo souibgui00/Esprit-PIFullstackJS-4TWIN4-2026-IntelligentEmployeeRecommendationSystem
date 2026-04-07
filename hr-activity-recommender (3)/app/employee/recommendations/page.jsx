@@ -23,7 +23,7 @@ export default function EmployeeRecommendationsPage() {
     setProcessingId(activityId)
     try {
       await enrollEmployee(activityId, employee.id || employee._id)
-      toast.success("Intelligence Stream Initialized", { description: `You have successfully synchronized with ${title}.` })
+      toast.success("Enrolled Successfully", { description: `You have been enrolled in ${title}.` })
     } finally {
       setProcessingId(null)
     }
@@ -33,7 +33,7 @@ export default function EmployeeRecommendationsPage() {
     setProcessingId(activityId)
     try {
       await unenrollEmployee(activityId, employee.id || employee._id)
-      toast.success("Stream Deactivated", { description: `Participation in ${title} has been suspended.` })
+      toast.success("Unenrolled", { description: `You have been removed from ${title}.` })
     } finally {
       setProcessingId(null)
     }
@@ -92,27 +92,26 @@ export default function EmployeeRecommendationsPage() {
           <div className="space-y-6 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark border-white/10 text-[#F28C1B] text-[10px] font-black tracking-[0.3em] uppercase mb-4 shimmer-sweep">
               <Compass className="w-3 h-3" />
-              MAGHREBIA_PATH_FINDER_v2.0
+              AI Career Guide
             </div>
             <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] uppercase">
               Strategic <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F28C1B] via-white to-[#F28C1B]">Pathfinder.</span>
             </h1>
             <p className="text-orange-100/40 font-medium text-xl leading-relaxed max-w-xl">
-              Our neural engine has calculated the optimal growth trajectories to bridge your
-              <span className="text-orange-400 font-bold px-2">competency gaps</span>
-              based on real-time market signals.
+              Based on your current skills profile, we have identified the best activities
+              to help you <span className="text-orange-400 font-bold px-2">grow and develop</span> your professional capabilities.
             </p>
           </div>
 
           <div className="flex gap-8">
             <div className="glass-dark px-10 py-6 rounded-3xl border-white/5 space-y-1">
               <p className="text-[#F28C1B] text-3xl font-black tracking-tighter">84%</p>
-              <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">Alignment</p>
+              <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">Profile Match</p>
             </div>
             <div className="glass-dark px-10 py-6 rounded-3xl border-white/5 space-y-1">
               <p className="text-white text-3xl font-black tracking-tighter">{recommendedActivities.length}</p>
-              <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">Growth Nodes</p>
+              <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">Activities Found</p>
             </div>
           </div>
         </div>
@@ -128,8 +127,8 @@ export default function EmployeeRecommendationsPage() {
                 <Map className="w-6 h-6 text-orange-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Primary Trajectory</h2>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">High-impact skill bridge</p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Best Matches</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Top recommended activities for your growth</p>
               </div>
             </div>
           </div>
@@ -155,12 +154,12 @@ export default function EmployeeRecommendationsPage() {
 
                       <div className="space-y-8 relative z-10">
                         <div className="flex items-center justify-between">
-                          <Badge className="bg-orange-50 text-orange-600 border-none px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase italic">
-                            #{idx + 1} STRATEGIC_FIT
+                          <Badge className="bg-orange-50 text-orange-600 border-none px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase">
+                            #{idx + 1} Recommended
                           </Badge>
                           <div className="text-right">
                             <p className="text-2xl font-black text-slate-900 leading-none">{rec.overallScore}%</p>
-                            <p className="text-[8px] text-orange-500 font-bold uppercase tracking-widest">Neural Fit</p>
+                            <p className="text-[8px] text-orange-500 font-bold uppercase tracking-widest">Match Score</p>
                           </div>
                         </div>
 
@@ -168,8 +167,8 @@ export default function EmployeeRecommendationsPage() {
 
                         <div className="space-y-4">
                           <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <span>Skill Bridge Potential</span>
-                            <span className="text-primary">+{rec.growthPotential}% Gained</span>
+                            <span>Skills You Will Develop</span>
+                            <span className="text-primary">+{rec.growthPotential}% Growth Potential</span>
                           </div>
                           <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden p-0.5 border border-slate-100">
                             <div className="h-full bg-gradient-to-r from-[#1E5FA8] to-[#F28C1B] rounded-full" style={{ width: `${rec.growthPotential}%` }}></div>
@@ -177,10 +176,10 @@ export default function EmployeeRecommendationsPage() {
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                          {rec.missingSkills.slice(0, 3).map(skill => (
-                            <div key={skill} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 text-orange-600 border border-orange-100 text-[9px] font-black uppercase tracking-wider">
+                          {rec.missingSkills.slice(0, 3).map((skill, sIdx) => (
+                            <div key={`${rec.activity.id || rec.activity._id}_skill_${sIdx}`} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 text-orange-600 border border-orange-100 text-[9px] font-black uppercase tracking-wider">
                               <Zap className="w-3 h-3 fill-current" />
-                              Gap: {skill}
+                              {skill}
                             </div>
                           ))}
                         </div>
@@ -197,22 +196,23 @@ export default function EmployeeRecommendationsPage() {
                             </div>
                           </div>
 
-                          <button
-                            onClick={() => rec.isEnrolled
-                              ? handleUnenroll(rec.activity.id || rec.activity._id, rec.activity.title)
-                              : handleEnroll(rec.activity.id || rec.activity._id, rec.activity.title)
-                            }
-                            disabled={processingId === (rec.activity.id || rec.activity._id)}
-                            className={cn(
-                              "px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95 flex items-center gap-3",
-                              rec.isEnrolled
-                                ? "bg-rose-50 text-rose-500 hover:bg-rose-100 border border-rose-100"
-                                : "bg-slate-900 text-white hover:bg-[#F28C1B] shadow-orange-500/10"
-                            )}
-                          >
-                            {processingId === (rec.activity.id || rec.activity._id) ? <Loader2 className="w-3 h-3 animate-spin" /> : rec.isEnrolled ? "Unsubscribe" : "Synchronize"}
-                            <ArrowRight className="w-3 h-3" />
-                          </button>
+                        <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+                          <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              <Clock className="w-4 h-4 text-primary/30" />
+                              {rec.activity.duration || "Self-Paced"}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              <Users className="w-4 h-4 text-primary/30" />
+                              {rec.activity.type || "Program"}
+                            </div>
+                          </div>
+
+                          <div className="px-6 py-3 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest border border-slate-100 flex items-center gap-2">
+                            <Brain className="w-3.5 h-3.5" />
+                            Recommended
+                          </div>
+                        </div>
                         </div>
                       </div>
                     </div>
@@ -221,8 +221,8 @@ export default function EmployeeRecommendationsPage() {
                   {/* Decoration persona for empty side */}
                   <div className="hidden lg:block w-1/2 px-12 text-center space-y-4">
                     <Brain className="w-16 h-16 text-primary/10 mx-auto" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Trajectory_Point_0{idx + 1}</p>
-                    <p className="text-sm font-medium text-slate-400 max-w-xs mx-auto">This node specifically targets your {rec.missingSkills[0] || "primary"} intelligence deficit.</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Recommendation #{idx + 1}</p>
+                    <p className="text-sm font-medium text-slate-400 max-w-xs mx-auto">This activity is designed to help you develop your {rec.missingSkills[0] || "key"} skills.</p>
                   </div>
                 </div>
               ))}
@@ -238,8 +238,8 @@ export default function EmployeeRecommendationsPage() {
                 <Rocket className="w-6 h-6 text-orange-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Competency Opportunities</h2>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secondary growth vectors</p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">More Activities</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Additional activities matching your profile</p>
               </div>
             </div>
 
@@ -249,29 +249,13 @@ export default function EmployeeRecommendationsPage() {
                   <div className="w-24 h-24 bg-slate-900 rounded-[32px] flex flex-col items-center justify-center relative overflow-hidden shrink-0 group-hover:bg-white/20">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/50 to-orange-500/50"></div>
                     <p className="text-2xl font-black text-white relative z-10 leading-none">{rec.overallScore}%</p>
-                    <p className="text-[8px] font-black text-white/50 uppercase tracking-widest mt-1 relative z-10">SYNC</p>
+                    <p className="text-[8px] font-black text-white/50 uppercase tracking-widest mt-1 relative z-10">MATCH</p>
                   </div>
 
                   <div className="flex-1 space-y-4">
                     <div>
                       <h4 className="font-black text-slate-900 group-hover:text-white transition-colors tracking-tight line-clamp-1">{rec.activity.title}</h4>
                       <p className="text-[10px] text-slate-400 group-hover:text-white/60 font-black uppercase tracking-widest mt-1">{rec.activity.type || "Training"} • {rec.activity.duration || "Self-Paced"}</p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Flame className="w-4 h-4 text-orange-500 group-hover:text-white" />
-                        <span className="text-[10px] font-black text-slate-600 group-hover:text-white uppercase tracking-widest">+{rec.growthPotential}% Gain</span>
-                      </div>
-                      <button
-                        onClick={() => rec.isEnrolled
-                          ? handleUnenroll(rec.activity.id || rec.activity._id, rec.activity.title)
-                          : handleEnroll(rec.activity.id || rec.activity._id, rec.activity.title)
-                        }
-                        disabled={processingId === (rec.activity.id || rec.activity._id)}
-                        className="p-3 rounded-full bg-slate-900/5 group-hover:bg-white text-slate-900 transition-all"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -286,8 +270,8 @@ export default function EmployeeRecommendationsPage() {
             <div className="w-24 h-24 bg-orange-50 rounded-[32px] flex items-center justify-center mx-auto mb-10 text-orange-200">
               <Brain className="w-12 h-12" />
             </div>
-            <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">Calibration Complete.</h3>
-            <p className="text-slate-500 max-w-sm mx-auto font-medium text-lg">No immediate strategic gaps detected. Your current trajectory is optimal for your designated role.</p>
+            <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">All Caught Up!</h3>
+            <p className="text-slate-500 max-w-sm mx-auto font-medium text-lg">No new activities match your skill profile right now. Check back soon or contact your manager to get assigned to a program.</p>
           </div>
         )}
       </div>

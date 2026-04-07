@@ -44,6 +44,7 @@ export function ActivityForm({ activity, mode = "create" }) {
     Array.isArray(activity?.targetDepartments) ? activity.targetDepartments.map(d => d?._id || d?.id || d).filter(Boolean) : []
   )
   const [addSkillValue, setAddSkillValue] = useState("")
+
   const [customSkillMode, setCustomSkillMode] = useState(false)
   const [customSkillName, setCustomSkillName] = useState("")
   const [isExtracting, setIsExtracting] = useState(false)
@@ -67,12 +68,14 @@ export function ActivityForm({ activity, mode = "create" }) {
       status: activity?.status || "open",
       level: activity?.level || "beginner",
       location: activity?.location || "",
+      intent: activity?.intent || "development",
     },
   })
 
   const formType = watch("type")
   const formStatus = watch("status")
   const formLevel = watch("level")
+  const formIntent = watch("intent")
 
   const addSkill = (skillId) => {
     if (!skillId || selectedSkillIds.includes(skillId)) return
@@ -125,9 +128,11 @@ export function ActivityForm({ activity, mode = "create" }) {
           requiredLevel: watch("level") 
         })),
         level: data.level,
+        intent: data.intent,
         location: data.location,
         targetDepartments: selectedDeptIds,
       }
+
       console.log('[DEBUG] payload being sent:', JSON.stringify(payload))
       if (mode === "create") {
         await addActivity(payload)
@@ -317,6 +322,20 @@ export function ActivityForm({ activity, mode = "create" }) {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1 font-mono">Recommendation Intent</Label>
+                <Select value={formIntent} onValueChange={(v) => setValue("intent", v)}>
+                  <SelectTrigger className="h-14 w-full bg-slate-50/50 border-slate-100 rounded-2xl text-[11px] font-black tracking-widest uppercase">
+                    <SelectValue placeholder="Select intent" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border-none shadow-2xl">
+                    <SelectItem value="development" className="text-[10px] font-black uppercase tracking-widest py-3">Development (Find skill gaps)</SelectItem>
+                    <SelectItem value="performance" className="text-[10px] font-black uppercase tracking-widest py-3">Performance (Find experts)</SelectItem>
+                    <SelectItem value="balanced" className="text-[10px] font-black uppercase tracking-widest py-3">Balanced (Mix of both)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -354,7 +373,9 @@ export function ActivityForm({ activity, mode = "create" }) {
             )}
           </div>
 
+
           <div className="space-y-8">
+
             <div className="flex items-center gap-4">
                 <Briefcase className="w-4 h-4 text-primary" />
                 <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em]">Skills Covered</h3>
@@ -448,7 +469,7 @@ export function ActivityForm({ activity, mode = "create" }) {
                             onClick={async () => {
                                 if (customSkillName.trim()) {
                                     try {
-                                        await createGlobalSkill({ name: customSkillName.trim(), type: 'knowledge', category: 'General' });
+                                        await createGlobalSkill({ name: customSkillName.trim(), type: 'technique', category: 'General' });
                                         toast.success("Skill created", { description: `${customSkillName} has been added to the matrix.` });
                                         // We don't automatically select it locally because we await the remote object to get an ID. 
                                         // But it will instantly appear in the dropdown.

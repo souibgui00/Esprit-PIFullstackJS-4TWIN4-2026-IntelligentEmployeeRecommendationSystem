@@ -40,6 +40,8 @@ export default function ActivityEnrollmentView() {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [currentEnrollments, setCurrentEnrollments] = useState([])
+    const [recommendations, setRecommendations] = useState([])
+    const [loadingRecommendations, setLoadingRecommendations] = useState(false)
 
     const toIdString = (value) => {
         if (value == null) return ""
@@ -120,6 +122,21 @@ export default function ActivityEnrollmentView() {
 
             setCurrentEnrollments(enrolled)
             form.setValue("selectedEmployees", enrolled)
+
+            // Fetch AI Recommendations
+            const fetchRecs = async () => {
+                setLoadingRecommendations(true)
+                try {
+                    const data = await api.get(`/activities/${activeId}/recommendations`)
+                    // data: array of { user: User, score: number, matchReason: string }
+                    setRecommendations(data || [])
+                } catch (err) {
+                    console.error("Failed to fetch recommendations:", err)
+                } finally {
+                    setLoadingRecommendations(false)
+                }
+            }
+            fetchRecs()
         }
     }, [activity, enrollments, deptEmployees, form])
 
@@ -222,8 +239,9 @@ export default function ActivityEnrollmentView() {
                                 </div>
                             </div>
                             <Button
+                                type="button"
                                 variant="outline"
-                                onClick={() => navigate("/manager/activities")}
+                                onClick={(e) => { e.preventDefault(); navigate("/manager/activities"); }}
                                 className="flex items-center gap-2"
                             >
                                 <ArrowLeft className="h-4 w-4" />
@@ -268,163 +286,60 @@ export default function ActivityEnrollmentView() {
                     </CardContent>
                 </Card>
 
-                {/* Enrollment Form */}
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <Card className="border-slate-200 shadow-sm">
-                            <CardHeader>
-                                <CardTitle className="text-lg text-slate-900">Team Enrollment</CardTitle>
-                                <p className="text-sm text-slate-500">Select team members to participate in this program.</p>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                {/* Priority Level */}
-                                <FormField
-                                    control={form.control}
-                                    name="priorityLevel"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Assignment Priority</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select priority level" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="standard">Standard</SelectItem>
-                                                    <SelectItem value="high">High Priority</SelectItem>
-                                                    <SelectItem value="critical">Critical</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {/* Employee Selection */}
-                                <FormField
-                                    control={form.control}
-                                    name="selectedEmployees"
-                                    render={() => (
-                                        <FormItem>
-                                            <FormLabel className="text-base font-semibold">Team Members</FormLabel>
-                                            <p className="text-sm text-slate-500 mb-4">Select employees from the {deptName} department.</p>
-                                            <div className="space-y-3 max-h-96 overflow-y-auto">
-                                                {deptEmployees.map((employee) => (
-                                                    <FormField
-                                                        key={employee.id || employee._id}
-                                                        control={form.control}
-                                                        name="selectedEmployees"
-                                                        render={({ field }) => (
-                                                            <FormItem className="flex items-start space-x-3 space-y-0 rounded-lg border p-4 hover:bg-slate-50 transition-colors">
-                                                                <FormControl>
-                                                                    {(() => {
-                                                                        const empId = toIdString(employee.id || employee._id)
-                                                                        const selected = (field.value || []).map(id => toIdString(id))
-                                                                        return (
-                                                                    <Checkbox
-                                                                        checked={selected.includes(empId)}
-                                                                        onCheckedChange={(checked) => {
-                                                                            const currentValue = (field.value || []).map(id => toIdString(id)).filter(Boolean)
-                                                                            const updatedValue = checked
-                                                                                ? [...new Set([...currentValue, empId])]
-                                                                                : currentValue.filter((id) => id !== empId)
-                                                                            field.onChange(updatedValue)
-                                                                        }}
-                                                                    />
-                                                                        )
-                                                                    })()}
-                                                                </FormControl>
-                                                                <div className="flex items-center gap-3 flex-1">
-                                                                    <Avatar className="h-10 w-10">
-                                                                        <AvatarImage src={employee.avatar} />
-                                                                        <AvatarFallback>{employee.name?.split(" ").map(n => n[0]).join("")}</AvatarFallback>
-                                                                    </Avatar>
-                                                                    <div className="flex-1">
-                                                                        <p className="font-medium text-slate-900">{employee.name}</p>
-                                                                        <p className="text-sm text-slate-500">{employee.position}</p>
-                                                                    </div>
-                                                                    {normalizedCurrentIds.includes(toIdString(employee.id || employee._id)) && (
-                                                                        <Badge variant="secondary" className="text-xs">
-                                                                            Currently Enrolled
-                                                                        </Badge>
-                                                                    )}
-                                                                </div>
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {/* Enrollment Notes */}
-                                <FormField
-                                    control={form.control}
-                                    name="enrollmentNotes"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Enrollment Notes</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Provide any additional context or reasons for this enrollment..."
-                                                    className="resize-none"
-                                                    rows={3}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        {/* Summary */}
-                        <Card className="border-slate-200 shadow-sm bg-slate-50">
-                            <CardContent className="p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-slate-900">Enrollment Summary</h3>
-                                        <p className="text-sm text-slate-500 mt-1">
-                                            {normalizedSelectedIds.length} personnel selected for "{activity.title}"
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle2 className={cn(
-                                            "h-5 w-5",
-                                            hasEnrollmentChanges ? "text-emerald-500" : "text-slate-400"
-                                        )} />
-                                        <span className="text-sm font-medium text-slate-700">
-                                            {normalizedSelectedIds.length} Assignments Selected
-                                        </span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Actions */}
-                        <div className="flex gap-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate("/manager/activities")}
-                                className="flex-1"
+                {/* AI Enrollment Notice */}
+                <Card className="border-slate-200 shadow-sm relative overflow-hidden bg-slate-950 text-white">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+                    <CardHeader className="relative z-10">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 bg-white/10 backdrop-blur-xl rounded-xl flex items-center justify-center border border-white/10">
+                                <Target className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl text-white">Intelligent Team Selection</CardTitle>
+                                <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-0.5">Automated Assignment Protocol</p>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6 relative z-10">
+                        <p className="text-slate-300 leading-relaxed max-w-2xl">
+                            Manual enrollment configurations are disabled to ensure fairness and competency alignment across the organization. 
+                            If you need to assign additional personnel (for example, if a team member withdrew), please reach out to the Human Resources department 
+                            to execute a new AI-driven recommendation sweep for this activity.
+                        </p>
+                        <div className="mt-6">
+                            <Button 
+                                type="button" 
+                                disabled={isSubmitting}
+                                onClick={async (e) => {
+                                    e.preventDefault()
+                                    setIsSubmitting(true)
+                                    try {
+                                        const creatorId = activity.createdBy?.id || activity.createdBy?._id || activity.createdBy
+                                        if (creatorId) {
+                                            await import('@/lib/api').then(m => m.api.post('/notifications', {
+                                                recipientId: creatorId,
+                                                title: '🧠 AI Sweep Requested',
+                                                message: `The manager for your activity "${activity.title}" has requested a new AI recommendation sweep to identify additional personnel.`,
+                                                type: 'system_alert'
+                                            }))
+                                            toast.success("Request sent to HR", { description: "HR has been notified to execute a new recommendation cycle." })
+                                        } else {
+                                            toast.error("Error", { description: "Could not identify the HR administrator who created this activity." })
+                                        }
+                                    } catch (err) {
+                                        toast.error("Failed to send request", { description: "Please try again later." })
+                                    } finally {
+                                        setIsSubmitting(false)
+                                    }
+                                }}
+                                className="bg-primary text-white hover:bg-primary/90 font-bold px-6 h-10"
                             >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting || !hasEnrollmentChanges}
-                                className="flex-1"
-                            >
-                                {isSubmitting ? "Processing..." : "Confirm Enrollment"}
+                                <Target className="w-4 h-4 mr-2" />
+                                {isSubmitting ? "Sending Request..." : "Request New AI Recommendation"}
                             </Button>
                         </div>
-                    </form>
-                </Form>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

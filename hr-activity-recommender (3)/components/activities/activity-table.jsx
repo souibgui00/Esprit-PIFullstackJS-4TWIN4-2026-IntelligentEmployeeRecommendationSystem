@@ -49,13 +49,21 @@ export function ActivityTable({
   const [currentPage, setCurrentPage] = React.useState(1)
   const itemsPerPage = 6
 
-  // Reset to first page when filtering/searching
+  // Reset to first page when searching
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [externalSearch, activities])
+  }, [externalSearch])
 
   // Pagination Logic
   const totalPages = Math.ceil(activities.length / itemsPerPage)
+  
+  // Ensure currentPage is not out of bounds if items are deleted or filtered
+  React.useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [totalPages, currentPage])
+
   const paginatedActivities = activities.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage

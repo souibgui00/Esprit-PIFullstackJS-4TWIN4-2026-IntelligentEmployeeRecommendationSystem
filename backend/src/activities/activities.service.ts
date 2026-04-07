@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, InternalServerError
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Activity } from './schema/activity.schema';
 import { CreateActivityDto, UpdateActivityDto } from './dto/activity.dto';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -18,6 +18,8 @@ export class ActivitiesService {
     private activityModel: Model<Activity>,
     @InjectModel('Participation')
     private participationModel: Model<any>,
+    @InjectModel('Assignment')
+    private assignmentModel: Model<any>,
     private notificationsService: NotificationsService,
     private usersService: UsersService,
     private recommendationModelService: RecommendationModelService,
@@ -66,7 +68,25 @@ export class ActivitiesService {
     return activity;
   }
 
-  async findAll(): Promise<Activity[]> {
+  async findAll(userRole?: string, userId?: string): Promise<Activity[]> {
+    if (userRole === Role.EMPLOYEE && userId) {
+      // Find all activities where the user has an assignment OR a participation
+      const [assignments, participations] = await Promise.all([
+        this.assignmentModel.find({ userId: new Types.ObjectId(userId) }).exec(),
+        this.participationModel.find({ userId: new Types.ObjectId(userId) }).exec(),
+      ]);
+
+      const allowedActivityIds = new Set([
+        ...assignments.map(a => a.activityId.toString()),
+        ...participations.map(p => p.activityId.toString()),
+      ]);
+
+      return this.activityModel.find({
+        _id: { $in: Array.from(allowedActivityIds).map(id => new Types.ObjectId(id)) }
+      }).exec();
+    }
+
+    // Default: Admin/HR/Manager see everything
     return this.activityModel.find().exec();
   }
 
@@ -306,7 +326,8 @@ export class ActivitiesService {
     const results = await Promise.all(
       candidateActivities.map(async (activity) => {
         try {
-          const nlpMap = await this.getNlpScores(activity, [user]);
+          const intent = activity.intent || this.prioritizationService.inferIntent(activity.type);
+          const nlpMap = await this.getNlpScores(activity, [user], intent);
           const nlpData = nlpMap.get(userId);
 
           let score = 0;
@@ -371,6 +392,7 @@ export class ActivitiesService {
   private async getNlpScores(
     activity: any,
     employees: any[],
+    intent: string,
   ): Promise<Map<string, any>> {
     try {
       const payload = {
@@ -408,6 +430,7 @@ export class ActivitiesService {
             score: u.rankScore || 50.0
           };
         }),
+        intent,  // ← passed to Python for NLP score inversion
       };
 
       const response = await firstValueFrom(
@@ -435,69 +458,107 @@ export class ActivitiesService {
       throw new NotFoundException(`Activity with ID ${activityId} not found`);
     }
 
-    const users = await this.usersService.findAll();
-    const employees = (users || []).filter(
+    // 1. Initial Filtering: Department
+    const allUsers = await this.usersService.findAll();
+    const targetDeptIds = activity.targetDepartments || [];
+    
+    let eligibleEmployees = (allUsers || []).filter(
       (user: any) => String(user.role || '').toUpperCase() === Role.EMPLOYEE,
     );
 
-    const nlpScores = await this.getNlpScores(activity, employees);
+    if (targetDeptIds.length > 0) {
+      eligibleEmployees = eligibleEmployees.filter((user: any) => {
+        const userDeptId = user.department_id?._id?.toString() || user.department_id?.toString();
+        return targetDeptIds.includes(userDeptId);
+      });
+    }
 
-    const rankedCandidates = await Promise.all(
-      employees.map(async (user: any) => {
-        try {
-          const userId = user._id?.toString();
+    // 2. Exclusion Filtering: Already Invited or Enrolled
+    const existingParticipationsList = await this.participationModel.find({ activityId: new Types.ObjectId(activityId) }).lean();
+    const existingAssignmentsList = await this.assignmentModel.find({ activityId: new Types.ObjectId(activityId) }).lean();
 
-          const gap = await this.prioritizationService.identifySkillGaps(
-            userId,
-            activityId,
-          );
+    const excludedUserIds = new Set([
+      ...existingParticipationsList.map((p: any) => p.userId.toString()),
+      ...existingAssignmentsList.map((a: any) => a.userId.toString())
+    ]);
 
-          // Get NLP + RF score from Python service
-          const nlpData = nlpScores.get(userId);
-          
-          if (nlpData && typeof nlpData === 'object') {
-            // Python service returned full score object
-            return {
-              userId,
-              name: user.name,
-              role: user.role,
-              score: (nlpData as any).finalScore || 0,
-              nlpScore: (nlpData as any).nlpScore || 0,
-              rfScore: (nlpData as any).rfScore || 0,
-              gap,
-            };
-          }
-
-          // Fallback to hybrid model if Python service unavailable
-          const score = await this.recommendationModelService.predictScore(
-            userId,
-            activityId,
-          );
-          return {
-            userId,
-            name: user.name,
-            role: user.role,
-            score,
-            gap,
-          };
-        } catch (error) {
-          console.error(
-            `[ActivitiesService] Failed to score user ${user._id} for activity ${activityId}:`,
-            error,
-          );
-          return {
-            userId: user._id?.toString(),
-            name: user.name,
-            role: user.role,
-            score: 0,
-            gap: [],
-          };
-        }
-      }),
+    const candidatesToScore = eligibleEmployees.filter(
+      (user: any) => !excludedUserIds.has(user._id.toString())
     );
 
+    if (candidatesToScore.length === 0) {
+      return { activity: activity, candidates: [] };
+    }
+
+    // 3. Scoring — intent-aware hybrid
+    const intent = activity.intent || this.prioritizationService.inferIntent(activity.type);
+    const nlpScores = await this.getNlpScores(activity, candidatesToScore, intent);
+
+    // Build gap + context scores for all candidates first
+    const candidatesMeta = await Promise.all(
+      candidatesToScore.map(async (user: any) => {
+        const userId = user._id?.toString();
+        const gap = await this.prioritizationService.identifySkillGaps(userId, activityId);
+        return {
+          employeeId: userId,
+          name: user.name,
+          role: user.role,
+          rank: user.rank || 'Junior',
+          rankScore: user.rankScore || 0,
+          department: user.department_id?.name || 'General',
+          globalScore: user.rankScore || 0,
+          matchPercentage: Math.max(0, 100 - gap.length * 25),
+          skillGaps: gap,
+          contextScore: 0,
+          recommendation_reason: '',
+        };
+      })
+    );
+
+    // Apply intent-aware scoring from prioritization service
+    const intentScored = this.prioritizationService.applyIntentAwareScoring(candidatesMeta, activity);
+
+    const rankedCandidates = intentScored.map((candidate: any) => {
+      const nlpData = nlpScores.get(candidate.employeeId);
+
+      // Blend weights depend on intent:
+      // development: 50% gap/intent score + 30% NLP + 20% RF reliability
+      // performance: 20% gap/intent score + 50% NLP + 30% RF reliability
+      // balanced:    35% gap/intent score + 40% NLP + 25% RF reliability
+      let finalScore: number;
+      const intentScore = candidate.contextScore / 100; // normalise to [0,1]
+
+      if (nlpData) {
+        if (intent === 'development') {
+          finalScore = (intentScore * 0.50) + (nlpData.nlpScore * 0.30) + (nlpData.rfScore * 0.20);
+        } else if (intent === 'performance') {
+          finalScore = (intentScore * 0.20) + (nlpData.nlpScore * 0.50) + (nlpData.rfScore * 0.30);
+        } else {
+          finalScore = (intentScore * 0.35) + (nlpData.nlpScore * 0.40) + (nlpData.rfScore * 0.25);
+        }
+      } else {
+        // Fallback when Python is offline
+        finalScore = intentScore;
+      }
+
+      return {
+        userId:      candidate.employeeId,
+        name:        candidate.name,
+        role:        candidate.role,
+        department:  candidate.department,
+        score:       Math.min(Math.max(finalScore, 0), 1),
+        nlpScore:    nlpData?.nlpScore  ?? 0,
+        rfScore:     nlpData?.rfScore   ?? 0,
+        intentScore: Math.round(intentScore * 100) / 100,
+        intent,
+        recommendation_reason: candidate.recommendation_reason,
+        gap: candidate.skillGaps,
+      };
+    });
+
     const candidates = rankedCandidates
-      .sort((a, b) => b.score - a.score)
+      .filter((c: any) => c !== null)
+      .sort((a: any, b: any) => b.score - a.score)
       .slice(0, 10);
 
     return {
@@ -505,6 +566,7 @@ export class ActivitiesService {
         activityId: activity._id,
         title: activity.title,
         type: activity.type,
+        intent,
         level: activity.level,
         date: activity.date,
         duration: activity.duration,

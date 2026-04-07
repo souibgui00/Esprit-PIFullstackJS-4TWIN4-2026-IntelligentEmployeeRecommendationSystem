@@ -26,7 +26,7 @@ export function EditSkillDialog({ open, onOpenChange, skill }) {
     const [formData, setFormData] = useState({
         name: "",
         category: "Programming",
-        type: "knowledge",
+        type: "technique",
         description: ""
     })
 
@@ -118,9 +118,10 @@ export function EditSkillDialog({ open, onOpenChange, skill }) {
                                 <Label className="text-[9px] font-black text-gray-400 tracking-widest ml-1">Energy Profile (Type)</Label>
                                 <div className="flex gap-2">
                                     {[
-                                        { id: 'knowledge', icon: BookOpen, label: 'KB' },
-                                        { id: 'knowHow', icon: Brain, label: 'KH' },
-                                        { id: 'soft', icon: Heart, label: 'SK' }
+                                        { id: 'technique', icon: BookOpen, label: 'Technical' },
+                                        { id: 'opérationnelle', icon: Brain, label: 'Operational' },
+                                        { id: 'comportementale', icon: Heart, label: 'Soft Skills' },
+                                        { id: 'transverse', icon: Zap, label: 'Transversal' }
                                     ].map(type => (
                                         <button
                                             key={type.id}
