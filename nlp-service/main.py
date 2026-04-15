@@ -70,12 +70,102 @@ class SkillExtractionResponse(BaseModel):
     extractedSkills: List[str]
     confidence: float
 
+class SentimentRequest(BaseModel):
+    text: str
+
+class SentimentResponse(BaseModel):
+    label: str
+    score: float
+    confidence: float
+
 def cosine_similarity(vec1, vec2):
     norm1 = np.linalg.norm(vec1)
     norm2 = np.linalg.norm(vec2)
     if norm1 == 0 or norm2 == 0:
         return 0.0
     return float(np.dot(vec1, vec2) / (norm1 * norm2))
+
+POSITIVE_ANCHORS = [
+    "this is excellent and very positive",
+    "great work and amazing outcome",
+    "i am happy and satisfied",
+    "excellent collaboration and success",
+]
+
+NEGATIVE_ANCHORS = [
+    "this is very bad and negative",
+    "terrible result and disappointing",
+    "i am frustrated and angry",
+    "poor quality and problematic delivery",
+]
+
+POSITIVE_ANCHOR_EMB = nlp_model.encode(POSITIVE_ANCHORS)
+NEGATIVE_ANCHOR_EMB = nlp_model.encode(NEGATIVE_ANCHORS)
+
+POSITIVE_WORDS = {
+    "good", "great", "excellent", "awesome", "love", "nice", "perfect", "happy", "amazing",
+    "bien", "super", "bravo", "merci", "parfait", "genial", "heureux", "top", "cool",
+}
+
+NEGATIVE_WORDS = {
+    "bad", "poor", "awful", "hate", "terrible", "bug", "issue", "problem", "angry",
+    "mauvais", "nul", "horrible", "erreur", "probleme", "lent", "decu", "triste",
+}
+
+NEGATIONS = {"not", "never", "no", "pas", "jamais", "aucun", "rien"}
+
+INTENSIFIERS = {"very", "extremely", "so", "tres", "vraiment", "trop", "super"}
+
+def lexical_sentiment_score(text: str) -> float:
+    tokens = [t.strip(".,!?;:()[]{}\"'`).-_").lower() for t in text.split()]
+    score = 0.0
+
+    for i, tok in enumerate(tokens):
+        if not tok:
+            continue
+
+        base = 0.0
+        if tok in POSITIVE_WORDS:
+            base = 1.0
+        elif tok in NEGATIVE_WORDS:
+            base = -1.0
+
+        if base == 0.0:
+            continue
+
+        prev = tokens[i - 1] if i > 0 else ""
+        prev2 = tokens[i - 2] if i > 1 else ""
+
+        if prev in NEGATIONS or prev2 in NEGATIONS:
+            base *= -1.0
+
+        if prev in INTENSIFIERS or prev2 in INTENSIFIERS:
+            base *= 1.35
+
+        score += base
+
+    if not tokens:
+        return 0.0
+
+    return float(max(-1.0, min(1.0, score / max(3.0, len(tokens) * 0.35))))
+
+def semantic_sentiment_score(text: str) -> float:
+    if not text.strip():
+        return 0.0
+
+    text_emb = nlp_model.encode(text)
+    pos_sim = float(np.mean([cosine_similarity(text_emb, emb) for emb in POSITIVE_ANCHOR_EMB]))
+    neg_sim = float(np.mean([cosine_similarity(text_emb, emb) for emb in NEGATIVE_ANCHOR_EMB]))
+
+    raw = pos_sim - neg_sim
+    return float(max(-1.0, min(1.0, raw * 1.8)))
+
+def score_to_label(score: float) -> str:
+    if score > 0.2:
+        return "positive"
+    if score < -0.2:
+        return "negative"
+    return "neutral"
 
 def build_activity_text(activity: ActivityData) -> str:
     skills_text = " ".join(activity.requiredSkills)
@@ -218,4 +308,22 @@ def extract_skills(request: SkillExtractionRequest):
     return SkillExtractionResponse(
         extractedSkills=top_skills,
         confidence=round(avg_confidence, 4)
+    )
+
+@app.post("/analyze-sentiment", response_model=SentimentResponse)
+def analyze_sentiment(request: SentimentRequest):
+    text = (request.text or "").strip()
+    if not text:
+        return SentimentResponse(label="neutral", score=0.0, confidence=0.0)
+
+    semantic = semantic_sentiment_score(text)
+    lexical = lexical_sentiment_score(text)
+
+    final_score = float(max(-1.0, min(1.0, (0.7 * semantic) + (0.3 * lexical))))
+    confidence = float(max(0.05, min(1.0, abs(final_score) + abs(semantic - lexical) * 0.2)))
+
+    return SentimentResponse(
+        label=score_to_label(final_score),
+        score=round(final_score, 4),
+        confidence=round(confidence, 4),
     )
