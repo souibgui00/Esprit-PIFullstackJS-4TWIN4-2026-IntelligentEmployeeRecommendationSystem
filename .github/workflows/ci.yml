@@ -1,22 +1,26 @@
-name: CI Pipeline
+name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Install Backend
-        run: |
-          cd backend
-          npm install
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
-      - name: Run Backend Tests
+      - name: Install dependencies
         run: |
           cd backend
           npm run test
@@ -26,7 +30,12 @@ jobs:
           cd "hr-activity-recommender (3)"
           npm install
 
-      - name: Build Frontend
+      - name: Build
         run: |
           cd "hr-activity-recommender (3)"
           npm run build
+
+      - name: Run tests
+        run: |
+          cd "hr-activity-recommender (3)"
+          npm test
