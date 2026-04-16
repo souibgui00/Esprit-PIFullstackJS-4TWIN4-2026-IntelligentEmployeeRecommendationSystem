@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
+import { EmailService } from '../common/services/email.service';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -16,6 +17,11 @@ describe('UsersService', () => {
     save: jest.fn(),
   };
 
+  const mockEmailService = {
+    sendNewUserCredentials: jest.fn(),
+    sendResetPasswordEmail: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -24,6 +30,7 @@ describe('UsersService', () => {
           provide: getModelToken(User.name),
           useValue: mockUserModel,
         },
+        { provide: EmailService, useValue: mockEmailService },
       ],
     }).compile();
 
