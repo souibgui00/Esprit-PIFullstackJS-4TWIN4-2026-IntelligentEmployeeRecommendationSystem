@@ -36,5 +36,5 @@ jobs:
 
       - name: Run tests
         run: |
-          cd "hr-activity-recommender (3)"
+          cd "frontend"
           npm test
