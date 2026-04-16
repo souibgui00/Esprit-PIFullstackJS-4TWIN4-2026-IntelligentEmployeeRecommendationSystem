@@ -21,13 +21,12 @@ describe('AuthService', () => {
     verify: jest.fn(),
   };
 
-  const mockSessionModel = {
-    create: jest.fn(),
-    findOne: jest.fn(),
-    findOneAndUpdate: jest.fn(),
-    updateMany: jest.fn(),
+  const mockSessionModel = jest.fn().mockImplementation(() => ({
     save: jest.fn(),
-  };
+  }));
+  (mockSessionModel as any).findOne = jest.fn();
+  (mockSessionModel as any).findOneAndUpdate = jest.fn();
+  (mockSessionModel as any).updateMany = jest.fn();
 
   const mockConfigService = {
     get: jest.fn((key: string) => {
