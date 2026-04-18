@@ -223,7 +223,7 @@ export function PendingValidationsPanel({ onValidated }) {
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Your Rating</p>
                   <StarDisplay value={p.organizerRating || 0} />
                   {p.organizerNote && (
-                    <p className="text-[10px] text-slate-500 font-medium italic max-w-[180px] line-clamp-2 mt-1">
+                    <p className="text-[10px] text-slate-500 font-medium italic max-w-45 line-clamp-2 mt-1">
                       "{p.organizerNote}"
                     </p>
                   )}
@@ -236,7 +236,7 @@ export function PendingValidationsPanel({ onValidated }) {
                         window.location.href = `/manager/validation/${p._id}`
                     }}
                     size="sm"
-                    className="bg-primary hover:bg-[#D97706] text-white font-black text-[9px] uppercase tracking-wider px-5 h-9 rounded-2xl gap-1.5 transition-all shadow-md shadow-primary/20"
+                    className="bg-primary hover:bg-primary-dark text-white font-black text-[9px] uppercase tracking-wider px-5 h-9 rounded-2xl gap-1.5 transition-all shadow-md shadow-primary/20"
                   >
                     <CheckCircle2 className="w-3 h-3" /> Review Validation Report
                   </Button>

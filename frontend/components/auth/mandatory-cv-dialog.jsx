@@ -48,11 +48,11 @@ export function MandatoryCvDialog() {
 
   return (
     <Dialog open={true} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md border-none shadow-mega rounded-[32px] overflow-hidden p-0 bg-white z-[9999]">
+      <DialogContent className="sm:max-w-md border-none shadow-mega rounded-4xl overflow-hidden p-0 bg-white z-9999">
         <div className="bg-slate-950 p-8 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#F28C1B]/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
           <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 relative z-10 border border-white/10">
-            <UploadCloud className="w-8 h-8 text-[#F28C1B]" />
+            <UploadCloud className="w-8 h-8 text-primary" />
           </div>
           <DialogTitle className="text-2xl font-black text-white tracking-tight relative z-10 uppercase">
             Initialize Your Journey
@@ -77,7 +77,7 @@ export function MandatoryCvDialog() {
                 id="mandatory-cv-upload"
               />
               <label htmlFor="mandatory-cv-upload" className="cursor-pointer flex flex-col items-center">
-                <div className="w-12 h-12 bg-[#F28C1B]/10 rounded-full flex items-center justify-center mb-4 text-[#F28C1B]">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
                   <FileText className="w-6 h-6" />
                 </div>
                 <span className="text-sm font-bold text-slate-700">
@@ -93,7 +93,7 @@ export function MandatoryCvDialog() {
           <Button 
             onClick={handleCvUpload}
             disabled={!cvFile || isUploading}
-            className="w-full h-14 bg-slate-950 hover:bg-[#F28C1B] text-white mt-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95"
+            className="w-full h-14 bg-slate-950 hover:bg-primary text-white mt-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95"
           >
             {isUploading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

@@ -42,7 +42,7 @@ export default function HRActivitiesPage() {
         description="A clear list of all current programs and skill-building sessions." 
       />
 
-      <div className="flex-1 p-6 md:p-10 max-w-[1400px] mx-auto w-full animate-in fade-in duration-700 space-y-12">
+      <div className="flex-1 p-6 md:p-10 max-w-350 mx-auto w-full animate-in fade-in duration-700 space-y-12">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pt-4">
             <div className="flex-1 max-w-2xl relative group">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-orange-500 transition-colors" />
@@ -66,7 +66,7 @@ export default function HRActivitiesPage() {
                             key={type.id}
                             onClick={() => setTypeFilter(type.id)}
                             className={cn(
-                                "px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all",
+                                "px-8 py-4 rounded-4xl text-[10px] font-black uppercase tracking-widest transition-all",
                                 typeFilter === type.id ? "bg-slate-950 text-white shadow-xl" : "text-slate-400 hover:text-slate-600"
                             )}
                         >
@@ -77,7 +77,7 @@ export default function HRActivitiesPage() {
 
                 <Button
                     onClick={() => navigate(`/hr/activities/new`)}
-                    className="bg-[#F28C1B] hover:bg-orange-600 text-white h-18 px-12 rounded-[2.5rem] font-black text-[12px] tracking-widest uppercase transition-all shadow-xl active:scale-95 flex items-center gap-4"
+                    className="bg-primary hover:bg-orange-600 text-white h-18 px-12 rounded-[2.5rem] font-black text-[12px] tracking-widest uppercase transition-all shadow-xl active:scale-95 flex items-center gap-4"
                 >
                     <Plus className="h-6 w-6" />
                     Add Session
@@ -85,7 +85,7 @@ export default function HRActivitiesPage() {
             </div>
         </div>
 
-        <div className="bg-white border-2 border-slate-50 rounded-[4rem] shadow-premium overflow-hidden min-h-[600px] pt-4 p-4 animate-in slide-in-from-bottom-5 duration-1000">
+        <div className="bg-white border-2 border-slate-50 rounded-[4rem] shadow-premium overflow-hidden min-h-150 pt-4 p-4 animate-in slide-in-from-bottom-5 duration-1000">
             <ActivityTable 
                 activities={filteredActivities || []} 
                 enrollments={enrollments}

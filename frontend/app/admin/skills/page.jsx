@@ -76,7 +76,7 @@ export default function AdminSkillsPage() {
           setActiveViewTab("Overview")
         }}
         className={cn(
-          "bg-white border-2 rounded-[2rem] p-8 transition-all group cursor-pointer hover:shadow-2xl relative",
+          "bg-white border-2 rounded-4xl p-8 transition-all group cursor-pointer hover:shadow-2xl relative",
           isSelected ? "border-primary bg-slate-50/30" : "border-slate-50 shadow-premium"
         )}
       >
@@ -127,7 +127,7 @@ export default function AdminSkillsPage() {
     <div className="flex flex-col bg-[#F8FAFC] min-h-screen text-slate-600">
       <DashboardHeader title="Skills" description="Manage your skills and training requirements" />
 
-      <div className="flex-1 p-6 md:p-10 max-w-[1400px] mx-auto w-full animate-in fade-in duration-700 space-y-12">
+      <div className="flex-1 p-6 md:p-10 max-w-350 mx-auto w-full animate-in fade-in duration-700 space-y-12">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pt-4">
           <div className="flex flex-wrap items-center gap-4 w-full justify-between">
             <div className="relative group min-w-[320px]">
@@ -137,19 +137,19 @@ export default function AdminSkillsPage() {
                 placeholder="Search skills, categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-14 pr-8 h-16 bg-white border-2 border-slate-50 focus:border-primary/20 rounded-[2rem] text-sm font-bold text-slate-900 shadow-premium outline-none transition-all placeholder:text-slate-300 placeholder:font-black placeholder:uppercase placeholder:text-[10px] placeholder:tracking-widest"
+                className="w-full pl-14 pr-8 h-16 bg-white border-2 border-slate-50 focus:border-primary/20 rounded-4xl text-sm font-bold text-slate-900 shadow-premium outline-none transition-all placeholder:text-slate-300 placeholder:font-black placeholder:uppercase placeholder:text-[10px] placeholder:tracking-widest"
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="h-16 px-8 rounded-[2rem] bg-white border-2 border-slate-50 shadow-premium hover:bg-slate-50 transition-all gap-4">
+                  <Button variant="outline" className="h-16 px-8 rounded-4xl bg-white border-2 border-slate-50 shadow-premium hover:bg-slate-50 transition-all gap-4">
                     <SlidersHorizontal className="h-5 w-5 text-primary" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Filters</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[380px] p-8 bg-white border-none rounded-[3rem] shadow-2xl space-y-10 mt-4 animate-in fade-in slide-in-from-top-4">
+                <PopoverContent className="w-95 p-8 bg-white border-none rounded-[3rem] shadow-2xl space-y-10 mt-4 animate-in fade-in slide-in-from-top-4">
                   <div className="space-y-8">
                      <div className="space-y-3">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Skill Category</label>
@@ -190,7 +190,7 @@ export default function AdminSkillsPage() {
                 </PopoverContent>
               </Popover>
 
-              <Button onClick={() => navigate("new")} className="h-16 px-10 rounded-[2rem] bg-slate-950 text-white font-black text-[11px] tracking-widest uppercase hover:bg-primary transition-all shadow-xl active:scale-95 flex items-center gap-4">
+              <Button onClick={() => navigate("new")} className="h-16 px-10 rounded-4xl bg-slate-950 text-white font-black text-[11px] tracking-widest uppercase hover:bg-primary transition-all shadow-xl active:scale-95 flex items-center gap-4">
                 <Plus className="h-5 w-5" />
                 Add Skill
               </Button>
@@ -216,7 +216,7 @@ export default function AdminSkillsPage() {
 
           <div className="lg:col-span-1 min-h-0">
             {selectedSkill ? (
-              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 sticky top-8 shadow-2xl shadow-slate-200/50 flex flex-col min-h-[650px] lg:max-h-[calc(100vh-5rem)] overflow-hidden animate-in slide-in-from-right-10 duration-700">
+              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 sticky top-8 shadow-2xl shadow-slate-200/50 flex flex-col min-h-162.5 lg:max-h-[calc(100vh-5rem)] overflow-hidden animate-in slide-in-from-right-10 duration-700">
                 <div className="flex justify-between items-start mb-8">
                   <div className="space-y-1">
                     <Badge className="bg-primary/10 text-primary border-none px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">Skill Details</Badge>
@@ -245,7 +245,7 @@ export default function AdminSkillsPage() {
                 <div className="flex-1 space-y-8 overflow-y-auto pr-2 no-scrollbar">
                   {activeViewTab === "Overview" ? (
                     <div className="space-y-8">
-                      <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100">
+                      <div className="bg-slate-50 rounded-4xl p-8 border border-slate-100">
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Description</p>
                         <p className="text-sm text-slate-600 font-medium leading-relaxed italic">
                           "{selectedSkill.description}"
@@ -318,12 +318,12 @@ export default function AdminSkillsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-16 text-center flex flex-col items-center justify-center min-h-[600px] shadow-premium">
+              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-16 text-center flex flex-col items-center justify-center min-h-150 shadow-premium">
                 <div className="w-20 h-20 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mb-6">
                   <BookOpen className="h-8 w-8 text-slate-200" />
                 </div>
                 <h3 className="text-lg font-black text-slate-900 uppercase">No Skill Selected</h3>
-                <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest max-w-[120px] mt-2">Select a skill to see more details.</p>
+                <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest max-w-30 mt-2">Select a skill to see more details.</p>
               </div>
             )}
           </div>

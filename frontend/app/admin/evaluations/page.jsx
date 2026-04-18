@@ -250,7 +250,7 @@ export default function EvaluationsPage() {
           description={isView ? "Detailed performance breakdown and recommendations." : "Complete the assessment form to update employee proficiency levels."}
         />
         
-        <div className="flex-1 p-6 md:p-10 max-w-[1400px] mx-auto w-full animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-10">
+        <div className="flex-1 p-6 md:p-10 max-w-350 mx-auto w-full animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-10">
           <button 
             onClick={() => setViewState({ mode: "list", currentEval: null })}
             className="group flex items-center gap-3 text-slate-400 hover:text-slate-900 transition-colors"
@@ -370,7 +370,7 @@ export default function EvaluationsPage() {
                       {skillEvaluations.map((se) => {
                         const skill = skills.find(s => s.id === se.skillId || s._id === se.skillId)
                         return (
-                          <div key={se.skillId} className="p-8 bg-slate-50/50 border border-slate-100 rounded-[32px] group hover:bg-white hover:shadow-premium transition-all duration-500">
+                          <div key={se.skillId} className="p-8 bg-slate-50/50 border border-slate-100 rounded-4xl group hover:bg-white hover:shadow-premium transition-all duration-500">
                             <div className="flex items-center justify-between mb-8">
                               <div className="flex items-center gap-5">
                                 <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-primary font-black shadow-sm group-hover:scale-110 transition-transform">
@@ -490,7 +490,7 @@ export default function EvaluationsPage() {
                   <div className="pt-6 grid grid-cols-1 gap-4">
                      <Button
                         onClick={() => handleSaveEvaluation("approved")}
-                        className="h-16 bg-primary hover:bg-[#D97706] text-white font-black text-[11px] tracking-widest uppercase rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+                        className="h-16 bg-primary hover:bg-primary-dark text-white font-black text-[11px] tracking-widest uppercase rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
                      >
                         <Send className="w-4 h-4" />
                         Finalize Assessment
@@ -525,7 +525,7 @@ export default function EvaluationsPage() {
     <div className="flex flex-col bg-transparent min-h-screen page-transition">
       <DashboardHeader title="Performance Dashboard" description="Enterprise-scale professional monitoring system" />
       
-      <div className="flex-1 p-6 md:p-10 max-w-[1400px] mx-auto w-full space-y-12 animate-in fade-in duration-700">
+      <div className="flex-1 p-6 md:p-10 max-w-350 mx-auto w-full space-y-12 animate-in fade-in duration-700">
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-1">
@@ -536,7 +536,7 @@ export default function EvaluationsPage() {
             <div className="flex flex-col md:flex-row items-center gap-4">
                 <Button
                     onClick={() => handleEnterAddMode()}
-                    className="bg-primary hover:bg-[#D97706] text-white h-14 px-8 rounded-2xl font-black text-[11px] tracking-widest uppercase transition-all shadow-xl shadow-orange-500/20 active:scale-95 flex items-center gap-3"
+                    className="bg-primary hover:bg-primary-dark text-white h-14 px-8 rounded-2xl font-black text-[11px] tracking-widest uppercase transition-all shadow-xl shadow-orange-500/20 active:scale-95 flex items-center gap-3"
                 >
                     <Plus className="h-5 w-5" />
                     New Assessment
@@ -657,7 +657,7 @@ export default function EvaluationsPage() {
                                          <MoreHorizontal className="w-5 h-5" />
                                       </button>
                                    </DropdownMenuTrigger>
-                                   <DropdownMenuContent align="end" className="bg-white border-slate-200 rounded-2xl shadow-mega p-2 min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
+                                   <DropdownMenuContent align="end" className="bg-white border-slate-200 rounded-2xl shadow-mega p-2 min-w-50 animate-in fade-in zoom-in-95 duration-200">
                                       <DropdownMenuItem onClick={() => handleEnterViewMode(evaluation)} className="flex items-center gap-3 rounded-xl px-4 py-3 font-black text-[10px] tracking-widest uppercase text-slate-600 hover:bg-slate-50 hover:text-primary transition-all cursor-pointer">
                                          <Eye className="w-4 h-4" /> View Details
                                       </DropdownMenuItem>

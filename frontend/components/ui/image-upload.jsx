@@ -47,7 +47,7 @@ export function ImageUpload({ value, onChange, className }) {
         <div className={cn("space-y-4", className)}>
             <div
                 className={cn(
-                    "relative group cursor-pointer border-2 border-dashed rounded-xl overflow-hidden transition-all duration-300 min-h-[180px] flex items-center justify-center",
+                    "relative group cursor-pointer border-2 border-dashed rounded-xl overflow-hidden transition-all duration-300 min-h-45 flex items-center justify-center",
                     dragActive ? "border-primary bg-primary/5 scale-[1.02]" : "border-slate-200 hover:border-primary/40 hover:bg-slate-50",
                     preview ? "border-solid" : ""
                 )}

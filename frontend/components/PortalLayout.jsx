@@ -127,7 +127,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
                     className={cn(
                         "fixed inset-y-0 left-0 z-50 w-72 border-r transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) lg:relative lg:translate-x-0",
                         sidebarOpen ? "translate-x-0" : "-translate-x-full lg:w-24",
-                        "bg-[#2C2C2C] border-[#3E3E3E] shadow-[20px_0_40px_-15px_rgba(0,0,0,0.3)]"
+                        "bg-[#2C2C2C] border-slate-600 shadow-[20px_0_40px_-15px_rgba(0,0,0,0.3)]"
                     )}
                 >
                     <div className="flex flex-col h-full overflow-hidden">
@@ -135,7 +135,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
                         <div className={cn(
                             "px-6 py-10 border-b flex items-center transition-all duration-300",
                             sidebarOpen ? "justify-between" : "justify-center",
-                            "border-[#3E3E3E]"
+                            "border-slate-600"
                         )}>
                             <div className={cn(
                                 "flex items-center gap-4 overflow-hidden transition-all duration-300",
@@ -143,13 +143,13 @@ function PortalLayoutInner({ children, role = "admin" }) {
                             )}>
                                 <div className={cn(
                                     "w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shrink-0 transform hover:rotate-6 transition-transform duration-300",
-                                    "bg-[#F28C1B] shadow-orange-500/10"
+                                    "bg-primary shadow-orange-500/10"
                                 )}>
                                     <activeConfig.icon className="w-6 h-6 text-white" />
                                 </div>
                                 <div className="flex flex-col">
                                     <h1 className="text-white font-display text-lg tracking-tight font-black m-0 leading-tight">Maghrebia</h1>
-                                    <p className="text-[#F28C1B] text-[10px] font-bold tracking-[0.2em] m-0 mt-0.5">{activeConfig.label}</p>
+                                    <p className="text-primary text-[10px] font-bold tracking-[0.2em] m-0 mt-0.5">{activeConfig.label}</p>
                                 </div>
                             </div>
                             <button
@@ -164,8 +164,8 @@ function PortalLayoutInner({ children, role = "admin" }) {
                         {/* Nav Items */}
                         <nav className="flex-1 px-4 py-8 overflow-y-auto space-y-2 custom-scrollbar">
                             <div className={cn("px-4 mb-4 transition-all duration-300 flex items-center gap-2", !sidebarOpen && "lg:opacity-0 lg:h-0 overflow-hidden")}>
-                                <div className="w-1 h-3 bg-[#1E5FA8] rounded-full"></div>
-                                <span className="text-[10px] font-bold text-[#1E5FA8] tracking-[0.2em]">Main menu</span>
+                                <div className="w-1 h-3 bg-accent-blue rounded-full"></div>
+                                <span className="text-[10px] font-bold text-accent-blue tracking-[0.2em]">Main menu</span>
                             </div>
                             {activeConfig.nav.map((item) => {
                                 const isActive = currentPath === item.href || (item.href !== `/${role}` && currentPath.startsWith(item.href))
@@ -178,15 +178,15 @@ function PortalLayoutInner({ children, role = "admin" }) {
                                         className={cn(
                                             "w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group relative mb-1 outline-none text-left",
                                             isActive
-                                                ? "bg-[#F28C1B] text-white shadow-lg shadow-orange-500/20"
-                                                : "text-slate-400 hover:bg-[#3E3E3E] hover:text-white"
+                                                ? "bg-primary text-white shadow-lg shadow-orange-500/20"
+                                                : "text-slate-400 hover:bg-slate-600 hover:text-white"
                                         )}
                                         title={!sidebarOpen ? item.name : ""}
                                     >
                                         <div className="flex items-center gap-4">
                                             <item.icon className={cn(
                                                 "w-5 h-5 transition-all duration-300",
-                                                isActive ? "text-white scale-110" : "text-slate-500 group-hover:text-[#1E5FA8] group-hover:scale-110"
+                                                isActive ? "text-white scale-110" : "text-slate-500 group-hover:text-accent-blue group-hover:scale-110"
                                             )} aria-hidden="true" />
                                             <span className={cn(
                                                 "font-semibold text-sm tracking-wide transition-all duration-300",
@@ -197,8 +197,8 @@ function PortalLayoutInner({ children, role = "admin" }) {
                                         </div>
                                         {item.badge && sidebarOpen && (
                                             <span className={cn(
-                                                "px-2.5 py-0.5 text-[10px] font-bold rounded-lg min-w-[24px] text-center transition-all",
-                                                isActive ? "bg-white/20 text-white" : "bg-[#3E3E3E] text-slate-400 group-hover:bg-[#F28C1B]/20 group-hover:text-[#F28C1B]"
+                                                "px-2.5 py-0.5 text-[10px] font-bold rounded-lg min-w-6 text-center transition-all",
+                                                isActive ? "bg-white/20 text-white" : "bg-slate-600 text-slate-400 group-hover:bg-primary/20 group-hover:text-primary"
                                             )}>
                                                 {item.badge}
                                             </span>
@@ -211,7 +211,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
                             })}
                         </nav>
 
-                        <div className={cn("p-6 border-t transition-all bg-[#2C2C2C] border-[#3E3E3E]")}>
+                        <div className={cn("p-6 border-t transition-all bg-[#2C2C2C] border-slate-600")}>
                             <button
                                 onClick={logout}
                                 aria-label="Sign out of the platform"
@@ -231,10 +231,10 @@ function PortalLayoutInner({ children, role = "admin" }) {
             )}
 
             {/* Main Content Area */}
-            <div className={cn("flex-1 flex flex-col min-w-0 overflow-hidden relative", "bg-[var(--theme-content-bg)]")}>
+            <div className={cn("flex-1 flex flex-col min-w-0 overflow-hidden relative", "bg-(--theme-content-bg)")}>
                 {/* Decorative background blobs */}
-                <div className={cn("absolute top-0 right-0 w-[800px] h-[800px] rounded-full blur-[140px] -translate-y-1/2 translate-x-1/2 pointer-events-none bg-[#F28C1B]/[0.03] animate-pulse")}></div>
-                <div className={cn("absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full blur-[140px] translate-y-1/2 -translate-x-1/2 pointer-events-none bg-[#1E5FA8]/[0.03]")}></div>
+                <div className={cn("absolute top-0 right-0 w-200 h-200 rounded-full blur-[140px] -translate-y-1/2 translate-x-1/2 pointer-events-none bg-primary/3 animate-pulse")}></div>
+                <div className={cn("absolute bottom-0 left-0 w-150 h-150 rounded-full blur-[140px] translate-y-1/2 -translate-x-1/2 pointer-events-none bg-accent-blue/3")}></div>
 
                 {/* No separate mobile header anymore, as we'll integrate the toggle into DashboardHeader */}
 

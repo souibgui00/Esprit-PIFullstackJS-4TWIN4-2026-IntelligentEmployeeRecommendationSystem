@@ -78,7 +78,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-primary to-primary/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-primary via-primary to-primary/80" />
         <div className="relative z-10 flex flex-col justify-between p-12 text-primary-foreground">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/10 backdrop-blur-sm">
@@ -226,7 +226,7 @@ export default function LoginPage() {
 
           {/* Face ID Dialog */}
           <Dialog open={faceLoginOpen} onOpenChange={setFaceLoginOpen}>
-            <DialogContent className="sm:max-w-md bg-white rounded-[32px] border-none shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-md bg-white rounded-4xl border-none shadow-2xl p-0 overflow-hidden">
               <div className="p-8 space-y-6">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black tracking-tight text-center">Face Verification</DialogTitle>
