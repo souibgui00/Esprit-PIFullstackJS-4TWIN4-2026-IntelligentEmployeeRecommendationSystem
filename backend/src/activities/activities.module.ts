@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ScoringModule } from '../scoring/scoring.module';
 import { ParticipationSchema } from '../participations/schema/participation.schema';
+import { AssignmentSchema } from '../assignments/schema/assignment.schema';
 import { ActivityRequestModule } from './activity-request.module';
 import { AuditModule } from '../common/audit/audit.module';
 
@@ -17,6 +18,7 @@ import { AuditModule } from '../common/audit/audit.module';
         MongooseModule.forFeature([
             { name: Activity.name, schema: ActivitySchema },
             { name: 'Participation', schema: ParticipationSchema },
+            { name: 'Assignment', schema: AssignmentSchema },
         ]),
         UsersModule,
         NotificationsModule,

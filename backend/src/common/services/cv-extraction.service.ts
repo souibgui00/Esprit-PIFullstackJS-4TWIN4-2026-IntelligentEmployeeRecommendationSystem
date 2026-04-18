@@ -214,7 +214,30 @@ export class CvExtractionService {
       const mimetype = ext === '.pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       
       const text = await this.extractTextBuffer(dataBuffer, mimetype);
-      const { matchedSkillIds } = await this.findSkillsInText(text, { createMissing: true });
+      
+      // 1) Call Python NLP Service
+      let nlpSkills: string[] = [];
+      try {
+        const response = await fetch('http://localhost:8000/extract-skills', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: text, title: "CV Extraction" })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          nlpSkills = data.extractedSkills || [];
+          this.logger.log(`Python NLP extraction matched: ${nlpSkills.join(', ')}`);
+        } else {
+          this.logger.warn(`Python NLP returned status: ${response.status}`);
+        }
+      } catch (err: any) {
+        this.logger.error(`Failed to reach Python NLP at localhost:8000: ${err.message}`);
+      }
+
+      // 2) Fuse with the internal matching to guarantee MongoDB skill linking
+      const combinedText = text + '\n\n' + nlpSkills.join(' ');
+      const { matchedSkillIds } = await this.findSkillsInText(combinedText, { createMissing: true });
+      
       return matchedSkillIds;
     } catch (error: any) {
       this.logger.error(`Failed to extract data via local NLP: ${error.message}`);

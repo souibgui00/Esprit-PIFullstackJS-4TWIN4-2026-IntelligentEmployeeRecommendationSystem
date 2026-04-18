@@ -30,8 +30,8 @@ export class ActivitiesController {
     }
 
     @Get()
-    findAll() {
-        return this.activitiesService.findAll();
+    findAll(@Req() req: any) {
+        return this.activitiesService.findAll(req.user.role, req.user.userId);
     }
 
     @Roles(Role.MANAGER, Role.ADMIN, Role.HR)
@@ -67,7 +67,7 @@ export class ActivitiesController {
         return updated;
     }
 
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.HR)
     @Delete(':id')
     async remove(@Param('id') id: string, @Req() req: any) {
         const before = await this.activitiesService.findOne(id);

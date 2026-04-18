@@ -1,0 +1,55 @@
+/* app/globals.css — mirrors src/index.css. This file exists for Next.js compat; styles are driven from src/index.css */
+/* All police-style rules live in src/index.css which is the true global entry point */
+
+@layer base {
+	html {
+		scroll-behavior: smooth;
+		-webkit-tap-highlight-color: transparent;
+		font-size: 15px;
+	}
+
+	body {
+		font-size: 0.9rem;
+		line-height: 1.5;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		letter-spacing: -0.02em;
+		font-weight: 700;
+	}
+
+	h1 {
+		font-size: 1.9rem;
+		line-height: 1.15;
+	}
+
+	h2 {
+		font-size: 1.35rem;
+		line-height: 1.25;
+	}
+
+	h3 {
+		font-size: 1.1rem;
+		line-height: 1.35;
+	}
+
+	h4 {
+		font-size: 1rem;
+		line-height: 1.4;
+	}
+
+	p {
+		margin-bottom: 0.85rem;
+	}
+
+	body :is(h1, h2, h3, h4, h5, h6, p, span, button, label, a, li, th, td, option, summary, small, strong, em, dt, dd, legend, figcaption, caption, blockquote, div, input, textarea, select) {
+		text-transform: uppercase !important;
+	}
+
+	body :is(pre, code, kbd, samp, [contenteditable="true"]) {
+		text-transform: none !important;
+	}
+}

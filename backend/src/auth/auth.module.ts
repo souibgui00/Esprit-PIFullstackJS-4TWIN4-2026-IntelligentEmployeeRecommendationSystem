@@ -20,7 +20,7 @@ import { CommonModule } from '../common/common.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const expiresIn = configService.get<string>('JWT_EXPIRES_IN') || '15m';
+        const expiresIn = configService.get<string>('JWT_EXPIRES_IN') || '24h';
         return {
           secret: configService.get<string>('JWT_SECRET'),
           signOptions: {

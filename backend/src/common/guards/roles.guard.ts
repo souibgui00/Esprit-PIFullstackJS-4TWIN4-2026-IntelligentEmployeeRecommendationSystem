@@ -26,11 +26,9 @@ export class RolesGuard implements CanActivate {
     }
 
     const userRole = user.role.toUpperCase() as Role;
-    console.log(`[RolesGuard] Checking access - User role: ${userRole}, Required roles: ${requiredRoles.join(', ')}`);
 
     // ADMIN has access to everything (role hierarchy)
     if (userRole === Role.ADMIN) {
-      console.log('[RolesGuard] ADMIN user - access granted');
       return true;
     }
 

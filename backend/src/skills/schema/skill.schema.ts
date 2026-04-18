@@ -6,14 +6,23 @@ export class Skill extends Document {
     @Prop({ required: true })
     name!: string;
 
-    @Prop({ required: true, enum: ['knowledge', 'knowHow', 'softSkill'] })
+    @Prop({ required: true, enum: ['technique', 'comportementale', 'transverse', 'opérationnelle'] })
     type!: string;
+
+    @Prop({ enum: ['draft', 'submitted', 'validated'], default: 'draft' })
+    etat!: string;
 
     @Prop()
     description!: string;
 
     @Prop()
     category!: string;
+
+    @Prop({ default: 0 })
+    auto_eval!: number;
+
+    @Prop({ default: 0 })
+    hierarchie_eval!: number;
 }
 
 export const SkillSchema = SchemaFactory.createForClass(Skill);

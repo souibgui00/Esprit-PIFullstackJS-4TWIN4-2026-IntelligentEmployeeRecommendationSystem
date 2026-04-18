@@ -7,13 +7,15 @@ import { Assignment, AssignmentSchema } from './schema/assignment.schema';
 import { ActivitiesModule } from '../activities/activities.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { UsersModule } from '../users/users.module';
+import { ParticipationsModule } from '../participations/participations.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: Assignment.name, schema: AssignmentSchema }]),
         ActivitiesModule,
         NotificationsModule,
-        UsersModule
+        UsersModule,
+        ParticipationsModule
     ],
     controllers: [AssignmentsController],
     providers: [AssignmentsService],

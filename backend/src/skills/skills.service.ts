@@ -21,7 +21,21 @@ export class SkillsService {
     }
 
     async findOne(id: string): Promise<Skill | null> {
-        return this.skillModel.findById(id).exec();
+        if (!id) return null;
+        try {
+            // Try as ObjectID first
+            const doc = await this.skillModel.findById(id).exec();
+            if (doc) return doc;
+        } catch (e) {
+            // Not a valid ObjectID or failed
+        }
+        
+        // Fallback: search by exact name case-insensitive
+        return this.skillModel.findOne({ name: { $regex: new RegExp(`^${id}$`, 'i') } }).exec();
+    }
+
+    async findByName(name: string): Promise<Skill | null> {
+        return this.skillModel.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } }).exec();
     }
 
     async update(id: string, updateSkillDto: UpdateSkillDto): Promise<Skill | null> {

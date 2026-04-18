@@ -81,6 +81,25 @@ export class AssignmentsController {
         return this.assignmentsService.updateStatus(id, status, req.user.userId);
     }
 
+    @Roles(Role.EMPLOYEE)
+    @Post(':id/accept')
+    async employeeAccept(
+        @Req() req: any,
+        @Param('id') id: string,
+    ) {
+        return this.assignmentsService.employeeAccept(id, req.user.userId);
+    }
+
+    @Roles(Role.EMPLOYEE)
+    @Post(':id/reject')
+    async employeeReject(
+        @Req() req: any,
+        @Param('id') id: string,
+        @Body('reason') reason: string,
+    ) {
+        return this.assignmentsService.employeeReject(id, req.user.userId, reason);
+    }
+
     @Delete(':id')
     async remove(@Param('id') id: string) {
         return this.assignmentsService.remove(id);
