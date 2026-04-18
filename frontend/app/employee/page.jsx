@@ -121,38 +121,38 @@ export default function EmployeeHome() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-transparent page-transition overflow-x-hidden pb-24 font-sans text-[#2C2C2C]">
+    <div className="flex flex-col min-h-screen bg-transparent page-transition overflow-x-hidden pb-16 font-sans text-[#2C2C2C]">
       
 
       {/* Immersive Hero Section with Mesh Gradient */}
-      <div className="relative mesh-gradient-premium pt-20 md:pt-32 pb-40 md:pb-60 px-4 md:px-8 overflow-hidden">
+      <div className="relative mesh-gradient-premium pt-16 md:pt-24 pb-24 md:pb-36 px-4 md:px-6 overflow-hidden">
         {/* Animated Background Elements */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] -mr-96 -mt-96 animate-float"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-[100px] -ml-48 -mb-48 animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-0 right-0 w-200 h-200 bg-primary/10 rounded-full blur-[120px] -mr-96 -mt-96 animate-float"></div>
+        <div className="absolute bottom-0 left-0 w-150 h-150 bg-orange-500/5 rounded-full blur-[100px] -ml-48 -mb-48 animate-float" style={{ animationDelay: '2s' }}></div>
 
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-16">
-            <div className="space-y-10 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark border-white/10 text-[#F28C1B] text-[10px] font-black tracking-[0.3em] uppercase mb-4 shimmer-sweep">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+            <div className="space-y-6 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-dark border-white/10 text-primary text-[10px] font-black tracking-[0.3em] uppercase mb-3 shimmer-sweep">
                 <Activity className="w-3 h-3" />
                 Skill Development Platform
               </div>
 
-              <div className="space-y-4">
-                <h1 className="text-6xl md:text-7xl font-black text-white leading-[0.95] tracking-tighter text-balance uppercase">
+              <div className="space-y-3">
+                <h1 className="text-4xl md:text-5xl font-black text-white leading-[0.95] tracking-tighter text-balance uppercase">
                   Elevate your <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F28C1B] via-white to-[#F28C1B] animate-pulse">career path.</span>
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-white to-primary animate-pulse">career path.</span>
                 </h1>
-                <p className="text-slate-400 text-xl font-medium leading-relaxed max-w-lg">
+                <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-lg">
                   Welcome back, <span className="text-white font-bold">{user?.name?.split(" ")[0] || "Professional"}</span>.
                   Your current rank is <span className="text-orange-400 text-glow-orange font-bold">{employee.rank || "Junior"}</span> with <span className="text-white">{employee.skills?.length || 0}</span> verified competencies.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-6 pt-4">
+              <div className="flex flex-wrap gap-4 pt-2">
                 <button
                   onClick={() => navigate("/employee/activities")}
-                  className="px-12 py-5 rounded-[2rem] bg-[#F28C1B] hover:bg-[#D97706] text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl shadow-[#F28C1B]/30 hover:shadow-[#F28C1B]/50 active:scale-[0.98] flex items-center gap-4 hover:translate-y-[-4px]"
+                  className="px-8 py-3.5 rounded-3xl bg-primary hover:bg-primary-dark text-white font-black text-[10px] uppercase tracking-[0.18em] transition-all shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-[0.98] flex items-center gap-3 hover:-translate-y-1"
                 >
                   Start Professional Journey
                   <ArrowRight className="w-4 h-4" />
@@ -161,20 +161,22 @@ export default function EmployeeHome() {
             </div>
 
             {/* Premium Radar Chart Container */}
-            <div className="relative group w-full lg:w-[450px] mt-12 lg:mt-0">
-              <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 to-orange-500/30 rounded-[50px] blur-3xl opacity-50 group-hover:opacity-80 transition-opacity duration-1000"></div>
-              <div className="relative glass-dark p-6 md:p-10 rounded-[48px] border-white/10 hover:border-white/20 transition-all duration-700 shimmer-sweep">
-                <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+            <div className="relative group w-full lg:w-96 mt-8 lg:mt-0">
+              <div className="absolute -inset-4 bg-linear-to-tr from-primary/20 to-orange-500/30 rounded-[50px] blur-3xl opacity-50 group-hover:opacity-80 transition-opacity duration-1000"></div>
+              <div className="relative glass-dark p-4 md:p-6 rounded-[36px] border-white/10 hover:border-white/20 transition-all duration-700 shimmer-sweep">
+              
+              
+                <div className="flex items-center justify-between mb-5 pb-3 border-b border-white/5">
                   <div className="space-y-1">
-                    <h3 className="text-white font-bold text-xl tracking-tight">Competency Profile</h3>
+                    <h3 className="text-white font-bold text-base tracking-tight">Competency Profile</h3>
                     <p className="text-[10px] text-orange-400 font-bold uppercase tracking-[0.2em]">Verified Skills</p>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#F28C1B]/10 text-[#F28C1B] border border-[#F28C1B]/20">
-                    <Target className="w-5 h-5 fill-current" />
+                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
+                    <Target className="w-4 h-4 fill-current" />
                   </div>
                 </div>
 
-                <div className="h-[300px] w-full flex items-center justify-center">
+                <div className="h-60 w-full flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart cx="50%" cy="50%" outerRadius="80%" data={skillRadarData}>
                       <PolarGrid stroke="#1e293b" />
@@ -197,17 +199,17 @@ export default function EmployeeHome() {
                   </ResponsiveContainer>
                 </div>
 
-                <div className="mt-8 flex justify-center gap-12">
+                <div className="mt-5 flex justify-center gap-7">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-white leading-none">{employee.rank || "Junior"}</p>
+                    <p className="text-xl font-bold text-white leading-none">{employee.rank || "Junior"}</p>
                     <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-widest mt-2">Rank</p>
                   </div>
-                  <div className="text-center border-x border-white/5 px-12">
-                    <p className="text-2xl font-bold text-orange-400 text-glow-orange leading-none">{Math.round(employee.rankScore) || 0}</p>
+                  <div className="text-center border-x border-white/5 px-8">
+                    <p className="text-xl font-bold text-orange-400 text-glow-orange leading-none">{Math.round(employee.rankScore) || 0}</p>
                     <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-widest mt-2">Score</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-white leading-none">{employee.skills?.length || 0}</p>
+                    <p className="text-xl font-bold text-white leading-none">{employee.skills?.length || 0}</p>
                     <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-widest mt-2">Top Skills</p>
                   </div>
                 </div>
@@ -219,54 +221,54 @@ export default function EmployeeHome() {
 
 
       {/* Main Content Sections - Floating Layout */}
-      <div className="max-w-6xl mx-auto w-full px-4 md:px-8 -mt-24 md:-mt-32 pb-24 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="max-w-6xl mx-auto w-full px-4 md:px-6 -mt-16 md:-mt-24 pb-18 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
           {/* Left Column: Progress & Milestones */}
-          <div className="lg:col-span-8 space-y-12">
+          <div className="lg:col-span-8 space-y-8">
             
-            <section className="space-y-8">
+            <section className="space-y-5">
               <div className="flex items-center justify-end mb-4">
-                <button onClick={() => navigate("/employee/activities")} className="p-4 rounded-2xl glass-card border-none hover:bg-white text-primary font-black text-[10px] uppercase tracking-widest flex items-center gap-3 transition-all hover:-translate-x-1 shadow-premium">
+                <button onClick={() => navigate("/employee/activities")} className="p-3 rounded-xl glass-card border-none hover:bg-white text-primary font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all hover:-translate-x-1 shadow-premium">
                   View All <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {(enrolledActivities.length > 0 ? enrolledActivities : []).map((activity, idx) => (
-                  <div key={activity.id || activity._id} className="group bg-white rounded-[40px] border border-orange-100/50 shadow-premium p-6 md:p-10 hover:translate-y-[-12px] transition-all duration-700 relative overflow-hidden">
+                  <div key={activity.id || activity._id} className="group bg-white rounded-[28px] border border-orange-100/50 shadow-premium p-4 md:p-6 hover:-translate-y-2 transition-all duration-700 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
 
                     <div className="flex flex-col h-full relative z-10">
-                      <div className="flex items-center justify-between mb-8">
+                      <div className="flex items-center justify-between mb-5">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-2xl",
-                          idx === 0 ? "bg-gradient-to-br from-[#1E5FA8] to-[#1E5FA8]/80 shadow-blue-500/20" : "bg-gradient-to-br from-[#F28C1B] to-[#F28C1B]/80 shadow-orange-500/20"
+                          "w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-2xl",
+                          idx === 0 ? "bg-linear-to-br from-accent-blue to-accent-blue/80 shadow-blue-500/20" : "bg-linear-to-br from-primary to-primary/80 shadow-orange-500/20"
                         )}>
-                          {idx === 0 ? <Brain className="w-7 h-7" /> : <TrendingUp className="w-7 h-7" />}
+                          {idx === 0 ? <Brain className="w-6 h-6" /> : <TrendingUp className="w-6 h-6" />}
                         </div>
-                        <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase">
+                        <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">
                           {activity.type || "Training"}
                         </Badge>
                       </div>
 
-                      <h4 className="text-2xl font-bold text-slate-900 mb-2 truncate group-hover:text-primary transition-colors tracking-tight">{activity.title}</h4>
-                      <p className="text-sm text-slate-500 mb-10 line-clamp-2 font-medium leading-relaxed">{activity.description}</p>
+                      <h4 className="text-xl font-bold text-slate-900 mb-1.5 truncate group-hover:text-primary transition-colors tracking-tight">{activity.title}</h4>
+                      <p className="text-xs text-slate-500 mb-7 line-clamp-2 font-medium leading-relaxed">{activity.description}</p>
 
-                      <div className="mt-auto space-y-6">
+                      <div className="mt-auto space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Your progress</span>
-                          <span className="text-lg font-black text-primary tracking-tighter">{activity.progress || 0}%</span>
+                          <span className="text-base font-black text-primary tracking-tighter">{activity.progress || 0}%</span>
                         </div>
                         <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden p-0.5 border border-slate-100">
                           <div
-                            className="h-full bg-gradient-to-r from-primary to-orange-400 rounded-full transition-all duration-1000 relative"
+                            className="h-full bg-linear-to-r from-primary to-orange-400 rounded-full transition-all duration-1000 relative"
                             style={{ width: `${activity.progress || 0}%` }}
                           >
                             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-white/20 rounded-full"></div>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between pt-4">
+                        <div className="flex items-center justify-between pt-3">
                           <div className="flex items-center gap-6">
                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                               <Clock className="w-4 h-4 text-primary/50" />
@@ -277,7 +279,7 @@ export default function EmployeeHome() {
                               Level: {activity.level || "Med"}
                             </div>
                           </div>
-                          <button className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-primary transition-colors shadow-xl active:scale-90">
+                          <button className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-primary transition-colors shadow-xl active:scale-90">
                             <ArrowRight className="w-4 h-4" />
                           </button>
                         </div>
@@ -286,40 +288,40 @@ export default function EmployeeHome() {
                   </div>
                 ))}
                 {enrolledActivities.length === 0 && (
-                  <div className="col-span-full glass-card rounded-[40px] border-dashed border-orange-200 p-24 text-center space-y-6">
-                    <div className="w-20 h-20 bg-orange-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                      <Zap className="w-10 h-10 text-orange-200" />
+                  <div className="col-span-full glass-card rounded-[30px] border-dashed border-orange-200 p-16 text-center space-y-5">
+                    <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                      <Zap className="w-8 h-8 text-orange-200" />
                     </div>
                     <p className="text-slate-400 font-black uppercase text-xs tracking-widest mt-4">No active courses yet.</p>
-                    <button onClick={() => navigate("/employee/activities")} className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-xl">Browse Activities</button>
+                    <button onClick={() => navigate("/employee/activities")} className="px-7 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-xl">Browse Activities</button>
                   </div>
                 )}
               </div>
             </section>
 
             {topRecommendation && (
-              <section className="space-y-8 pt-8">
+              <section className="space-y-5 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Recommended for You</h3>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Recommended for You</h3>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Top picks for your growth</p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-[48px] border border-orange-100/50 overflow-hidden shadow-premium p-6 md:p-12 relative shimmer-sweep">
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/5 to-orange-500/5 rounded-full blur-3xl"></div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16 relative z-10">
-                    <div className="space-y-8">
+                <div className="bg-white rounded-[34px] border border-orange-100/50 overflow-hidden shadow-premium p-4 md:p-7 relative shimmer-sweep">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-primary/5 to-orange-500/5 rounded-full blur-3xl"></div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                    <div className="space-y-5">
                       <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 text-orange-600 text-[10px] font-black tracking-widest uppercase">
                         <Star className="w-3 h-3 fill-current" />
                         Next Milestone
                       </div>
-                      <h4 className="text-4xl font-black text-slate-900 tracking-tighter leading-[1.1]">
+                      <h4 className="text-3xl font-black text-slate-900 tracking-tighter leading-[1.1]">
                         {topRecommendation.title?.length > 20 && /^[0-9a-fA-F]+$/.test(topRecommendation.title) 
                           ? "Advanced Professional Training" 
                           : (topRecommendation.title || "Strategic Development")}
                       </h4>
-                      <p className="text-slate-500 text-lg font-medium leading-relaxed line-clamp-3">
+                      <p className="text-slate-500 text-sm md:text-base font-medium leading-relaxed line-clamp-3">
                         {(!topRecommendation.description || topRecommendation.description.length < 15 || topRecommendation.description.includes("asdasd"))
                           ? "Expand your capabilities with this curated program designed for your current career path and skill profile."
                           : topRecommendation.description}
@@ -337,10 +339,10 @@ export default function EmployeeHome() {
                         })}
                       </div>
 
-                      <div className="pt-8">
+                      <div className="pt-4">
                         <button
                           onClick={() => navigate("/employee/activities")}
-                          className="px-10 py-5 rounded-3xl bg-slate-900 hover:bg-primary text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center gap-4 active:scale-[0.98] group"
+                          className="px-7 py-3.5 rounded-2xl bg-slate-900 hover:bg-primary text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center gap-3 active:scale-[0.98] group"
                         >
                           Discover Path
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
@@ -349,14 +351,14 @@ export default function EmployeeHome() {
                     </div>
 
                     <div className="relative">
-                      <div className="absolute -inset-6 bg-gradient-to-tr from-primary/10 to-orange-500/10 rounded-[60px] blur-2xl"></div>
-                      <div className="relative aspect-[5/4] rounded-[50px] bg-[#0F172A] overflow-hidden shadow-2xl flex items-center justify-center p-12 border border-slate-800">
+                      <div className="absolute -inset-6 bg-linear-to-tr from-primary/10 to-orange-500/10 rounded-[60px] blur-2xl"></div>
+                      <div className="relative aspect-5/4 rounded-[36px] bg-[#0F172A] overflow-hidden shadow-2xl flex items-center justify-center p-8 border border-slate-800">
                         <div className="text-center space-y-4">
-                          <div className="w-20 h-20 bg-primary/10 rounded-[32px] flex items-center justify-center mx-auto animate-float">
-                            <Sparkles className="w-10 h-10 text-primary" />
+                          <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto animate-float">
+                            <Sparkles className="w-8 h-8 text-primary" />
                           </div>
                         </div>
-                        <div className="absolute bottom-8 right-8 px-6 py-3 glass-dark rounded-2xl text-[#F28C1B] font-black text-[10px] border border-white/10 uppercase tracking-widest">
+                        <div className="absolute bottom-6 right-6 px-4 py-2 glass-dark rounded-xl text-primary font-black text-[10px] border border-white/10 uppercase tracking-widest">
                           {topRecommendation.duration || "4h Session"}
                         </div>
                       </div>
@@ -369,20 +371,20 @@ export default function EmployeeHome() {
           </div>
 
           {/* Right Column: Intelligence & Persona */}
-          <div className="lg:col-span-4 space-y-12">
+          <div className="lg:col-span-4 space-y-8">
 
             {/* Live Intelligence Feed */}
-            <section className="space-y-8">
+            <section className="space-y-5">
               <div className="h-4"></div>
 
-              <div className="bg-slate-900 rounded-[40px] p-6 md:p-10 shadow-premium border border-white/5 relative overflow-hidden group">
+              <div className="bg-slate-900 rounded-[28px] p-4 md:p-6 shadow-premium border border-white/5 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16"></div>
 
-                <div className="space-y-10 relative z-10">
+                <div className="space-y-6 relative z-10">
                   {activeStream.map((item, idx) => (
-                    <div key={item.id} className="flex gap-6 group/item relative">
+                    <div key={item.id} className="flex gap-4 group/item relative">
                       {idx !== activeStream.length - 1 && (
-                        <div className="absolute left-[23px] top-12 bottom-[-40px] w-px bg-white/5"></div>
+                        <div className="absolute left-5.75 top-12 -bottom-10 w-px bg-white/5"></div>
                       )}
                       <div className="relative">
                         <Avatar className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl transition-transform group-hover/item:scale-110">
@@ -426,7 +428,7 @@ export default function EmployeeHome() {
               <div className="pt-4">
                 <button
                   onClick={() => navigate("/employee/profile")}
-                  className="w-full py-5 rounded-3xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.3em] hover:bg-primary transition-all shadow-xl hover:translate-y-[-2px] active:scale-95 shimmer-sweep"
+                  className="w-full py-5 rounded-3xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.3em] hover:bg-primary transition-all shadow-xl hover:-translate-y-0.5 active:scale-95 shimmer-sweep"
                 >
                   View Profile
                 </button>
