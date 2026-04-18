@@ -1,13 +1,13 @@
 "use client"
 
-import { DashboardHeader } from "/components/dashboard/header"
+import { DashboardHeader } from "@/components/dashboard/header"
 import { Link } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
-import { cn } from "/lib/utils"
-import { StatsCards } from "/components/dashboard/stats-cards"
-import { SkillDistributionChart } from "/components/dashboard/skill-distribution-chart"
-import { UpcomingActivities } from "/components/dashboard/upcoming-activities"
-import { HrParticipationStats } from "/components/dashboard/HrParticipationStats"
+import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
+import { StatsCards } from "@/components/dashboard/stats-cards"
+import { SkillDistributionChart } from "@/components/dashboard/skill-distribution-chart"
+import { UpcomingActivities } from "@/components/dashboard/upcoming-activities"
+import { HrParticipationStats } from "@/components/dashboard/HrParticipationStats"
 import { 
   Users, 
   Calendar, 

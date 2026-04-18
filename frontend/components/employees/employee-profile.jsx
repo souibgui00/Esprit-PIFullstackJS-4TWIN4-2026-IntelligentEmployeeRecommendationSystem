@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Mail,
   Building2,
@@ -19,10 +19,10 @@ import {
   CheckCircle,
   Fingerprint
 } from "lucide-react"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { cn, getInitials } from "/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { cn, getInitials } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useNavigate } from "react-router-dom"
 
 export function EmployeeProfile({ employee: initialEmployee, onClose }) {
@@ -39,9 +39,7 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
     }) || initialEmployee;
   }, [employees, initialEmployee]);
 
-  const role = currentUser?.role?.toLowerCase()
-  const rolePrefix = role === 'admin' ? '/admin' : role === 'hr' ? '/hr' : '/manager'
-  const evaluationsPath = `/manager/evaluations?employeeId=${employee.id || employee._id}`
+  const rolePrefix = currentUser?.role?.toLowerCase() === 'admin' ? '/admin' : '/manager'
 
   if (!employee) return null;
 
@@ -133,7 +131,7 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
                   <div className="flex items-center gap-3 mb-2">
                     <div className={cn(
                       "w-3 h-3 rounded-full shadow-sm",
-                      cat === 'opérationnelle' ? "bg-slate-950" : cat === 'comportementale' ? "bg-emerald-500" : "bg-primary"
+                      cat === 'opérationnelle' ? "bg-slate-950" : cat === 'comportementale' ? "bg-emerald-500" : "bg-[#F28C1B]"
                     )}></div>
                     <h5 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
                       {cat === 'opérationnelle' ? "Operational" : cat === 'comportementale' ? "Behavioral" : "Technical"}
@@ -157,7 +155,7 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
                             <div 
                               className={cn(
                                 "h-full rounded-full transition-all duration-1000",
-                                cat === 'knowHow' ? "bg-slate-950 text-white shadow-lg" : cat === 'softSkill' ? "bg-emerald-500 shadow-lg shadow-emerald-500/20" : "bg-primary shadow-lg shadow-orange-500/20"
+                                cat === 'knowHow' ? "bg-slate-950 text-white shadow-lg" : cat === 'softSkill' ? "bg-emerald-500 shadow-lg shadow-emerald-500/20" : "bg-[#F28C1B] shadow-lg shadow-orange-500/20"
                               )}
                               style={{ width: `${displayScore}%` }}
                             ></div>
@@ -180,19 +178,19 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
        </div>
 
       {/* Action Decision Panel */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t-2 border-slate-50">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-12 border-t-2 border-slate-50">
             <Button
-            onClick={() => navigate(evaluationsPath)}
-                className="h-14 md:h-16 bg-primary hover:bg-primary-dark text-white font-black text-[10px] md:text-[11px] tracking-[0.16em] uppercase rounded-2xl shadow-xl shadow-orange-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+                onClick={() => navigate(`${rolePrefix}/evaluations?employeeId=${employee.id || employee._id}`)}
+                className="h-18 bg-primary hover:bg-[#D97706] text-white font-black text-[12px] tracking-[0.2em] uppercase rounded-[2.5rem] shadow-2xl shadow-orange-500/30 transition-all active:scale-95 flex items-center justify-center gap-4"
             >
-            <TrendingUp className="w-5 h-5" />
+                <TrendingUp className="w-6 h-6" />
                 Evaluation
             </Button>
             <Button
                 onClick={handleEdit}
-            className="h-14 md:h-16 bg-slate-950 hover:bg-slate-800 text-white font-black text-[10px] md:text-[11px] tracking-[0.16em] uppercase rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3"
+                className="h-18 bg-slate-950 hover:bg-slate-800 text-white font-black text-[12px] tracking-[0.2em] uppercase rounded-[2.5rem] shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-4"
             >
-            <Edit className="w-4 h-4" />
+                <Edit className="w-5 h-5" />
                 Edit
             </Button>
       </div>

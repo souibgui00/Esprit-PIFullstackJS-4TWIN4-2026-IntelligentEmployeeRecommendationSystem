@@ -1,33 +1,31 @@
 "use client"
 
 import React, { useState } from "react"
-import { useAuth } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Button } from "/components/ui/button"
-import { Card, CardContent } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Slider } from "/components/ui/slider"
+import { useAuth } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Slider } from "@/components/ui/slider"
 import { toast } from "sonner"
 import { 
     Shield, ShieldCheck, Mail, Building, Briefcase, 
     Zap, Lock, Users, Target, Activity, LayoutGrid, 
     Settings, Compass, Award, Sparkles, TrendingUp, Star
 } from "lucide-react"
-import { cn, getInitials } from "/lib/utils"
+import { cn, getInitials } from "@/lib/utils"
 import { ProfileSettings } from "./ProfileSettings"
 import { ParticipationHistory } from "./ParticipationHistory"
-import { useNavigate } from "react-router-dom"
 import {
     Dialog, DialogContent, DialogDescription,
     DialogFooter, DialogHeader, DialogTitle
-} from "/components/ui/dialog"
+} from "@/components/ui/dialog"
 
 export default function UnifiedProfile() {
     const { user, getRoleLabel, refreshProfile } = useAuth()
     const { employees, activities, departments, selfEvaluateSkill, participations, evaluations, skills } = useData()
-    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState("overview") // overview | history | settings
 
     const [evalDialog, setEvalDialog] = useState(false)
@@ -101,11 +99,11 @@ export default function UnifiedProfile() {
                         {/* Sidebar: Identity Card */}
                         <div className="lg:col-span-4 space-y-8">
                             <Card className="card-premium p-8 bg-white border-none shadow-premium relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/2 rounded-full -mr-32 -mt-32 transition-all group-hover:bg-orange-500/5"></div>
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/[0.02] rounded-full -mr-32 -mt-32 transition-all group-hover:bg-orange-500/[0.05]"></div>
                                 
                                 <div className="relative z-10 flex flex-col items-center text-center space-y-6">
                                     <div className="relative group">
-                                        <div className="absolute -inset-1.5 bg-linear-to-tr from-orange-500 to-amber-300 rounded-[2.5rem] opacity-20 blur-md group-hover:opacity-40 transition-all"></div>
+                                        <div className="absolute -inset-1.5 bg-gradient-to-tr from-orange-500 to-amber-300 rounded-[2.5rem] opacity-20 blur-md group-hover:opacity-40 transition-all"></div>
                                         <Avatar className="h-28 w-28 rounded-[2.5rem] border-4 border-white shadow-2xl relative">
                                             <AvatarImage src={user?.avatar} />
                                             <AvatarFallback className="bg-slate-900 text-white text-2xl font-black font-display">
@@ -119,7 +117,7 @@ export default function UnifiedProfile() {
 
                                     <div className="space-y-1">
                                         <h2 className="text-2xl font-display font-black text-slate-900 tracking-tighter capitalize">{user?.name}</h2>
-                                        <Badge className="bg-orange-500/8 text-orange-600 text-[10px] font-black px-4 py-1 rounded-full border border-orange-500/10 tracking-widest uppercase">
+                                        <Badge className="bg-orange-500/[0.08] text-orange-600 text-[10px] font-black px-4 py-1 rounded-full border border-orange-500/10 tracking-widest uppercase">
                                             {getRoleLabel()}
                                         </Badge>
                                     </div>
@@ -183,7 +181,7 @@ export default function UnifiedProfile() {
 
                             return (
                                 <Card key={ev.id || ev._id} className="p-8 border-none shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/2 rounded-full -mr-16 -mt-16 group-hover:bg-primary/5"></div>
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/[0.02] rounded-full -mr-16 -mt-16 group-hover:bg-primary/[0.05] transition-all"></div>
                                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-start gap-6">
                                         <div className="space-y-4 flex-1">
                                             <div className="flex items-center gap-3">
@@ -203,7 +201,7 @@ export default function UnifiedProfile() {
                                                 {new Date(ev.createdAt || ev.date).toLocaleDateString()} • Evaluated by Manager
                                             </p>
                                         </div>
-                                        <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-6 min-w-30 border border-slate-100/50">
+                                        <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-6 min-w-[120px] border border-slate-100/50">
                                             <span className="text-4xl font-black font-display text-slate-900 tracking-tighter">{ev.overallScore ?? ev.score}%</span>
                                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Score</span>
                                         </div>
@@ -235,7 +233,7 @@ export default function UnifiedProfile() {
 
             {/* skill calibration dialog */}
             <Dialog open={evalDialog} onOpenChange={setEvalDialog}>
-                <DialogContent className="sm:max-w-md rounded-4xl bg-white border-none p-10 overflow-hidden shadow-2xl">
+                <DialogContent className="sm:max-w-md rounded-[32px] bg-white border-none p-10 overflow-hidden shadow-2xl">
                     <DialogHeader className="text-left space-y-4">
                         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-2">
                             <Target className="w-7 h-7" />
@@ -392,7 +390,7 @@ function RoleSummaryCard({ role, employees, activities, user, departments }) {
         
         return (
             <Card className="p-8 bg-white border border-slate-100 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/2 rounded-full -mr-16 -mt-16 group-hover:bg-primary/5" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/[0.02] rounded-full -mr-16 -mt-16 group-hover:bg-primary/[0.05] transition-all" />
                 <div className="relative z-10 space-y-6">
                     <div className="flex items-center gap-3">
                         <Users className="w-5 h-5 text-primary" />
@@ -416,10 +414,10 @@ function RoleSummaryCard({ role, employees, activities, user, departments }) {
 
         return (
             <Card className="p-8 bg-white border border-slate-100 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/2 rounded-full -mr-16 -mt-16 group-hover:bg-primary/5" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/[0.02] rounded-full -mr-16 -mt-16 group-hover:bg-primary/[0.05] transition-all" />
                 <div className="relative z-10 space-y-8">
                     <div className="flex items-center gap-3">
-                        <Zap className="w-5 h-5 text-primary" />
+                        <Zap className="w-5 h-5 text-[#F28C1B]" />
                         <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Skill Overview</span>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -428,7 +426,7 @@ function RoleSummaryCard({ role, employees, activities, user, departments }) {
                             <p className="text-[7px] font-black text-slate-400 tracking-widest uppercase">Skills Count</p>
                         </div>
                         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50">
-                            <p className="text-2xl font-black font-display text-primary tracking-tighter">{calibration}%</p>
+                            <p className="text-2xl font-black font-display text-[#F28C1B] tracking-tighter">{calibration}%</p>
                             <p className="text-[7px] font-black text-slate-400 tracking-widest uppercase">Proficiency</p>
                         </div>
                     </div>
@@ -475,7 +473,7 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
                     ))}
                 </div>
 
-                <div className="p-8 rounded-4xl bg-slate-900 relative overflow-hidden">
+                <div className="p-8 rounded-[32px] bg-slate-900 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500 opacity-5 blur-3xl"></div>
                     <div className="relative z-10 flex gap-8 items-center">
                         <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -489,13 +487,6 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
                         </div>
                     </div>
                 </div>
-
-                <Button
-                    onClick={() => navigate("/admin/evaluations")}
-                    className="w-full h-14 rounded-2xl bg-primary hover:bg-primary-dark text-white font-black text-[10px] uppercase tracking-[0.18em] shadow-xl active:scale-95"
-                >
-                    OPEN EVALUATIONS
-                </Button>
             </div>
         )
     }
@@ -597,8 +588,8 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
             <div className="space-y-10">
                 <div className="flex items-center justify-between px-4">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                            <Award className="w-6 h-6 text-primary" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#F28C1B]/10 flex items-center justify-center border border-[#F28C1B]/20">
+                            <Award className="w-6 h-6 text-[#F28C1B]" />
                         </div>
                         <div>
                             <h3 className="text-2xl font-display font-black text-slate-900 tracking-tight">My Skills</h3>
@@ -633,17 +624,17 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
                         const proficiency = Math.min(Math.round(s.score || s.proficiencyScore || 0), 100)
 
                         return (
-                        <Card key={idx} className="bg-white border-none shadow-sm p-8 group hover:shadow-xl hover:-translate-y-1 transition-all relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/2 rounded-full -mr-12 -mt-12 group-hover:bg-primary/5"></div>
+                        <Card key={idx} className="bg-white border-none shadow-sm p-8 group hover:shadow-xl hover:translate-y-[-4px] transition-all relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/[0.02] rounded-full -mr-12 -mt-12 group-hover:bg-primary/[0.05] transition-all"></div>
                             <div className="flex items-center justify-between mb-8">
                                 <div className="space-y-1">
                                     <h4 className="text-xl font-black text-slate-900 tracking-tight capitalize">{skillName}</h4>
                                     {skillCategory && (
-                                        <p className="text-[9px] font-black text-primary tracking-widest uppercase">{skillCategory}</p>
+                                        <p className="text-[9px] font-black text-[#F28C1B] tracking-widest uppercase">{skillCategory}</p>
                                     )}
                                 </div>
                                 <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center">
-                                    <Star className={cn("w-5 h-5", proficiency > 70 ? "fill-primary text-primary" : "text-slate-300")} />
+                                    <Star className={cn("w-5 h-5", proficiency > 70 ? "fill-[#F28C1B] text-[#F28C1B]" : "text-slate-300")} />
                                 </div>
                             </div>
 
@@ -666,7 +657,7 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
                     })}
                     
                     {/* Ghost Slot for New Skills */}
-                    <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-primary/20 hover:bg-primary/2 transition-all group cursor-pointer h-full min-h-40">
+                    <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-primary/20 hover:bg-primary/[0.02] transition-all group cursor-pointer h-full min-h-[160px]">
                         <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
                             <Zap className="w-5 h-5 text-slate-300 group-hover:text-primary" />
                         </div>
@@ -678,7 +669,7 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
     }
 
     return (
-        <div className="flex flex-col items-center justify-center h-100 text-slate-400 space-y-4">
+        <div className="flex flex-col items-center justify-center h-[400px] text-slate-400 space-y-4">
             <LayoutGrid className="w-16 h-16 opacity-10" />
             <p className="text-xs font-black tracking-widest uppercase">Loading Content...</p>
         </div>

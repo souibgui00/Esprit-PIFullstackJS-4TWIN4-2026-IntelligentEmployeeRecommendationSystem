@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
-import { useState, useEffect, lazy, Suspense } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "../lib/auth-context"
 import { API_URL } from "../lib/api"
 import {
@@ -22,18 +22,18 @@ import {
     ScanFace
 } from "lucide-react"
 import { FaceIdScanner } from "../components/auth/face-id-scanner"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog"
-import { Badge } from "../components/ui/badge"
-import { Button } from "../components/ui/button"
-import { Label } from "../components/ui/label"
-import { Input } from "../components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { cn } from "../lib/utils"
 import { AccessibilityWidget } from "../components/accessibility/AccessibilityWidget"
-
-const EmployeeApp = lazy(() => import("./EmployeeApp"))
-const ManagerApp = lazy(() => import("./ManagerApp"))
-const AdminApp = lazy(() => import("./AdminApp"))
-const HRApp = lazy(() => import("./HRApp"))
+import { Toaster } from "@/components/ui/sonner"
+import EmployeeApp from "./EmployeeApp"
+import ManagerApp from "./ManagerApp"
+import AdminApp from "./AdminApp"
+import HRApp from "./HRApp"
 
 // Login Component
 function LoginForm() {
@@ -121,51 +121,51 @@ function LoginForm() {
 
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 lg:p-6 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[#E5E5E5] p-4 lg:p-6 relative overflow-hidden">
             {/* Maghrebia Background Accents */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-accent-blue/5 rounded-full blur-[120px]"></div>
+                <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-[#F28C1B]/[0.1] rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#1E5FA8]/[0.05] rounded-full blur-[120px]"></div>
             </div>
 
-            <div className="w-full max-w-275 grid lg:grid-cols-2 bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-1000">
+            <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-1000">
                 {/* Left Side: Maghrebia Branding */}
-                <div className="hidden lg:flex flex-col justify-between p-10 xl:p-12 bg-[#2C2C2C] relative overflow-hidden group">
+                <div className="hidden lg:flex flex-col justify-between p-16 bg-[#2C2C2C] relative overflow-hidden group">
                     {/* Abstract Decorative Elements */}
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full -mr-48 -mt-48 blur-[100px] transition-transform duration-1000 group-hover:scale-110"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-blue/10 rounded-full -ml-32 -mb-32 blur-[80px]"></div>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#F28C1B]/20 rounded-full -mr-48 -mt-48 blur-[100px] transition-transform duration-1000 group-hover:scale-110"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#1E5FA8]/10 rounded-full -ml-32 -mb-32 blur-[80px]"></div>
 
                     <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-8 xl:mb-10 animate-in slide-in-from-left-8 duration-700">
-                            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-xl shadow-orange-500/30">
+                        <div className="flex items-center gap-3 mb-20 animate-in slide-in-from-left-8 duration-700">
+                            <div className="w-12 h-12 bg-[#F28C1B] rounded-xl flex items-center justify-center shadow-xl shadow-orange-500/30">
                                 <Sparkles className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-lg xl:text-xl font-bold font-display text-white tracking-[0.18em] leading-none">Maghrebia</span>
-                                <span className="text-[10px] font-medium font-sans text-primary tracking-[0.3em] mt-1">Group enterprise</span>
+                                <span className="text-2xl font-black font-display text-white tracking-widest leading-none">Maghrebia</span>
+                                <span className="text-[10px] font-bold text-[#F28C1B] tracking-[0.3em] mt-1">Group enterprise</span>
                             </div>
                         </div>
 
-                        <h1 className="font-display font-bold text-white leading-[1.02] mb-5 tracking-tight max-w-[14ch] xl:max-w-[16ch] text-[clamp(1.75rem,2.8vw,2.95rem)] wrap-break-word animate-in slide-in-from-left-12 duration-1000">
+                        <h1 className="text-6xl font-black font-display text-white leading-[1.1] mb-8 tracking-tight animate-in slide-in-from-left-12 duration-1000">
                             Professional <br />
-                            <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-[#FFB76B]">Talent Management.</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F28C1B] to-[#FFB76B]">Talent Management.</span>
                         </h1>
-                        <p className="text-xs xl:text-sm text-slate-400 mb-8 xl:mb-10 max-w-[34ch] font-sans font-medium leading-relaxed opacity-90 animate-in slide-in-from-left-16 duration-1000">
+                        <p className="text-lg text-slate-400 mb-14 max-w-md font-medium leading-relaxed opacity-90 animate-in slide-in-from-left-16 duration-1000">
                             Empowering Maghrebia's workforce through intelligent competency mapping and AI-driven growth paths.
                         </p>
                     </div>
                 </div>
 
                 {/* Right Side: Elegant Form */}
-                <div className="p-8 lg:p-10 xl:p-12 flex flex-col justify-center bg-white relative">
-                    <div className="max-w-100 mx-auto w-full">
-                        <div className="mb-8 lg:mb-10 text-center lg:text-left">
-                            <Badge variant="outline" className="mb-3 border-primary/20 bg-primary/5 text-primary px-3 py-1 font-bold text-[10px] tracking-widest rounded-full">Sign in securely</Badge>
-                            <h2 className="text-2xl lg:text-3xl font-bold font-display text-slate-900 mb-2 tracking-tight">Sign in</h2>
-                            <p className="text-slate-500 font-medium text-xs lg:text-sm">Enter your work email and password to access the platform.</p>
+                <div className="p-10 lg:p-20 flex flex-col justify-center bg-white relative">
+                    <div className="max-w-[400px] mx-auto w-full">
+                        <div className="mb-14 text-center lg:text-left">
+                            <Badge variant="outline" className="mb-4 border-primary/20 bg-primary/5 text-primary px-3 py-1 font-bold text-[10px] tracking-widest rounded-full">Sign in securely</Badge>
+                            <h2 className="text-4xl font-bold font-display text-slate-900 mb-3 tracking-tight">Sign in</h2>
+                            <p className="text-slate-500 font-medium text-base">Enter your work email and password to access the platform.</p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="group space-y-2">
                                 <label className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">Work email</label>
                                 <div className="relative">
@@ -175,7 +175,7 @@ function LoginForm() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="name@company.com"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
                                         required
                                     />
                                 </div>
@@ -199,7 +199,7 @@ function LoginForm() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••••••"
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-12 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-12 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
                                         required
                                     />
                                     <Button
@@ -218,7 +218,7 @@ function LoginForm() {
                                 type="submit"
                                 disabled={isLoading}
                                 size="lg"
-                                className="w-full mt-2 lg:mt-3 flex items-center justify-center gap-3 group/btn shadow-[0_20px_40px_-10px_rgba(242,140,27,0.3)] bg-primary hover:bg-primary-dark text-white h-12 rounded-2xl font-black tracking-widest text-xs"
+                                className="w-full mt-4 flex items-center justify-center gap-3 group/btn shadow-[0_20px_40px_-10px_rgba(242,140,27,0.3)] bg-[#F28C1B] hover:bg-[#D97706] text-white h-14 rounded-2xl font-black tracking-widest text-xs"
                             >
                                 {isLoading ? (
                                     <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -230,7 +230,7 @@ function LoginForm() {
                                 )}
                             </Button>
 
-                            <div className="flex items-center gap-4 my-4 lg:my-5">
+                            <div className="flex items-center gap-4 my-6">
                                 <div className="flex-1 h-px bg-slate-100" />
                                 <span className="text-[10px] font-black text-slate-300 tracking-widest">Biometric access</span>
                                 <div className="flex-1 h-px bg-slate-100" />
@@ -240,15 +240,15 @@ function LoginForm() {
                                 type="button"
                                 variant="outline"
                                 size="lg"
-                                className="w-full border-slate-100 hover:bg-slate-50 text-[#2C2C2C] font-black tracking-widest text-[10px] h-12 rounded-2xl group/face transition-all"
+                                className="w-full border-slate-100 hover:bg-slate-50 text-[#2C2C2C] font-black tracking-widest text-[10px] h-14 rounded-2xl group/face transition-all"
                                 onClick={handleFaceLoginStart}
                                 disabled={isLoading}
                             >
-                                <ScanFace className="mr-2 h-5 w-5 text-primary group-hover/face:scale-110 transition-transform" />
+                                <ScanFace className="mr-2 h-5 w-5 text-[#F28C1B] group-hover/face:scale-110 transition-transform" />
                                 Biometric passport sign
                             </Button>
 
-                            <div className="flex items-center gap-4 my-4 lg:my-5">
+                            <div className="flex items-center gap-4 my-6">
                                 <div className="flex-1 h-px bg-slate-200" />
                                 <span className="text-xs font-bold text-slate-400 tracking-widest">Other accounts</span>
                                 <div className="flex-1 h-px bg-slate-200" />
@@ -257,7 +257,7 @@ function LoginForm() {
                                 asChild
                                 variant="outline"
                                 size="lg"
-                                className="w-full border-slate-100 hover:bg-slate-50 text-[#2C2C2C] font-black tracking-widest text-[10px] h-12 rounded-2xl"
+                                className="w-full border-slate-100 hover:bg-slate-50 text-[#2C2C2C] font-black tracking-widest text-[10px] h-14 rounded-2xl"
                                 aria-label="Sign in with Google"
                             >
                                 <a href={`${API_URL}/auth/google`} className="flex items-center justify-center gap-3">
@@ -297,7 +297,7 @@ function LoginForm() {
                             </DialogContent>
                         </Dialog>
 
-                        <div className="mt-auto pt-8 lg:pt-10 text-center lg:text-left lg:opacity-60">
+                        <div className="mt-auto pt-12 text-center lg:text-left lg:opacity-60">
                             <p className="text-[11px] font-semibold text-slate-400 tracking-[0.2em]">
                                 © 2026 Maghrebia group · Intelligence beyond boundaries
                             </p>
@@ -367,10 +367,10 @@ function ForgotPasswordForm() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-50">
-                <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-primary/5 rounded-full blur-[120px]"></div>
+                <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-[#F28C1B]/[0.05] rounded-full blur-[120px]"></div>
             </div>
 
-            <div className="w-full max-w-112.5 bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-10 lg:p-14 relative z-10 animate-in slide-in-from-bottom-8 duration-700">
+            <div className="w-full max-w-[450px] bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-10 lg:p-14 relative z-10 animate-in slide-in-from-bottom-8 duration-700">
                 <button
                     onClick={() => navigate("/login")}
                     className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors mb-10"
@@ -499,7 +499,7 @@ function ResetPasswordForm() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden text-slate-900">
-            <div className="w-full max-w-112.5 bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-10 lg:p-14 relative z-10 animate-in slide-in-from-right-8 duration-700">
+            <div className="w-full max-w-[450px] bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-10 lg:p-14 relative z-10 animate-in slide-in-from-right-8 duration-700">
                 <div className="mb-14 text-center lg:text-left">
                     <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Reset password</h2>
                     <p className="text-slate-500 font-medium">Create a new password for your account.</p>
@@ -666,6 +666,7 @@ function AppContent() {
     return (
         <>
             <AccessibilityWidget />
+            <Toaster richColors position="top-right" />
             <Routes>
                 <Route path="/login" element={<LoginForm />} />
                 <Route path="/forgot-password" element={<ForgotPasswordForm />} />
@@ -674,9 +675,7 @@ function AppContent() {
                     path="/employee/*"
                     element={
                         <ProtectedRoute requiredRole="employee">
-                            <Suspense fallback={<RouteLoader />}>
-                                <EmployeeApp />
-                            </Suspense>
+                            <EmployeeApp />
                         </ProtectedRoute>
                     }
                 />
@@ -684,9 +683,7 @@ function AppContent() {
                     path="/manager/*"
                     element={
                         <ProtectedRoute requiredRole="manager">
-                            <Suspense fallback={<RouteLoader />}>
-                                <ManagerApp />
-                            </Suspense>
+                            <ManagerApp />
                         </ProtectedRoute>
                     }
                 />
@@ -694,9 +691,7 @@ function AppContent() {
                     path="/admin/*"
                     element={
                         <ProtectedRoute requiredRole="admin">
-                            <Suspense fallback={<RouteLoader />}>
-                                <AdminApp />
-                            </Suspense>
+                            <AdminApp />
                         </ProtectedRoute>
                     }
                 />
@@ -704,9 +699,7 @@ function AppContent() {
                     path="/hr/*"
                     element={
                         <ProtectedRoute requiredRole="hr">
-                            <Suspense fallback={<RouteLoader />}>
-                                <HRApp />
-                            </Suspense>
+                            <HRApp />
                         </ProtectedRoute>
                     }
                 />
@@ -725,14 +718,6 @@ function AppContent() {
                 />
             </Routes>
         </>
-    )
-}
-
-function RouteLoader() {
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
-            <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
     )
 }
 

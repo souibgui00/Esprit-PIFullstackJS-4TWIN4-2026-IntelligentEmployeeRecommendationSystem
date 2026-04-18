@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { api } from "/lib/api"
-import { useAuth } from "/lib/auth-context"
+import { api } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
-} from "/components/ui/dialog"
-import { Button } from "/components/ui/button"
-import { Textarea } from "/components/ui/textarea"
-import { Badge } from "/components/ui/badge"
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import {
   CheckCircle2, XCircle, Clock, Calendar, Loader2, Bell, AlertTriangle
 } from "lucide-react"
@@ -48,7 +48,7 @@ export function ActivityResponsePanel() {
     setSubmitting(true)
     try {
       await api.post(`/participations/${activityId}/respond`, { accept: true })
-      toast.success(" Participation Confirmed!", {
+      toast.success("✅ Participation Confirmed!", {
         description: `You are now enrolled in "${activityTitle}".`
       })
       await fetchPending()

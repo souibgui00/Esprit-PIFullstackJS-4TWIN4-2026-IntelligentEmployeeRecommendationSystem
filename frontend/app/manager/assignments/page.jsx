@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import {

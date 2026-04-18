@@ -1,18 +1,18 @@
 "use client"
 
 import React, { useState } from "react"
-import { useAuth } from "/lib/auth-context"
+import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 import { 
     User, Mail, Phone, Lock, Eye, EyeOff, Shield, 
     Camera, CheckCircle2, AlertCircle, ScanFace 
 } from "lucide-react"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-import { Button } from "/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "/components/ui/dialog"
-import { FaceIdScanner } from "/components/auth/face-id-scanner"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { FaceIdScanner } from "@/components/auth/face-id-scanner"
 
 export function ProfileSettings() {
     const { user, updateProfile, changePassword, registerFace } = useAuth()

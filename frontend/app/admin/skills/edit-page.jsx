@@ -2,9 +2,9 @@
 
 import React from "react"
 import { useParams } from "react-router-dom"
-import { useData } from "/lib/data-store"
-import { SkillForm } from "/components/skills/skill-form"
-import { DashboardHeader } from "/components/dashboard/header"
+import { useData } from "@/lib/data-store"
+import { SkillForm } from "@/components/skills/skill-form"
+import { DashboardHeader } from "@/components/dashboard/header"
 import { Loader2, Brain } from "lucide-react"
 
 export default function AdminSkillEditPage() {
@@ -47,7 +47,7 @@ export default function AdminSkillEditPage() {
         <div className="flex flex-col bg-[#F8FAFC] min-h-screen page-transition">
             <DashboardHeader
                 title={`Edit: ${skill.name}`}
-                description={`Update details for ${(skill.category || skill.type || "skill").toString().toUpperCase()} skills`}
+                description={`Update details for ${skill.category.toUpperCase()} skills`}
             />
             <div className="flex-1 p-10 max-w-7xl mx-auto w-full">
                 <SkillForm skill={skill} mode="edit" />

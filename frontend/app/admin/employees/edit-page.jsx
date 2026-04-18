@@ -2,9 +2,9 @@
 
 import React from "react"
 import { useParams } from "react-router-dom"
-import { useData } from "/lib/data-store"
-import { EmployeeForm } from "/components/employees/employee-form"
-import { DashboardHeader } from "/components/dashboard/header"
+import { useData } from "@/lib/data-store"
+import { EmployeeForm } from "@/components/employees/employee-form"
+import { DashboardHeader } from "@/components/dashboard/header"
 import { Loader2 } from "lucide-react"
 
 export default function AdminEmployeeEditPage() {

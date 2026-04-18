@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useAuth } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { useAuth } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, MessageCircle, Share2, MoreHorizontal, Sparkles, ShieldCheck, Zap, Globe } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 
 export function PostCard({ post }) {

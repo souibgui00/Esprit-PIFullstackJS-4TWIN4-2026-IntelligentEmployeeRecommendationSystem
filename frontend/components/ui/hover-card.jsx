@@ -3,7 +3,7 @@
 import * from 'react'
 import * from '@radix-ui/react-hover-card'
 
-import { cn } from '/lib/utils'
+import { cn } from '@/lib/utils'
 
 function HoverCard({
   ...props

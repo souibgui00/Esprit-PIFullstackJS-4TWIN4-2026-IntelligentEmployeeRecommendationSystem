@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { api } from "/lib/api"
+import { api } from "@/lib/api"
 import { toast } from "sonner"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription
-} from "/components/ui/sheet"
-import { Button } from "/components/ui/button"
-import { Textarea } from "/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Badge } from "/components/ui/badge"
+} from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Loader2, Star, CheckCircle2, XCircle, Send, ClipboardList } from "lucide-react"
 
 /**
@@ -104,7 +104,7 @@ export function OrganizerAttendancePanel({
       const result = await api.post(`/participations/${activityId}/organizer-report`, {
         report: reportArray
       })
-      toast.success(" Attendance Report Submitted!", {
+      toast.success("✅ Attendance Report Submitted!", {
         description: `${result.awaitingValidation} completed, ${result.notCompleted} not completed. HR has been notified.`
       })
       onSubmitted?.()

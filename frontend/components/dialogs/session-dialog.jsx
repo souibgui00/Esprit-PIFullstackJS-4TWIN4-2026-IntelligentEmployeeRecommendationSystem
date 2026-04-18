@@ -2,15 +2,15 @@
 
 import React from "react"
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "/components/ui/dialog"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-import { Textarea } from "/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/components/ui/select"
-import { useData } from "/lib/data-store"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
 import { Zap, Clock, Loader2, X } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export function SessionDialog({ open, onOpenChange, session, activityId }) {
   const { activities, addSession, updateSession } = useData()

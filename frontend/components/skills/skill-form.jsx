@@ -3,23 +3,23 @@
 import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { skillSchema } from "/lib/schemas"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-import { Textarea } from "/components/ui/textarea"
+import { skillSchema } from "@/lib/schemas"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "/components/ui/select"
-import { useData } from "/lib/data-store"
+} from "@/components/ui/select"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
 import { Loader2, ArrowLeft, LayoutGrid, BookOpen, Brain, Heart, Database, Layers, ShieldCheck, Sparkles } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
-import { cn } from "/lib/utils"
+import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
 
 export function SkillForm({ skill, mode = "create" }) {
   const { addSkill, updateSkill, departments } = useData()

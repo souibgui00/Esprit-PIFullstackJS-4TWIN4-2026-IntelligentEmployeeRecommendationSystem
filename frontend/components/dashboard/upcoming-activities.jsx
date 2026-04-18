@@ -1,10 +1,10 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Users, ArrowRight, Loader2, Zap } from "lucide-react"
-import { useData } from "/lib/data-store"
-import { getActivityTypeLabel, cn } from "/lib/utils"
+import { useData } from "@/lib/data-store"
+import { getActivityTypeLabel, cn } from "@/lib/utils"
 import { Link } from "react-router-dom"
 
 export function UpcomingActivities() {

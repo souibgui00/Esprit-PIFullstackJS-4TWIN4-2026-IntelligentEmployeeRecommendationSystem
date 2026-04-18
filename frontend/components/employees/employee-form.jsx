@@ -3,19 +3,19 @@
 import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { employeeSchema } from "/lib/schemas"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-import { Button } from "/components/ui/button"
-import { Textarea } from "/components/ui/textarea"
+import { employeeSchema } from "@/lib/schemas"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "/components/ui/select"
-import { useData } from "/lib/data-store"
+} from "@/components/ui/select"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
 import { 
   Loader2, 
@@ -26,9 +26,9 @@ import {
   UserPlus
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
-import { cn, getInitials } from "/lib/utils"
-import { api } from "/lib/api"
+import { useAuth } from "@/lib/auth-context"
+import { cn, getInitials } from "@/lib/utils"
+import { api } from "@/lib/api"
 import { FileText } from "lucide-react"
 
 export function EmployeeForm({ employee, mode = "create" }) {

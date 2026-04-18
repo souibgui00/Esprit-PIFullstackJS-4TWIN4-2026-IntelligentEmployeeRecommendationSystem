@@ -1,9 +1,9 @@
 "use client"
 
-import { useData } from "/lib/data-store"
+import { useData } from "@/lib/data-store"
 import { useMemo } from "react"
 import { CheckCircle2, XCircle, Clock, AlertTriangle } from "lucide-react"
-import { Progress } from "/components/ui/progress"
+import { Progress } from "@/components/ui/progress"
 
 export function HrParticipationStats() {
   const { participations } = useData()

@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { CreatePost } from "/components/social/create-post"
-import { PostCard } from "/components/social/post-card"
-import { Separator } from "/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { CreatePost } from "@/components/social/create-post"
+import { PostCard } from "@/components/social/post-card"
+import { Separator } from "@/components/ui/separator"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     Users,
     Rss,
@@ -23,7 +23,7 @@ import {
     Rocket,
     BarChart3
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export default function EmployeeHubPage() {
     const { posts, addPost, employees, loading } = useData()

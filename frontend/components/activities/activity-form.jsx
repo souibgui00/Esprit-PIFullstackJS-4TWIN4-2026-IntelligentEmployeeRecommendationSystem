@@ -3,25 +3,25 @@
 import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { activitySchema } from "/lib/schemas"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-import { Textarea } from "/components/ui/textarea"
+import { activitySchema } from "@/lib/schemas"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "/components/ui/select"
-import { useData } from "/lib/data-store"
+} from "@/components/ui/select"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
-import { cn } from "/lib/utils"
+import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
 import { ArrowLeft, Activity, X, Loader2, Calendar, Clock, Target, Plus, Briefcase, Database, Sparkles, Wand2, Users } from "lucide-react"
-import { Button } from "/components/ui/button"
-import { api } from "/lib/api"
+import { Button } from "@/components/ui/button"
+import { api } from "@/lib/api"
 
 export function ActivityForm({ activity, mode = "create" }) {
   const { addActivity, updateActivity, skills, departments, addSkill: createGlobalSkill } = useData()
@@ -369,7 +369,7 @@ export function ActivityForm({ activity, mode = "create" }) {
               })}
             </div>
             {selectedDeptIds.length === 0 && (
-              <p className="text-[10px] text-amber-500 font-bold"> No departments selected — activity will not be sent to any manager.</p>
+              <p className="text-[10px] text-amber-500 font-bold">⚠ No departments selected — activity will not be sent to any manager.</p>
             )}
           </div>
 
@@ -417,7 +417,7 @@ export function ActivityForm({ activity, mode = "create" }) {
                             : "bg-white border-primary/20 text-slate-700 hover:border-primary hover:text-primary shadow-sm"
                         )}
                       >
-                        {sname} {isAdded && "YES"}
+                        {sname} {isAdded && "✓"}
                       </button>
                     )
                   })}

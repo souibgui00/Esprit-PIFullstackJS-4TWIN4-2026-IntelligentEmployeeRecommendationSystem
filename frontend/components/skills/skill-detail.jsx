@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Progress } from "/components/ui/progress"
-import { useData } from "/lib/data-store"
-import { getSkillTypeLabel, getSkillLevelColor, cn } from "/lib/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Progress } from "@/components/ui/progress"
+import { useData } from "@/lib/data-store"
+import { getSkillTypeLabel, getSkillLevelColor, cn } from "@/lib/utils"
 import {
   X,
   BookOpen,
@@ -20,8 +20,8 @@ import {
   UserPlus
 } from "lucide-react"
 
-import { SkillDialog } from "/components/dialogs/skill-dialog"
-import { EmployeeSkillDialog } from "/components/dialogs/employee-skill-dialog"
+import { SkillDialog } from "@/components/dialogs/skill-dialog"
+import { EmployeeSkillDialog } from "@/components/dialogs/employee-skill-dialog"
 
 
 
@@ -87,7 +87,7 @@ export function SkillDetail({ skill: initialSkill, onClose }) {
   const Icon = getTypeIcon()
 
   return (
-    <Card className="border-0 shadow-lg lg:max-h-[calc(100vh-11rem)] flex flex-col overflow-hidden">
+    <Card className="border-0 shadow-lg">
       <CardHeader className="relative pb-4">
         <Button
           variant="ghost"
@@ -111,7 +111,7 @@ export function SkillDetail({ skill: initialSkill, onClose }) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6 overflow-y-auto custom-scrollbar pr-2">
+      <CardContent className="space-y-6">
         {/* Quick Actions */}
         <Button variant="outline" size="sm" onClick={() => setSkillDialogOpen(true)} className="bg-transparent">
           <Edit className="mr-1 h-3 w-3" />

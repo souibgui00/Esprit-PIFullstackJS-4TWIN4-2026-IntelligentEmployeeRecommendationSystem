@@ -2,23 +2,23 @@
 
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "/components/ui/dialog"
-import { Input } from "/components/ui/input"
-import { Button } from "/components/ui/button"
-import { api } from "/lib/api"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { useAuth } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
-import { cn } from "/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Badge } from "/components/ui/badge"
+import { useAuth } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
+import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import {
   Calendar, Clock, ArrowRight, Loader2, Sparkles, Brain,
   Activity, TrendingUp, Zap, Target, Star, Globe, AlertTriangle, UploadCloud, FileText
 } from "lucide-react"
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts"
-import { SkillDistributionChart } from "/components/dashboard/skill-distribution-chart"
-import { ActivityResponsePanel } from "/components/activities/ActivityResponsePanel"
+import { SkillDistributionChart } from "@/components/dashboard/skill-distribution-chart"
+import { ActivityResponsePanel } from "@/components/activities/ActivityResponsePanel"
 
 export default function EmployeeHome() {
   const { user, getEmployeeProfile, refreshProfile } = useAuth()

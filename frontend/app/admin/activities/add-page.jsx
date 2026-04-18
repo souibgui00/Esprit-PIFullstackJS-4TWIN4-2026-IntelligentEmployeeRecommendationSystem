@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import { ActivityForm } from "/components/activities/activity-form"
-import { DashboardHeader } from "/components/dashboard/header"
+import { ActivityForm } from "@/components/activities/activity-form"
+import { DashboardHeader } from "@/components/dashboard/header"
 
 export default function AdminActivityAddPage() {
     return (

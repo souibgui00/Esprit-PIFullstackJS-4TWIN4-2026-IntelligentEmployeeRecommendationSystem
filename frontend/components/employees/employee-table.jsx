@@ -8,9 +8,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "/components/ui/table"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,10 +18,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel
-} from "/components/ui/dropdown-menu"
-import { useData } from "/lib/data-store"
-import { cn, getInitials } from "/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+} from "@/components/ui/dropdown-menu"
+import { useData } from "@/lib/data-store"
+import { cn, getInitials } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Search,
   MoreHorizontal,
@@ -40,7 +40,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
+import { useAuth } from "@/lib/auth-context"
 
 export function EmployeeTable({ 
   onSelectEmployee, 

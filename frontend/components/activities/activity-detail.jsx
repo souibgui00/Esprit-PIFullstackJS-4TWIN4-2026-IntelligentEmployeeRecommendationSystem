@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Progress } from "/components/ui/progress"
-import { Separator } from "/components/ui/separator"
-import { useData } from "/lib/data-store"
-import { getActivityTypeLabel, getStatusColor, getSkillLevelColor, getSkillTypeLabel, cn } from "/lib/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import { useData } from "@/lib/data-store"
+import { getActivityTypeLabel, getStatusColor, getSkillLevelColor, getSkillTypeLabel, cn } from "@/lib/utils"
 import {
   X,
   Calendar,
@@ -26,8 +26,8 @@ import {
   Edit
 } from "lucide-react"
 
-import { ActivityDialog } from "/components/dialogs/activity-dialog"
-import { EnrollmentDialog } from "/components/dialogs/enrollment-dialog"
+import { ActivityDialog } from "@/components/dialogs/activity-dialog"
+import { EnrollmentDialog } from "@/components/dialogs/enrollment-dialog"
 
 
 

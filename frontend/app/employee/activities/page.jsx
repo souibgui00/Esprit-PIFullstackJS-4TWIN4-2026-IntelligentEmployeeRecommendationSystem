@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { Badge } from "/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "/components/ui/tabs"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "/components/ui/dialog"
-import { Textarea } from "/components/ui/textarea"
-import { Button } from "/components/ui/button"
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 import {
   Calendar,
   Clock,
@@ -31,9 +31,9 @@ import {
   LogOut,
   AlertTriangle,
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { api } from "/lib/api"
+import { api } from "@/lib/api"
 
 // Statuses that mean the employee is actively enrolled in the activity
 const ACTIVE_STATUSES = ['started', 'completed', 'accepted', 'in_progress', 'awaiting_organizer', 'organizer_submitted', 'awaiting_manager', 'validated']
@@ -122,7 +122,7 @@ export default function EmployeeActivitiesPage() {
       awaiting_organizer: { label: "Completion Pending Review", cls: "bg-amber-50 text-amber-600" },
       organizer_submitted: { label: "Under Review", cls: "bg-violet-50 text-violet-600" },
       awaiting_manager: { label: "Awaiting Manager Approval", cls: "bg-sky-50 text-sky-600" },
-      validated: { label: "YES Validated", cls: "bg-emerald-100 text-emerald-700" },
+      validated: { label: "✓ Validated", cls: "bg-emerald-100 text-emerald-700" },
       withdrawn: { label: "Withdrawn", cls: "bg-rose-50 text-rose-400" },
     }
     const s = map[status]
@@ -424,7 +424,7 @@ function ActivityCard({
               {/* Progress bar */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest mb-1.5 px-1">
-                  <span className="text-primary">{status === 'validated' ? "Validated YES" : status === 'awaiting_manager' ? "Awaiting manager approval" : status === 'awaiting_organizer' ? "Completion under review" : status === 'organizer_submitted' ? "Review in progress" : "In Progress"}</span>
+                  <span className="text-primary">{status === 'validated' ? "Validated ✓" : status === 'awaiting_manager' ? "Awaiting manager approval" : status === 'awaiting_organizer' ? "Completion under review" : status === 'organizer_submitted' ? "Review in progress" : "In Progress"}</span>
                   <span className="text-slate-400">{progress}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-orange-50 rounded-full overflow-hidden mb-1">

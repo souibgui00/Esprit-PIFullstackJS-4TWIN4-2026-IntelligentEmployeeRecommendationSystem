@@ -2,9 +2,9 @@ import React from "react"
 
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import { AuthProvider } from '/lib/auth-context'
-import { DataProvider } from '/lib/data-store'
-import { Toaster } from '/components/ui/sonner'
+import { AuthProvider } from '@/lib/auth-context'
+import { DataProvider } from '@/lib/data-store'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });

@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { useAuth } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Button } from "/components/ui/button"
-import { Textarea } from "/components/ui/textarea"
+import { useAuth } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { ImagePlus, Send, Sparkles, Smile, MapPin } from "lucide-react"
 import { toast } from "sonner"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export function CreatePost() {
     const { user } = useAuth()

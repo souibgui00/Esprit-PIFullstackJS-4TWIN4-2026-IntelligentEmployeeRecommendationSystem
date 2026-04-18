@@ -8,12 +8,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "/components/ui/dialog"
-import { Checkbox } from "/components/ui/checkbox"
-import { Badge } from "/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { useData } from "/lib/data-store"
-import { cn } from "/lib/utils"
+} from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useData } from "@/lib/data-store"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Search, Users, ShieldCheck, Loader2, X } from "lucide-react"
 

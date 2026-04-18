@@ -2,16 +2,16 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { useData } from "/lib/data-store"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Button } from "/components/ui/button"
+import { useData } from "@/lib/data-store"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Button } from "@/components/ui/button"
 import { ArrowLeft, Brain, Target, Users, TrendingUp, Sparkles, PieChart as PieChartIcon, BarChart3 } from "lucide-react"
-import { Card } from "/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar 
 } from "recharts"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export default function AdminGlobalSkillsDashboard() {
   const navigate = useNavigate()

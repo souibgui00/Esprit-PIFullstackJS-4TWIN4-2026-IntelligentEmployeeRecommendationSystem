@@ -5,11 +5,11 @@ import {
   Award, Flame, Brain, Rocket, CheckCircle2, XCircle, ArrowRight,
   ChevronRight, Map, Compass
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { useAuth } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
-import { Badge } from "/components/ui/badge"
+import { useAuth } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
+import { Badge } from "@/components/ui/badge"
 
 export default function EmployeeRecommendationsPage() {
   const { getEmployeeProfile } = useAuth()

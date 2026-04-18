@@ -5,9 +5,9 @@ import { toast } from "sonner"
 import { 
     Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, ScanFace 
 } from "lucide-react"
-import { Button } from "/components/ui/button"
-import { Badge } from "/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Loader2 } from "lucide-react"
 import { Suspense, lazy } from "react"
 

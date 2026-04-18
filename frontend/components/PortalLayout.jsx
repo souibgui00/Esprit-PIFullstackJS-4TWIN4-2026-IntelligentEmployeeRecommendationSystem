@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { useAuth } from "../lib/auth-context"
-import { cn } from "../lib/utils"
+import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
 import {
     Users,
     LayoutDashboard,
@@ -19,9 +19,9 @@ import {
     Building,
     Shield
 } from "lucide-react"
-import { MandatoryCvDialog } from "./auth/mandatory-cv-dialog"
-import { EmployeeNavigation } from "./dashboard/employee-navigation"
-import { LayoutProvider, useLayout } from "../lib/layout-context"
+import { MandatoryCvDialog } from "@/components/auth/mandatory-cv-dialog"
+import { EmployeeNavigation } from "@/components/dashboard/employee-navigation"
+import { LayoutProvider, useLayout } from "@/lib/layout-context"
 
 function PortalLayoutInner({ children, role = "admin" }) {
     const { sidebarOpen, setSidebarOpen, toggleSidebar } = useLayout()

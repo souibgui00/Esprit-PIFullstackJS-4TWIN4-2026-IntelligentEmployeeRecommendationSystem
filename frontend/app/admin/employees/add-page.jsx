@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import { EmployeeForm } from "/components/employees/employee-form"
-import { DashboardHeader } from "/components/dashboard/header"
+import { EmployeeForm } from "@/components/employees/employee-form"
+import { DashboardHeader } from "@/components/dashboard/header"
 
 export default function AdminEmployeeAddPage() {
     return (

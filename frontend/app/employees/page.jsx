@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Sidebar } from "/components/dashboard/sidebar"
-import { Header } from "/components/dashboard/header"
-import { EmployeeTable } from "/components/employees/employee-table"
-import { EmployeeProfile } from "/components/employees/employee-profile"
-import { Button } from "/components/ui/button"
+import { Sidebar } from "@/components/dashboard/sidebar"
+import { Header } from "@/components/dashboard/header"
+import { EmployeeTable } from "@/components/employees/employee-table"
+import { EmployeeProfile } from "@/components/employees/employee-profile"
+import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 
 

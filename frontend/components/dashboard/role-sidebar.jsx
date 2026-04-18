@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
   Users,
@@ -16,17 +16,17 @@ import {
   BookOpen,
   Shield,
 } from "lucide-react"
-import { Button } from "/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "/components/ui/tooltip"
+} from "@/components/ui/tooltip"
 import { useState } from "react"
-import { useAuth, getRoleLabel } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
+import { useAuth, getRoleLabel } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
 const navItems = [

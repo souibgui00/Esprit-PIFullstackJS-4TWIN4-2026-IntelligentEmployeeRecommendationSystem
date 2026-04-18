@@ -9,8 +9,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "/components/ui/alert-dialog"
-import { cn } from "/lib/utils"
+} from "@/components/ui/alert-dialog"
+import { cn } from "@/lib/utils"
 
 
 

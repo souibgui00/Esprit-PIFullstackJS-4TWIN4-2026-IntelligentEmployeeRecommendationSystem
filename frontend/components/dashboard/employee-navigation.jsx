@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation, Link } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
-import { cn } from "/lib/utils"
+import { useAuth } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
+import { cn } from "@/lib/utils"
 import {
     Bell,
     Search,
@@ -22,8 +22,8 @@ import {
     ChevronDown,
     Sparkles
 } from "lucide-react"
-import { Button } from "/components/ui/button"
-import { Input } from "/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -31,8 +31,8 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function EmployeeNavigation() {
     const { user, logout } = useAuth()

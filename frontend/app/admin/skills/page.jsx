@@ -1,30 +1,30 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useData } from "/lib/data-store"
-import { Badge } from "/components/ui/badge"
+import { useData } from "@/lib/data-store"
+import { Badge } from "@/components/ui/badge"
 import { 
   Search, Brain, Plus, BookOpen, Heart, ArrowRight, X, 
   Edit3, Award, Sparkles, Filter, Database, Users, 
   ShieldCheck, BarChart3, TrendingUp, Layers, SlidersHorizontal
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { DashboardHeader } from "/components/dashboard/header"
+import { DashboardHeader } from "@/components/dashboard/header"
 import { useNavigate } from "react-router-dom"
-import { Button } from "/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "/components/ui/popover"
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "/components/ui/select"
+} from "@/components/ui/select"
 
 export default function AdminSkillsPage() {
   const { skills, employees, activities } = useData()
@@ -214,9 +214,9 @@ export default function AdminSkillsPage() {
             )}
           </div>
 
-          <div className="lg:col-span-1 min-h-0">
+          <div className="lg:col-span-1">
             {selectedSkill ? (
-              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 sticky top-8 shadow-2xl shadow-slate-200/50 flex flex-col min-h-[650px] lg:max-h-[calc(100vh-5rem)] overflow-hidden animate-in slide-in-from-right-10 duration-700">
+              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 sticky top-8 shadow-2xl shadow-slate-200/50 flex flex-col min-h-[650px] animate-in slide-in-from-right-10 duration-700">
                 <div className="flex justify-between items-start mb-8">
                   <div className="space-y-1">
                     <Badge className="bg-primary/10 text-primary border-none px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">Skill Details</Badge>

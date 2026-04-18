@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useData } from "/lib/data-store"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Button } from "/components/ui/button"
-import { Input } from "/components/ui/input"
-import { Badge } from "/components/ui/badge"
+import { useData } from "@/lib/data-store"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
     Building2,
     Plus,
@@ -25,8 +25,8 @@ import {
     ArrowDownAZ,
     ArrowUpAZ
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { cn } from "/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import {
     AlertDialog,
@@ -37,7 +37,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -45,7 +45,7 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
     DropdownMenuLabel
-} from "/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { Check } from "lucide-react"
 
 export default function DepartmentsPage() {
@@ -448,7 +448,7 @@ export default function DepartmentsPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Lead </label>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Lead 👤</label>
                                         <select
                                             value={newDeptManagerId}
                                             onChange={(e) => setNewDeptManagerId(e.target.value)}

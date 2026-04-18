@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useData } from "/lib/data-store"
-import { Badge } from "/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Progress } from "/components/ui/progress"
-import { Checkbox } from "/components/ui/checkbox"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
-import { Button } from "/components/ui/button"
+import { useData } from "@/lib/data-store"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Progress } from "@/components/ui/progress"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   Trophy,
   TrendingUp,
@@ -37,7 +37,7 @@ import {
   Users,
   X
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 function ScoreCircle({ score, size = 60, strokeWidth = 5 }) {
   const radius = (size - strokeWidth) / 2

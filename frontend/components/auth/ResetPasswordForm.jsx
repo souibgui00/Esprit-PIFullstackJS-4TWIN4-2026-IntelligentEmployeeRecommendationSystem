@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../lib/auth-context"
 import { toast } from "sonner"
 import { Lock, Eye, EyeOff, ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
-import { Button } from "/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 export default function ResetPasswordForm() {
     const navigate = useNavigate()

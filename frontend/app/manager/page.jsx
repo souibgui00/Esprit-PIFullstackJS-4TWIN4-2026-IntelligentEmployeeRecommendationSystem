@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { Badge } from "/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { DashboardHeader } from "/components/dashboard/header"
-import { PendingValidationsPanel } from "/components/dashboard/PendingValidationsPanel"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { PendingValidationsPanel } from "@/components/dashboard/PendingValidationsPanel"
 
 
 import { useNavigate } from "react-router-dom"
@@ -24,8 +24,8 @@ import {
   ClipboardList,
   Trophy
 } from "lucide-react"
-import { cn } from "/lib/utils"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function ManagerDashboard() {
   const { employees, activities, enrollments, departments } = useData()

@@ -8,18 +8,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "/components/ui/table"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "/components/ui/dropdown-menu"
-import { useData } from "/lib/data-store"
-import { cn } from "/lib/utils"
+} from "@/components/ui/dropdown-menu"
+import { useData } from "@/lib/data-store"
+import { cn } from "@/lib/utils"
 import {
   MoreVertical,
   Eye,

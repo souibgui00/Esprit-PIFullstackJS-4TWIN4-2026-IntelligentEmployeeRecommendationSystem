@@ -1,17 +1,17 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { api } from "/lib/api"
+import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { useAuth } from "/lib/auth-context"
-import { useData } from "/lib/data-store"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Textarea } from "/components/ui/textarea"
+import { useAuth } from "@/lib/auth-context"
+import { useData } from "@/lib/data-store"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
-} from "/components/ui/dialog"
+} from "@/components/ui/dialog"
 import {
   CheckCircle2, XCircle, Star, Loader2, Trophy, AlertCircle, ClipboardCheck
 } from "lucide-react"
@@ -92,7 +92,7 @@ export function PendingValidationsPanel({ onValidated }) {
     setSubmitting(participationId)
     try {
       await api.post(`/participations/${participationId}/validate`, { validate: true })
-      toast.success("Completion Validated!", {
+      toast.success("🎓 Completion Validated!", {
         description: "Skill scores have been automatically updated for this employee."
       })
       await fetchPending()

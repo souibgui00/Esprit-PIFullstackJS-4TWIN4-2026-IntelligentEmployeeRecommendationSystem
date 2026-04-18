@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react"
-import { useData } from "/lib/data-store"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
-import { Badge } from "/components/ui/badge"
-import { cn } from "/lib/utils"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 import { Loader2, RefreshCcw } from "lucide-react"
 import {
     Dialog, DialogContent, DialogDescription,
     DialogFooter, DialogHeader, DialogTitle
-} from "/components/ui/dialog"
+} from "@/components/ui/dialog"
 
 export function SelfAssessmentDialog({ open, onOpenChange, employee }) {
     const { updateEmployee, settings } = useData()

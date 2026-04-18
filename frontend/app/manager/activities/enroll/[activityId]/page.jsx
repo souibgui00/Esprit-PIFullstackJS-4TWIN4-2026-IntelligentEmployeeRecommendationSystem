@@ -4,18 +4,18 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { managerActivityEnrollmentSchema } from "/lib/schemas"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Button } from "/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Checkbox } from "/components/ui/checkbox"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "/components/ui/form"
-import { Textarea } from "/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/components/ui/select"
+import { managerActivityEnrollmentSchema } from "@/lib/schemas"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Users,
   Calendar,
@@ -29,7 +29,7 @@ import {
   AlertCircle,
   CheckCircle2
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 export default function ManagerActivityEnrollmentPage() {

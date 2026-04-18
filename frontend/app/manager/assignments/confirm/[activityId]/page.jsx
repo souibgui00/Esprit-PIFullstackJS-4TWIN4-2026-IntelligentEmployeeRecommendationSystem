@@ -2,16 +2,16 @@
 
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Button } from "/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Checkbox } from "/components/ui/checkbox"
-import { Textarea } from "/components/ui/textarea"
-import { api } from "/lib/api"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Textarea } from "@/components/ui/textarea"
+import { api } from "@/lib/api"
 import {
   Users,
   Calendar,
@@ -27,7 +27,7 @@ import {
   Sparkles,
   Info,
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 export default function ManagerAssignmentConfirmationPage() {

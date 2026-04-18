@@ -1,8 +1,8 @@
 "use client"
 
 import { ReactNode } from "react"
-import { RoleSidebar } from "/components/dashboard/role-sidebar"
-import { AuthGuard } from "/components/auth/auth-guard"
+import { RoleSidebar } from "@/components/dashboard/role-sidebar"
+import { AuthGuard } from "@/components/auth/auth-guard"
 
 export default function ManagerLayout({ children }) {
   return (

@@ -1,31 +1,31 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "/components/ui/tabs"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useNavigate } from "react-router-dom"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-import { Textarea } from "/components/ui/textarea"
-import { api } from "/lib/api"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { api } from "@/lib/api"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "/components/ui/select"
+} from "@/components/ui/select"
 import {
   Calendar, MapPin, Users, Clock, BookOpen, Award, Briefcase,
   Eye, UserPlus, Sparkles, CheckCircle, XCircle, X,
   ClipboardList, Star, ShieldCheck, AlertCircle, Loader2, ChevronRight
 } from "lucide-react"
-import { getActivityTypeLabel, cn } from "/lib/utils"
+import { getActivityTypeLabel, cn } from "@/lib/utils"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -34,7 +34,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "/components/ui/dialog"
+} from "@/components/ui/dialog"
 
 // ── Star Rating ────────────────────────────────────────────────────────────────
 function StarRating({ value, onChange, disabled }) {
@@ -226,7 +226,7 @@ export default function ManagerActivitiesPage() {
         validate,
         rejectionReason: reason || undefined,
       })
-      toast.success(validate ? " Completion Validated" : " Completion Rejected", {
+      toast.success(validate ? "✅ Completion Validated" : "❌ Completion Rejected", {
         description: validate
           ? "Skill scores have been automatically updated."
           : `Rejected: ${reason}`
@@ -572,7 +572,7 @@ const ActivityCard = ({ activity, deptEmployees, enrollments, getTypeIcon, forma
                                     : "bg-white text-rose-500 border-rose-200 hover:bg-rose-50"
                                 )}
                               >
-                                {report.completed ? "YES Completed" : "NO Not Completed"}
+                                {report.completed ? "✓ Completed" : "✗ Not Completed"}
                               </button>
                             </div>
                             {report.completed && (

@@ -2,11 +2,11 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "react-router-dom"
-import { DashboardHeader } from "/components/dashboard/header"
-import { RecommendationEngine } from "/components/recommendations/recommendation-engine"
-import RecommendationResults from "/components/recommendations/recommendation-results"
-import { useData } from "/lib/data-store"
-import { api } from "/lib/api"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { RecommendationEngine } from "@/components/recommendations/recommendation-engine"
+import RecommendationResults from "@/components/recommendations/recommendation-results"
+import { useData } from "@/lib/data-store"
+import { api } from "@/lib/api"
 import { toast } from "sonner"
 import { Zap, Shield, Cpu, UserCheck } from "lucide-react"
 

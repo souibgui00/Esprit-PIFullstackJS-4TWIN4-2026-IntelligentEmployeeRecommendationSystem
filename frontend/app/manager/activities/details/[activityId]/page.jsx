@@ -1,13 +1,13 @@
 "use client"
 
 import { useParams, useNavigate } from "react-router-dom"
-import { useData } from "/lib/data-store"
-import { useAuth } from "/lib/auth-context"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Button } from "/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { useData } from "@/lib/data-store"
+import { useAuth } from "@/lib/auth-context"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Calendar,
   Clock,
@@ -26,7 +26,7 @@ import {
   CheckCircle,
   MessageCircle
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export default function ManagerActivityDetailsPage() {
   const { activityId } = useParams()

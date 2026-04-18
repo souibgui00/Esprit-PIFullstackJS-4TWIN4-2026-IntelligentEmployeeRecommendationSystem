@@ -1,11 +1,11 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
-import { useData } from "/lib/data-store"
+import { useData } from "@/lib/data-store"
 import { useMemo } from "react"
 import { Loader2 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export function SkillDistributionChart({ employeeId = null, variant = "admin" }) {
   const { employees, skills, loading } = useData()

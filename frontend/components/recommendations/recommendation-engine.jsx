@@ -1,21 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { Badge } from "/components/ui/badge"
-import { Textarea } from "/components/ui/textarea"
-import { Label } from "/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
-import { Button } from "/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "/components/ui/select"
-import { Slider } from "/components/ui/slider"
-import { Switch } from "/components/ui/switch"
-import { useData } from "/lib/data-store"
+} from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
+import { useData } from "@/lib/data-store"
 import {
   Brain,
   Sparkles,
@@ -35,7 +35,7 @@ import {
   Filter,
   Search
 } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export function RecommendationEngine({
   selectedActivity,

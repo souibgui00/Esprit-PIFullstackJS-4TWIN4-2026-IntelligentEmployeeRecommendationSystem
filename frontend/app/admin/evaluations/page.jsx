@@ -2,23 +2,23 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
-import { useData } from "/lib/data-store"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "/components/ui/select"
-import { Textarea } from "/components/ui/textarea"
-import { Slider } from "/components/ui/slider"
-import { Label } from "/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { useData } from "@/lib/data-store"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Slider } from "@/components/ui/slider"
+import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { 
   ClipboardCheck, 
   MoreHorizontal, 
@@ -39,10 +39,10 @@ import {
   Target,
   ClipboardList
 } from "lucide-react"
-import { useAuth } from "/lib/auth-context"
-import { cn } from "/lib/utils"
+import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { ConfirmDialog } from "/components/dialogs/confirm-dialog"
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 
 export default function EvaluationsPage() {
   const { evaluations, addEvaluation, updateEvaluation, deleteEvaluation, activities, employees, skills, updateEmployeeSkill } = useData()

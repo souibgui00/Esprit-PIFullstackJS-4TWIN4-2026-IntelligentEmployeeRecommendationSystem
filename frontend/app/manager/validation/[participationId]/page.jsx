@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { api } from "/lib/api"
-import { useData } from "/lib/data-store"
+import { api } from "@/lib/api"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
-import { DashboardHeader } from "/components/dashboard/header"
-import { Button } from "/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
-import { Badge } from "/components/ui/badge"
-import { Textarea } from "/components/ui/textarea"
-import { Switch } from "/components/ui/switch"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { Loader2, ArrowLeft, Star, FileText, CheckCircle2, AlertCircle, XCircle } from "lucide-react"
 
 export default function ManagerValidationReportPage() {
@@ -215,7 +215,7 @@ export default function ManagerValidationReportPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-xs font-bold ${skillAssessments[skill.skillId] ? 'text-emerald-500' : 'text-rose-400'}`}>
-                         {skillAssessments[skill.skillId] ? 'YES IMPROVED' : 'NO DID NOT IMPROVE'}
+                         {skillAssessments[skill.skillId] ? '✓ IMPROVED' : '✗ DID NOT IMPROVE'}
                       </span>
                       <Switch 
                         checked={skillAssessments[skill.skillId]}

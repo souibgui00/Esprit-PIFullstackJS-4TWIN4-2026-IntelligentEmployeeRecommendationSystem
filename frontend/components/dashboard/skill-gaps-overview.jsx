@@ -1,11 +1,11 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
-import { getSkillTypeLabel } from "/lib/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getSkillTypeLabel } from "@/lib/utils"
 import { AlertTriangle, TrendingUp, Loader2, Sparkles } from "lucide-react"
-import { useData } from "/lib/data-store"
+import { useData } from "@/lib/data-store"
 import { useMemo } from "react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export function SkillGapsOverview() {
   const { employees, skills, loading } = useData()

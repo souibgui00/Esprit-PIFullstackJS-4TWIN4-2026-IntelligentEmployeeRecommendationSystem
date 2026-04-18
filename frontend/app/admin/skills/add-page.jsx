@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import { SkillForm } from "/components/skills/skill-form"
-import { DashboardHeader } from "/components/dashboard/header"
+import { SkillForm } from "@/components/skills/skill-form"
+import { DashboardHeader } from "@/components/dashboard/header"
 
 export default function AdminSkillAddPage() {
     return (

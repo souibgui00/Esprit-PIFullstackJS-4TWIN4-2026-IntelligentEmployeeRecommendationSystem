@@ -1,9 +1,9 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Sparkles, Calendar, TrendingUp, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react"
-import { cn } from "/lib/utils"
-import { useData } from "/lib/data-store"
+import { cn } from "@/lib/utils"
+import { useData } from "@/lib/data-store"
 
 export function StatsCards() {
   const { employees, activities, evaluations, participations, loading } = useData()
@@ -72,25 +72,25 @@ export function StatsCards() {
         return (
           <Card key={stat.title} className="relative overflow-hidden bg-white border border-slate-100 rounded-2xl shadow-sm group hover:border-primary/30 transition-all duration-500">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <CardTitle className="text-[10px] font-sans font-medium text-slate-400 tracking-[0.2em] ">
+              <CardTitle className="text-[10px] font-black text-slate-400 tracking-[0.2em] ">
                 {stat.title}
               </CardTitle>
               <div className={cn(
                 "p-2.5 rounded-xl transition-all duration-500",
-                stat.color === "orange" ? "bg-orange-50 text-orange-500 group-hover:bg-primary group-hover:text-white" :
-                  stat.color === "blue" ? "bg-blue-50 text-accent-blue group-hover:bg-accent-blue group-hover:text-white" :
+                stat.color === "orange" ? "bg-orange-50 text-orange-500 group-hover:bg-[#F28C1B] group-hover:text-white" :
+                  stat.color === "blue" ? "bg-blue-50 text-[#1E5FA8] group-hover:bg-[#1E5FA8] group-hover:text-white" :
                     stat.color === "emerald" ? "bg-emerald-50 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white" :
-                      "bg-blue-50 text-accent-blue group-hover:bg-accent-blue group-hover:text-white"
+                      "bg-blue-50 text-[#1E5FA8] group-hover:bg-[#1E5FA8] group-hover:text-white"
               )}>
                 <Icon className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-display font-semibold text-slate-900 tracking-tighter">{stat.value}</span>
+                <span className="text-3xl font-black text-slate-900 tracking-tighter">{stat.value}</span>
                 {stat.change && (
                   <div className={cn(
-                    "flex items-center gap-0.5 text-[9px] font-sans font-medium tracking-widest",
+                    "flex items-center gap-0.5 text-[9px] font-bold tracking-widest",
                     stat.trend === "up" ? "text-emerald-500" : "text-slate-500"
                   )}>
                     {stat.trend === "up" && <ArrowUpRight className="h-3 w-3" />}
@@ -98,13 +98,13 @@ export function StatsCards() {
                   </div>
                 )}
               </div>
-              <p className="mt-3 text-[9px] font-sans font-medium text-slate-400 tracking-widest uppercase opacity-60 leading-relaxed">{stat.description}</p>
+              <p className="mt-3 text-[9px] font-bold text-slate-400 tracking-widest uppercase opacity-60 leading-relaxed">{stat.description}</p>
 
               <div className={cn(
                 "absolute bottom-0 left-0 w-full h-1 bg-transparent group-hover:opacity-100 transition-all duration-500",
-                stat.color === "orange" ? "bg-primary" :
-                  stat.color === "blue" ? "bg-accent-blue" :
-                    stat.color === "emerald" ? "bg-emerald-500" : "bg-accent-blue"
+                stat.color === "orange" ? "bg-[#F28C1B]" :
+                  stat.color === "blue" ? "bg-[#1E5FA8]" :
+                    stat.color === "emerald" ? "bg-emerald-500" : "bg-[#1E5FA8]"
               )}></div>
             </CardContent>
           </Card>

@@ -1,10 +1,10 @@
 "use client"
 import { useState, useEffect } from "react"
-import { DashboardHeader } from "/components/dashboard/header"
-import { api } from "/lib/api"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { api } from "@/lib/api"
 import { toast } from "sonner"
 import { Loader2, Shield, Calendar, Activity, FileJson, CheckCircle, Database, Search, Filter, X, ArrowRight } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 export default function AdminAuditLogsPage() {
   const [logs, setLogs] = useState([])
@@ -183,7 +183,7 @@ export default function AdminAuditLogsPage() {
 
             {/* Filter Navigation Bar */}
             <div className="p-4 bg-white border-b border-slate-100 flex flex-wrap items-center gap-4">
-                <div className="relative flex-1 min-w-50">
+                <div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
                         type="text"
@@ -199,7 +199,7 @@ export default function AdminAuditLogsPage() {
                     <select 
                         value={dateFilter} 
                         onChange={(e) => setDateFilter(e.target.value)}
-                        className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 border-none focus:ring-0 cursor-pointer min-w-30"
+                        className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 border-none focus:ring-0 cursor-pointer min-w-[120px]"
                     >
                         <option value="ALL">All Time</option>
                         <option value="TODAY">Today</option>
@@ -213,7 +213,7 @@ export default function AdminAuditLogsPage() {
                     <select 
                         value={actionFilter} 
                         onChange={(e) => setActionFilter(e.target.value)}
-                        className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 border-none focus:ring-0 cursor-pointer min-w-30"
+                        className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 border-none focus:ring-0 cursor-pointer min-w-[120px]"
                     >
                         <option value="ALL">All Actions</option>
                         {uniqueActions.map(action => (
@@ -227,7 +227,7 @@ export default function AdminAuditLogsPage() {
                     <select 
                         value={entityFilter} 
                         onChange={(e) => setEntityFilter(e.target.value)}
-                        className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 border-none focus:ring-0 cursor-pointer min-w-30"
+                        className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 border-none focus:ring-0 cursor-pointer min-w-[120px]"
                     >
                         <option value="ALL">All Entities</option>
                         {uniqueEntities.map(entity => (
@@ -323,13 +323,7 @@ export default function AdminAuditLogsPage() {
 
       {/* Human-Readable Inspector Modal */}
       <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
-        <DialogContent className="sm:max-w-4xl bg-slate-950 p-0 border border-slate-800 shadow-2xl overflow-hidden rounded-4xl">
-                        <DialogTitle className="sr-only">
-                            Audit log inspector for {selectedLog?.action || "selected action"}
-                        </DialogTitle>
-                        <DialogDescription className="sr-only">
-                            Inspect the state changes, metadata, and actor details for the selected audit log entry.
-                        </DialogDescription>
+        <DialogContent className="sm:max-w-4xl bg-slate-950 p-0 border border-slate-800 shadow-2xl overflow-hidden rounded-[2rem]">
             <div className="p-8 border-b border-white/10 flex items-center justify-between bg-slate-900/80">
                 <div className="space-y-2">
                    <div className="flex items-center gap-3">
@@ -355,7 +349,7 @@ export default function AdminAuditLogsPage() {
             <div className="p-8 overflow-y-auto max-h-[60vh] custom-scrollbar bg-[#0f111a]">
                 <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 mb-6 flex items-center gap-4">
                     <span>State Comparison</span>
-                    <div className="h-px flex-1 bg-white/5"></div>
+                    <div className="h-[1px] flex-1 bg-white/5"></div>
                 </h4>
                 
                 {renderStateComparison(selectedLog?.oldValue, selectedLog?.newValue)}

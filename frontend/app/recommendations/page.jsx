@@ -2,14 +2,14 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "react-router-dom"
-import { DashboardHeader } from "/components/dashboard/header"
-import { RecommendationEngine } from "/components/recommendations/recommendation-engine"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { RecommendationEngine } from "@/components/recommendations/recommendation-engine"
 import {
   RecommendationResults,
   generateRecommendations
-} from "/components/recommendations/recommendation-results"
+} from "@/components/recommendations/recommendation-results"
 const activities = []
-import { useData } from "/lib/data-store"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
 import { Brain, Cpu, Sparkles, Zap, Shield } from "lucide-react"
 

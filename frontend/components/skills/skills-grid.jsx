@@ -3,17 +3,17 @@
 import React from "react"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Input } from "/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "/components/ui/select"
+} from "@/components/ui/select"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,13 +21,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "/components/ui/dropdown-menu"
-import { useData } from "/lib/data-store"
-import { getSkillTypeLabel, cn } from "/lib/utils"
+} from "@/components/ui/dropdown-menu"
+import { useData } from "@/lib/data-store"
+import { getSkillTypeLabel, cn } from "@/lib/utils"
 import { Search, BookOpen, Brain, Heart, Users, TrendingUp, Filter, Plus, MoreVertical, Edit, Trash2 } from "lucide-react"
 
-import { SkillDialog } from "/components/dialogs/skill-dialog"
-import { ConfirmDialog } from "/components/dialogs/confirm-dialog"
+import { SkillDialog } from "@/components/dialogs/skill-dialog"
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { toast } from "sonner"
 
 

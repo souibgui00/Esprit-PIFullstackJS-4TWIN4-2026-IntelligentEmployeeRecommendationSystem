@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { useData } from "/lib/data-store"
-import { DashboardHeader } from "/components/dashboard/header"
-import { ActivityTable } from "/components/activities/activity-table"
-import { cn } from "/lib/utils"
+import { useData } from "@/lib/data-store"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { ActivityTable } from "@/components/activities/activity-table"
+import { cn } from "@/lib/utils"
 import { Search, Plus, BookOpen } from "lucide-react"
-import { Button } from "/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
+import { useAuth } from "@/lib/auth-context"
 
 export default function HRActivitiesPage() {
   const { activities, enrollments, deleteActivity } = useData()

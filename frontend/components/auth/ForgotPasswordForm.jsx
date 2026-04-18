@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../lib/auth-context"
 import { toast } from "sonner"
 import { Mail, ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
-import { Button } from "/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 export default function ForgotPasswordForm() {
     const navigate = useNavigate()

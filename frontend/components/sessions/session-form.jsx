@@ -3,24 +3,24 @@
 import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { sessionSchema } from "/lib/schemas"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-import { Textarea } from "/components/ui/textarea"
+import { sessionSchema } from "@/lib/schemas"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "/components/ui/select"
-import { useData } from "/lib/data-store"
+} from "@/components/ui/select"
+import { useData } from "@/lib/data-store"
 import { toast } from "sonner"
 import { Sparkles, Loader2, ArrowLeft, Clock, MapPin, User, Users, Calendar } from "lucide-react"
-import { Button } from "/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "/lib/auth-context"
-import { cn } from "/lib/utils"
+import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
 
 export function SessionForm({ session, mode = "create", initialActivityId }) {
     const { activities, addSession, updateSession } = useData()

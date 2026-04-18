@@ -1,10 +1,10 @@
 "use client"
 
 import React from 'react'
-import { Card } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Clock, CheckCircle2, XCircle, TrendingUp, Target, Calendar } from "lucide-react"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 
 export function ParticipationHistory({ user, participations, activities }) {
     // participations look like { activityId, progress, status, lastUpdated }

@@ -1,13 +1,13 @@
 "use client"
 
 import { Brain, AlertCircle, TrendingUp, Target, Zap, ArrowUpRight, Sparkles, BookOpen, Layers } from "lucide-react"
-import { DashboardHeader } from "/components/dashboard/header"
-import { useData } from "/lib/data-store"
-import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
-import { Badge } from "/components/ui/badge"
-import { Button } from "/components/ui/button"
-import { Progress } from "/components/ui/progress"
-import { cn } from "/lib/utils"
+import { DashboardHeader } from "@/components/dashboard/header"
+import { useData } from "@/lib/data-store"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 export default function ManagerSkillsPage() {

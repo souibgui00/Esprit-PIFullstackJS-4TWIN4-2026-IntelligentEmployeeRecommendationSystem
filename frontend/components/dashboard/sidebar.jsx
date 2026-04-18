@@ -1,7 +1,7 @@
 "use client"
 
 import { Link, useLocation } from "react-router-dom"
-import { cn } from "/lib/utils"
+import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
   Users,
@@ -14,14 +14,14 @@ import {
   ChevronRight,
   Brain,
 } from "lucide-react"
-import { Button } from "/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "/components/ui/tooltip"
+} from "@/components/ui/tooltip"
 import { useState } from "react"
 
 export function Sidebar() {
@@ -53,8 +53,8 @@ export function Sidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-display font-bold text-sm">SkillMatch</span>
-              <span className="font-sans text-xs text-sidebar-foreground/70">HR Platform</span>
+              <span className="font-semibold text-sm">SkillMatch</span>
+              <span className="text-xs text-sidebar-foreground/70">HR Platform</span>
             </div>
           )}
         </div>
@@ -69,7 +69,7 @@ export function Sidebar() {
               <Link
                 to={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-sans font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
@@ -105,8 +105,8 @@ export function Sidebar() {
             </Avatar>
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-sans font-medium truncate">Sarah Johnson</p>
-                <p className="text-xs font-sans text-sidebar-foreground/70">HR Manager</p>
+                <p className="text-sm font-medium truncate">Sarah Johnson</p>
+                <p className="text-xs text-sidebar-foreground/70">HR Manager</p>
               </div>
             )}
           </div>
@@ -133,7 +133,7 @@ export function Sidebar() {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="flex-1 justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 font-sans font-medium">
+                <Button variant="ghost" size="sm" className="flex-1 justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </Button>

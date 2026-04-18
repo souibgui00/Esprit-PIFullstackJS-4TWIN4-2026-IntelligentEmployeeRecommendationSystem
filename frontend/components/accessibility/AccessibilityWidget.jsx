@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react"
-import { cn } from "../../lib/utils"
+import { cn } from "@/lib/utils"
 import {
-    PersonStanding, X, Type, Contrast, Eye, AlignLeft,
-    Move, ZapOff, ScanLine, Space, AlignJustify, Target, RotateCcw
+    Accessibility, X, Type, Contrast, Eye, AlignLeft,
+    Move, ZapOff, ScanLine, Space, ChevronRight, RotateCcw
 } from "lucide-react"
 
 const STORAGE_KEY = "skillmatch_a11y"
@@ -16,8 +16,6 @@ const defaultSettings = {
     readingGuide: false,
     focusHighlight: false,
     letterSpacing: false,
-    lineHeight: false,
-    largeTargets: false,
 }
 
 const FONT_LABELS = ["Sm", "Norm", "Lg", "XL", "2XL"]
@@ -40,8 +38,6 @@ function applySettings(settings) {
     toggleClass("a11y-reading-guide", settings.readingGuide)
     toggleClass("a11y-focus-highlight", settings.focusHighlight)
     toggleClass("a11y-letter-spacing", settings.letterSpacing)
-    toggleClass("a11y-line-height", settings.lineHeight)
-    toggleClass("a11y-large-targets", settings.largeTargets)
 }
 
 export function AccessibilityWidget() {
@@ -94,10 +90,10 @@ export function AccessibilityWidget() {
             {/* Reading Guide Line */}
             {settings.readingGuide && (
                 <div
-                    className="pointer-events-none fixed left-0 right-0 z-99999"
+                    className="pointer-events-none fixed left-0 right-0 z-[99999]"
                     style={{ top: guideY - 14, height: 28 }}
                 >
-                    <div className="w-full h-full bg-primary/10 border-y border-primary/30" />
+                    <div className="w-full h-full bg-[#F28C1B]/10 border-y border-[#F28C1B]/30" />
                 </div>
             )}
 
@@ -106,18 +102,18 @@ export function AccessibilityWidget() {
                 onClick={() => setOpen(o => !o)}
                 aria-label="Open accessibility options"
                 className={cn(
-                    "fixed bottom-8 right-8 z-9998 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 group",
+                    "fixed bottom-8 right-8 z-[9998] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 group",
                     open
-                        ? "bg-primary rotate-180 shadow-primary/40"
-                        : "bg-[#222222] hover:bg-primary shadow-[#222222]/30 hover:shadow-primary/30"
+                        ? "bg-[#F28C1B] rotate-180 shadow-[#F28C1B]/40"
+                        : "bg-[#222222] hover:bg-[#F28C1B] shadow-[#222222]/30 hover:shadow-[#F28C1B]/30"
                 )}
             >
                 {open
                     ? <X className="w-6 h-6 text-white" />
-                    : <PersonStanding className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+                    : <Accessibility className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
                 }
                 {hasAnyActive && !open && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-white animate-pulse" />
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F28C1B] rounded-full border-2 border-white animate-pulse" />
                 )}
             </button>
 
@@ -125,7 +121,7 @@ export function AccessibilityWidget() {
             <div
                 ref={panelRef}
                 className={cn(
-                    "fixed right-8 z-9997 w-80 bg-white border border-[#EEEEEE] rounded-[4px] shadow-2xl shadow-[#222222]/10 overflow-hidden transition-all duration-500",
+                    "fixed right-8 z-[9997] w-80 bg-white border border-[#EEEEEE] rounded-[4px] shadow-2xl shadow-[#222222]/10 overflow-hidden transition-all duration-500",
                     open
                         ? "opacity-100 translate-y-0 pointer-events-auto"
                         : "opacity-0 translate-y-4 pointer-events-none"
@@ -137,7 +133,7 @@ export function AccessibilityWidget() {
                 {/* Header */}
                 <div className="bg-[#222222] px-8 py-6 flex items-center justify-between">
                     <div>
-                        <p className="text-[9px] font-bold text-primary tracking-[0.4em]">Assist Protocol</p>
+                        <p className="text-[9px] font-bold text-[#F28C1B] tracking-[0.4em]">Assist Protocol</p>
                         <h2 className="text-lg font-black font-display text-white tracking-tighter leading-tight">
                             Accessibility
                         </h2>
@@ -145,7 +141,7 @@ export function AccessibilityWidget() {
                     <button
                         onClick={reset}
                         title="Reset all settings"
-                        className="flex items-center gap-2 text-[9px] font-bold text-gray-400 tracking-widest hover:text-primary transition-colors"
+                        className="flex items-center gap-2 text-[9px] font-bold text-gray-400 tracking-widest hover:text-[#F28C1B] transition-colors"
                     >
                         <RotateCcw className="w-3.5 h-3.5" />
                         Reset
@@ -157,11 +153,11 @@ export function AccessibilityWidget() {
                     {/* Font Size */}
                     <div className="bg-[#F8FAFC] border border-[#EEEEEE] rounded-[4px] p-5">
                         <div className="flex items-center gap-3 mb-4">
-                            <Type className="w-4 h-4 text-primary" />
+                            <Type className="w-4 h-4 text-[#F28C1B]" />
                             <span className="text-[10px] font-black font-display text-[#222222] tracking-widest">
                                 Text Size
                             </span>
-                            <span className="ml-auto text-[9px] font-bold text-primary tracking-widest ">
+                            <span className="ml-auto text-[9px] font-bold text-[#F28C1B] tracking-widest ">
                                 {FONT_LABELS[settings.fontSize + 1]}
                             </span>
                         </div>
@@ -169,7 +165,7 @@ export function AccessibilityWidget() {
                             <button
                                 onClick={() => update("fontSize", Math.max(-1, settings.fontSize - 1))}
                                 disabled={settings.fontSize <= -1}
-                                className="w-8 h-8 rounded-[4px] bg-white border border-[#EEEEEE] text-[#222222] font-black text-sm hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="w-8 h-8 rounded-[4px] bg-white border border-[#EEEEEE] text-[#222222] font-black text-sm hover:border-[#F28C1B] hover:text-[#F28C1B] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                 aria-label="Decrease text size"
                             >−</button>
                             <div className="flex-1 flex gap-1">
@@ -180,8 +176,8 @@ export function AccessibilityWidget() {
                                         className={cn(
                                             "flex-1 h-2 rounded-full transition-all",
                                             i <= settings.fontSize + 1
-                                                ? "bg-primary"
-                                                : "bg-[#EEEEEE] hover:bg-primary/40"
+                                                ? "bg-[#F28C1B]"
+                                                : "bg-[#EEEEEE] hover:bg-[#F28C1B]/40"
                                         )}
                                         aria-label={`Set text size to ${label}`}
                                     />
@@ -190,7 +186,7 @@ export function AccessibilityWidget() {
                             <button
                                 onClick={() => update("fontSize", Math.min(3, settings.fontSize + 1))}
                                 disabled={settings.fontSize >= 3}
-                                className="w-8 h-8 rounded-[4px] bg-white border border-[#EEEEEE] text-[#222222] font-black text-sm hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="w-8 h-8 rounded-[4px] bg-white border border-[#EEEEEE] text-[#222222] font-black text-sm hover:border-[#F28C1B] hover:text-[#F28C1B] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                 aria-label="Increase text size"
                             >+</button>
                         </div>
@@ -240,18 +236,6 @@ export function AccessibilityWidget() {
                             label: "Letter Spacing",
                             desc: "Increases spacing between letters & words",
                         },
-                        {
-                            key: "lineHeight",
-                            icon: AlignJustify,
-                            label: "Line Height",
-                            desc: "Adds more breathing room between text lines",
-                        },
-                        {
-                            key: "largeTargets",
-                            icon: Target,
-                            label: "Large Targets",
-                            desc: "Makes buttons and controls easier to tap",
-                        },
                     ].map(({ key, icon: Icon, label, desc }) => {
                         const active = settings[key]
                         return (
@@ -262,13 +246,13 @@ export function AccessibilityWidget() {
                                     "w-full flex items-start gap-4 p-5 rounded-[4px] border text-left transition-all group",
                                     active
                                         ? "bg-[#222222] border-[#222222] shadow-lg shadow-[#222222]/10"
-                                        : "bg-[#F8FAFC] border-[#EEEEEE] hover:border-primary/30 hover:bg-white"
+                                        : "bg-[#F8FAFC] border-[#EEEEEE] hover:border-[#F28C1B]/30 hover:bg-white"
                                 )}
                                 aria-pressed={active}
                             >
                                 <div className={cn(
                                     "w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0 transition-colors",
-                                    active ? "bg-primary" : "bg-[#EEEEEE] group-hover:bg-primary/10"
+                                    active ? "bg-[#F28C1B]" : "bg-[#EEEEEE] group-hover:bg-[#F28C1B]/10"
                                 )}>
                                     <Icon className={cn("w-4 h-4", active ? "text-white" : "text-[#222222]")} />
                                 </div>
@@ -289,8 +273,8 @@ export function AccessibilityWidget() {
                                 <div className={cn(
                                     "w-5 h-5 rounded-full border-2 shrink-0 mt-1 flex items-center justify-center transition-all",
                                     active
-                                        ? "bg-primary border-primary"
-                                        : "border-[#EEEEEE] group-hover:border-primary/50"
+                                        ? "bg-[#F28C1B] border-[#F28C1B]"
+                                        : "border-[#EEEEEE] group-hover:border-[#F28C1B]/50"
                                 )}>
                                     {active && <div className="w-2 h-2 rounded-full bg-white" />}
                                 </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react"
 import { Camera, X, UploadCloud, User } from "lucide-react"
-import { cn } from "../../lib/utils"
+import { cn } from "@/lib/utils"
 
 export function ImageUpload({ value, onChange, className }) {
     const [dragActive, setDragActive] = useState(false)

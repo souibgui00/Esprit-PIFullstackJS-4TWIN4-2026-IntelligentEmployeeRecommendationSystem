@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "/components/ui/dialog"
-import { Input } from "/components/ui/input"
-import { Button } from "/components/ui/button"
-import { api } from "/lib/api"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { useAuth } from "/lib/auth-context"
+import { useAuth } from "@/lib/auth-context"
 import { UploadCloud, FileText, Loader2 } from "lucide-react"
 
 export function MandatoryCvDialog() {
