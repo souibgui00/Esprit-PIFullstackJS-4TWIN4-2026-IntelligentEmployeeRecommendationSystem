@@ -20,8 +20,6 @@ export default function ManagerTeamPage() {
   const navigate = useNavigate()
 
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedEmployee, setSelectedEmployee] = useState(null)
-
   // Helper to extract a string ID from various formats
   const getDeptId = (d) => {
     if (!d) return null;
@@ -172,7 +170,7 @@ export default function ManagerTeamPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => setSelectedEmployee(employee)}
+                            onClick={() => navigate(`/manager/employees/${employee.id || employee._id}`)}
                             className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-all"
                             title="View Profile"
                           >
@@ -195,156 +193,6 @@ export default function ManagerTeamPage() {
           </div>
         </div>
       </div>
-
-      <Dialog open={!!selectedEmployee} onOpenChange={() => setSelectedEmployee(null)}>
-        <DialogContent className="max-w-[700px] bg-white border-none rounded-xl p-0 overflow-hidden shadow-2xl">
-          <div className="bg-slate-900 px-8 py-10 relative">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <Users className="w-32 h-32 text-white" />
-            </div>
-            <DialogHeader className="relative z-10">
-              <Badge variant="outline" className="text-[10px] font-bold text-primary border-primary/30 tracking-wider mb-2 bg-primary/5">Personnel Profile</Badge>
-              <DialogTitle className="text-2xl font-bold text-white tracking-tight">
-                {selectedEmployee?.name}
-              </DialogTitle>
-              <DialogDescription className="text-slate-400 text-sm">
-                Comprehensive overview of performance and metrics.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-
-          {selectedEmployee && (
-            <div className="flex flex-col">
-              <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center gap-8 bg-slate-50/30">
-                <Avatar className="h-24 w-24 rounded-2xl border-2 border-white shadow-xl bg-white">
-                  <AvatarImage src={selectedEmployee.avatar} className="object-cover" />
-                  <AvatarFallback className="text-2xl font-bold text-slate-400">{selectedEmployee.name[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 border-slate-200 text-slate-600 tracking-wider">{selectedEmployee.department}</Badge>
-                    <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 border-slate-200 text-slate-600 tracking-wider">ID: {selectedEmployee.matricule}</Badge>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900">{selectedEmployee.position}</h3>
-                  <div className="grid grid-cols-2 gap-4 mt-4 text-slate-500">
-                    <div className="flex items-center gap-2 text-xs">
-                      <Mail className="w-3.5 h-3.5 text-slate-400" />
-                      {selectedEmployee.email}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" />
-                      {selectedEmployee.telephone}
-                    </div>
-                  </div>
-                </div>
-                <div className="shrink-0 bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center min-w-[100px]">
-                  <p className="text-[10px] font-bold text-slate-400 tracking-wider mb-1">Tenure</p>
-                  <p className="text-xl font-bold text-slate-900">{selectedEmployee.yearsOfExperience} <span className="text-sm font-medium text-slate-400">Yrs</span></p>
-                </div>
-              </div>
-
-              <Tabs defaultValue="skills" className="w-full">
-                <div className="px-8 border-b border-slate-100 bg-white">
-                  <TabsList className="bg-transparent p-0 gap-6 h-12">
-                    <TabsTrigger value="skills" className="bg-transparent border-none p-0 text-sm font-semibold text-slate-400 data-[state=active]:text-primary relative h-full rounded-none outline-none group/tab">
-                      Skill Assessment
-                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-data-[state=active]/tab:scale-x-100 transition-transform duration-300" />
-                    </TabsTrigger>
-                    <TabsTrigger value="info" className="bg-transparent border-none p-0 text-sm font-semibold text-slate-400 data-[state=active]:text-primary relative h-full rounded-none outline-none group/tab">
-                      Work Details
-                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-data-[state=active]/tab:scale-x-100 transition-transform duration-300" />
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-
-                <div className="p-8 max-h-[400px] overflow-y-auto">
-                  <TabsContent value="skills" className="mt-0 outline-none space-y-4">
-                    {selectedEmployee.skills?.map((skill) => (
-                      <div key={skill.skillId?._id || skill.skillId} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-white hover:border-primary/20 transition-all shadow-sm">
-                        <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm",
-                            (skill.score > 80) ? "bg-slate-900" : (skill.score > 50) ? "bg-primary" : "bg-slate-300"
-                          )}>
-                            {(skill.level?.[0] || 'B').toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900">{skill.skillId?.name || "Specialized Skill"}</p>
-                            <p className="text-xs text-slate-400">{getSkillTypeLabel(skill.skillId?.type)}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-6">
-                          <div className="text-right shrink-0">
-                            <p className="text-base font-bold text-slate-900 leading-none">{Math.round((skill.score || 0) * 10) / 10}</p>
-                            <div className="flex items-center justify-end gap-1 mt-1">
-                              {getProgressionIcon(skill.progression || 0)}
-                              <span className={cn(
-                                "text-[10px] font-bold",
-                                (skill.progression || 0) > 0 ? "text-emerald-500" : (skill.progression || 0) < 0 ? "text-rose-500" : "text-slate-400"
-                              )}>
-                                {skill.progression > 0 ? "+" : ""}{skill.progression || 0}%
-                              </span>
-                            </div>
-                          </div>
-                          <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-primary/70 transition-all duration-700" style={{ width: `${Math.min(((skill.score || 0) / 120) * 100, 100)}%` }} />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </TabsContent>
-
-                  <TabsContent value="info" className="mt-0 outline-none space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <CalendarIcon className="w-4 h-4 text-primary" />
-                          <p className="text-[11px] font-bold text-slate-400 tracking-wider">Join Date</p>
-                        </div>
-                        <p className="text-sm font-semibold text-slate-700">
-                           {selectedEmployee.date_embauche ? new Date(selectedEmployee.date_embauche).toLocaleDateString() : 'N/A'}
-                        </p>
-                      </div>
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Briefcase className="w-4 h-4 text-primary" />
-                          <p className="text-[11px] font-bold text-slate-400 tracking-wider">Contract Type</p>
-                        </div>
-                        <p className="text-sm font-semibold text-slate-700">Full-time Permanent</p>
-                      </div>
-                    </div>
-                    <div className="p-6 rounded-xl border border-slate-100 bg-slate-50/50">
-                      <p className="text-[11px] font-bold text-slate-400 tracking-wider mb-2">Role description</p>
-                      <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                        {selectedEmployee.jobDescription || "No job description provided."}
-                      </p>
-                    </div>
-                  </TabsContent>
-                </div>
-              </Tabs>
-
-              <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/30">
-                <button
-                  onClick={() => setSelectedEmployee(null)}
-                  className="bg-white border border-slate-200 text-slate-600 font-semibold py-2 px-6 rounded-lg text-sm hover:bg-slate-50 transition-all"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => {
-                    navigate(`/manager/evaluations?employee=${selectedEmployee.id}`)
-                    setSelectedEmployee(null)
-                  }}
-                  className="bg-primary text-white font-semibold py-2 px-6 rounded-lg text-sm shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2"
-                >
-                  <ClipboardCheck className="h-4 w-4" />
-                  Request Assessment
-                </button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

@@ -23,7 +23,7 @@ class GlobalErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif', color: '#333' }}>
+        <div className="font-sans" style={{ padding: '2rem', color: '#333' }}>
           <h1 style={{ color: '#d32f2f' }}>Something went wrong.</h1>
           <p>Please share this error message below:</p>
           <pre style={{ backgroundColor: '#f1f1f1', padding: '1rem', borderRadius: '4px', overflowX: 'auto', whiteSpace: 'pre-wrap' }}>

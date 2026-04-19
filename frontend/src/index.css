@@ -120,9 +120,12 @@
     color: var(--color-slate-600);
     margin-bottom: 1rem;
   }
-}
 
-@layer components {
+  /* Keep display typography consistent for brand/page/module titles using font-display utility */
+  .font-display {
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+  }
 
   /* Premium Cards */
   .card-premium {
@@ -283,6 +286,12 @@
     outline: none;
     border-color: var(--theme-accent, var(--color-primary));
     box-shadow: 0 0 0 4px rgba(242, 140, 27, 0.1);
+  }
+
+  .stat-number {
+    font-family: var(--font-display) !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
   }
 }
 

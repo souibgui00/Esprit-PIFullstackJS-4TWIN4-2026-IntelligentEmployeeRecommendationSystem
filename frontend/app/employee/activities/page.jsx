@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button"
 import {
   Calendar,
   Clock,
-  MapPin,
   Users,
   CheckCircle2,
   ShieldAlert,
@@ -29,7 +28,6 @@ import {
   Brain,
   X,
   LogOut,
-  AlertTriangle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -40,6 +38,7 @@ const ACTIVE_STATUSES = ['started', 'completed', 'accepted', 'in_progress', 'awa
 const WITHDRAWABLE_STATUSES = ['accepted', 'in_progress']
 
 export default function EmployeeActivitiesPage() {
+  const navigate = useNavigate()
   const {
     activities,
     participations,
@@ -54,11 +53,6 @@ export default function EmployeeActivitiesPage() {
   const { user } = useAuth()
   const employeeId = user?.id || user?._id
   const userDeptId = user?.department_id?._id || user?.department_id?.id || user?.department_id
-
-  // Withdrawal modal state
-  const [withdrawTarget, setWithdrawTarget] = useState(null) // { activityId, title }
-  const [withdrawReason, setWithdrawReason] = useState("")
-  const [withdrawing, setWithdrawing] = useState(false)
 
   const enrolledActivities = participations
     ?.filter(p => ACTIVE_STATUSES.includes(p.status))
@@ -88,32 +82,6 @@ export default function EmployeeActivitiesPage() {
     const activity = activities.find(a => String(a.id || a._id) === String(inv.activityId?._id || inv.activityId))
     return activity ? { ...activity, assignment: inv } : null
   }).filter(Boolean) || []
-
-  // ── Withdrawal handler ──────────────────────────────────────────────────────
-  const handleWithdraw = async () => {
-    if (!withdrawTarget) return
-    if (!withdrawReason.trim()) {
-      toast.error("Reason required", { description: "You must explain why you are withdrawing." })
-      return
-    }
-    setWithdrawing(true)
-    try {
-      await api.post(`/participations/${withdrawTarget.activityId}/withdraw`, {
-        reason: withdrawReason.trim(),
-      })
-      toast.success("Withdrawal submitted", {
-        description: "Your manager has been notified. The seat has been freed for another colleague."
-      })
-      setWithdrawTarget(null)
-      setWithdrawReason("")
-      // Refresh participations so the card disappears from "My Curriculum"
-      if (refreshParticipations) await refreshParticipations()
-    } catch (err) {
-      toast.error("Withdrawal failed", { description: err?.message || "Please try again." })
-    } finally {
-      setWithdrawing(false)
-    }
-  }
 
   const getStatusBadge = (status) => {
     const map = {
@@ -188,24 +156,7 @@ export default function EmployeeActivitiesPage() {
                 <h4 className="text-lg font-bold text-slate-900 mb-1">No active courses</h4>
                 <p className="text-slate-500 text-xs max-w-xs mx-auto">Explore the catalog or wait for manager invitations.</p>
               </div>
-            ) : (
-              enrolledActivities.map(activity => (
-                <ActivityCard
-                  key={activity.id || activity._id}
-                  activity={activity}
-                  enrolled
-                  employeeId={employeeId}
-                  enrollEmployee={enrollEmployee}
-                  updateParticipationProgress={updateParticipationProgress}
-                  getStatusBadge={getStatusBadge}
-                  canWithdraw={WITHDRAWABLE_STATUSES.includes(activity.participation?.status)}
-                  onWithdraw={() => setWithdrawTarget({
-                    activityId: activity.id || activity._id,
-                    title: activity.title,
-                  })}
-                />
-              ))
-            )}
+            </ScrollArea>
           </TabsContent>
 
           {/* ── Invitations ── */}
@@ -218,20 +169,7 @@ export default function EmployeeActivitiesPage() {
                 <h4 className="text-lg font-bold text-slate-900 mb-1">No active invitations</h4>
                 <p className="text-slate-500 text-xs max-w-xs mx-auto">Managers will send you recommendations here when they identify a good fit for your career growth.</p>
               </div>
-            ) : (
-              invitations.map(activity => (
-                <ActivityCard
-                  key={activity.id || activity._id}
-                  activity={activity}
-                  invitation
-                  employeeId={employeeId}
-                  getStatusBadge={getStatusBadge}
-                  acceptInvitation={() => acceptRecommendation(activity.assignment.id)}
-                  rejectInvitation={() => rejectRecommendation(activity.assignment.id, "Declined by employee")}
-
-                />
-              ))
-            )}
+            </ScrollArea>
           </TabsContent>
 
           {/* ── Marketplace ── */}

@@ -151,7 +151,7 @@ export default function ManagerDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 tracking-widest">Team size</p>
-                <p className="text-3xl font-display font-black text-slate-900 mt-2">{teamSize}</p>
+                <p className="stat-number text-3xl text-slate-900 mt-2">{teamSize}</p>
               </div>
               <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500">
                 <Users className="w-7 h-7 text-indigo-500 group-hover:text-white transition-colors" />
@@ -166,7 +166,7 @@ export default function ManagerDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 tracking-widest">Active programs</p>
-                <p className="text-3xl font-display font-black text-slate-900 mt-2">{activeActivities}</p>
+                <p className="stat-number text-3xl text-slate-900 mt-2">{activeActivities}</p>
               </div>
               <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all duration-500">
                 <Activity className="w-7 h-7 text-orange-500 group-hover:text-white transition-colors" />
@@ -181,7 +181,7 @@ export default function ManagerDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 tracking-widest">Mean Performance</p>
-                <p className="text-3xl font-display font-black text-slate-900 mt-2">
+                <p className="stat-number text-3xl text-slate-900 mt-2">
                   {avgPerformance != null ? `${Math.round(avgPerformance)}%` : "—"}
                 </p>
               </div>
