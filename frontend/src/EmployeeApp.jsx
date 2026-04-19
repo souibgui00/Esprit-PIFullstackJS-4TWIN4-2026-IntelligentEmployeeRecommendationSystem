@@ -66,8 +66,8 @@ function EmployeeProgress() {
     <div className="flex flex-col bg-transparent min-h-screen pb-24 font-sans">
       {/* Immersive Achievement Hero */}
       <div className="mesh-gradient-premium pt-32 pb-48 px-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#F28C1B]/10 rounded-full blur-[140px] -mr-96 -mt-96 animate-float"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#1E5FA8]/5 rounded-full blur-[100px] -ml-24 -mb-24 animate-float"></div>
+        <div className="absolute top-0 right-0 w-200 h-200 bg-primary/10 rounded-full blur-[140px] -mr-96 -mt-96 animate-float"></div>
+        <div className="absolute bottom-0 left-0 w-100 h-100 bg-accent-blue/5 rounded-full blur-[100px] -ml-24 -mb-24 animate-float"></div>
 
         <div className="max-w-6xl mx-auto relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-12">
           <div className="space-y-6">
@@ -76,7 +76,7 @@ function EmployeeProgress() {
               Achievements
             </div>
             <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight tracking-tight">
-              Your <span className="text-[#F28C1B]">Progress.</span>
+              Your <span className="text-primary">Progress.</span>
             </h1>
             <p className="text-slate-400 text-lg font-medium max-w-xl">
               Track your growth through the platform and celebrate your professional contributions.
@@ -85,11 +85,11 @@ function EmployeeProgress() {
           
           <div className="flex gap-6">
             <div className="glass-dark px-10 py-6 rounded-3xl border-white/5 text-center">
-              <p className="text-[#F28C1B] text-3xl font-black tracking-tighter">{stats.badges}</p>
+              <p className="stat-number text-primary text-3xl tracking-tighter">{stats.badges}</p>
               <p className="text-[10px] text-white/30 font-bold tracking-widest mt-1">Badges</p>
             </div>
             <div className="glass-dark px-10 py-6 rounded-3xl border-white/5 text-center">
-              <p className="text-white text-3xl font-black tracking-tighter">{stats.points}</p>
+              <p className="stat-number text-white text-3xl tracking-tighter">{stats.points}</p>
               <p className="text-[10px] text-white/30 font-bold tracking-widest mt-1">Combined score</p>
             </div>
           </div>

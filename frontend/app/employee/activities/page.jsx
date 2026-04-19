@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button"
 import {
   Calendar,
   Clock,
-  MapPin,
   Users,
   CheckCircle2,
   ShieldAlert,
@@ -29,7 +28,6 @@ import {
   Brain,
   X,
   LogOut,
-  AlertTriangle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -40,6 +38,7 @@ const ACTIVE_STATUSES = ['started', 'completed', 'accepted', 'in_progress', 'awa
 const WITHDRAWABLE_STATUSES = ['accepted', 'in_progress']
 
 export default function EmployeeActivitiesPage() {
+  const navigate = useNavigate()
   const {
     activities,
     participations,
@@ -54,11 +53,6 @@ export default function EmployeeActivitiesPage() {
   const { user } = useAuth()
   const employeeId = user?.id || user?._id
   const userDeptId = user?.department_id?._id || user?.department_id?.id || user?.department_id
-
-  // Withdrawal modal state
-  const [withdrawTarget, setWithdrawTarget] = useState(null) // { activityId, title }
-  const [withdrawReason, setWithdrawReason] = useState("")
-  const [withdrawing, setWithdrawing] = useState(false)
 
   const enrolledActivities = participations
     ?.filter(p => ACTIVE_STATUSES.includes(p.status))
@@ -89,32 +83,6 @@ export default function EmployeeActivitiesPage() {
     return activity ? { ...activity, assignment: inv } : null
   }).filter(Boolean) || []
 
-  // ── Withdrawal handler ──────────────────────────────────────────────────────
-  const handleWithdraw = async () => {
-    if (!withdrawTarget) return
-    if (!withdrawReason.trim()) {
-      toast.error("Reason required", { description: "You must explain why you are withdrawing." })
-      return
-    }
-    setWithdrawing(true)
-    try {
-      await api.post(`/participations/${withdrawTarget.activityId}/withdraw`, {
-        reason: withdrawReason.trim(),
-      })
-      toast.success("Withdrawal submitted", {
-        description: "Your manager has been notified. The seat has been freed for another colleague."
-      })
-      setWithdrawTarget(null)
-      setWithdrawReason("")
-      // Refresh participations so the card disappears from "My Curriculum"
-      if (refreshParticipations) await refreshParticipations()
-    } catch (err) {
-      toast.error("Withdrawal failed", { description: err?.message || "Please try again." })
-    } finally {
-      setWithdrawing(false)
-    }
-  }
-
   const getStatusBadge = (status) => {
     const map = {
       accepted: { label: "Accepted", cls: "bg-emerald-50 text-emerald-600" },
@@ -133,28 +101,28 @@ export default function EmployeeActivitiesPage() {
   return (
     <div className="flex flex-col min-h-screen bg-transparent page-transition overflow-x-hidden">
       {/* Immersive Header */}
-      <div className="bg-[#2C2C2C] pt-32 pb-48 px-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#F28C1B]/10 rounded-full blur-[100px] -mr-48 -mt-48"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#1E5FA8]/5 rounded-full blur-[80px] -ml-24 -mb-24"></div>
+      <div className="bg-[#2C2C2C] pt-24 pb-36 px-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-150 h-150 bg-primary/10 rounded-full blur-[100px] -mr-48 -mt-48"></div>
+        <div className="absolute bottom-0 left-0 w-100 h-100 bg-accent-blue/5 rounded-full blur-[80px] -ml-24 -mb-24"></div>
 
-        <div className="max-w-6xl mx-auto relative z-10 space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="space-y-4">
+        <div className="max-w-5xl mx-auto relative z-10 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/20 text-orange-400 text-[10px] font-bold tracking-widest uppercase mb-2">
                 <Trophy className="w-3 h-3" />
                 Learning Center
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-none text-balance uppercase">
-                Expand your <span className="text-[#F28C1B]">skills.</span>
+              <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none text-balance uppercase">
+                Expand your <span className="text-primary">skills.</span>
               </h1>
-              <p className="text-orange-100/60 max-w-lg font-medium">
+              <p className="text-orange-100/60 max-w-lg font-medium text-sm">
                 Choose from highly curated programs designed to elevate your professional trajectory and strategic impact.
               </p>
             </div>
 
             <div className="flex gap-4">
-              <div className="stats-glass px-6 py-4 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 text-center">
-                <p className="text-orange-400 text-2xl font-black leading-none">{enrolledActivities.length}</p>
+              <div className="stats-glass px-4 py-3 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 text-center">
+                <p className="text-orange-400 text-xl font-black leading-none">{enrolledActivities.length}</p>
                 <p className="text-orange-100/40 text-[10px] uppercase tracking-widest font-bold mt-2">Active Courses</p>
               </div>
             </div>
@@ -162,12 +130,12 @@ export default function EmployeeActivitiesPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto w-full px-8 -mt-24 pb-24 relative z-20">
-        <Tabs defaultValue="enrolled" className="space-y-12">
+      <div className="max-w-5xl mx-auto w-full px-6 -mt-18 pb-16 relative z-20">
+        <Tabs defaultValue="enrolled" className="space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <TabsList className="bg-[#2C2C2C]/10 backdrop-blur-xl p-1.5 rounded-2xl h-14 border border-slate-100 inline-flex shadow-sm">
-              <TabsTrigger value="enrolled" className="px-8 rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-[#F28C1B] data-[state=active]:text-white data-[state=active]:shadow-lg transition-all text-slate-500">My Curriculum</TabsTrigger>
-              <TabsTrigger value="invitations" className="px-8 rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all text-slate-500 relative">
+            <TabsList className="bg-[#2C2C2C]/10 backdrop-blur-xl p-1 rounded-xl h-11 border border-slate-100 inline-flex shadow-sm">
+              <TabsTrigger value="enrolled" className="px-6 rounded-lg font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all text-slate-500">My Curriculum</TabsTrigger>
+              <TabsTrigger value="invitations" className="px-6 rounded-lg font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all text-slate-500 relative">
                 Invitations
                 {invitations.length > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-[8px] flex items-center justify-center rounded-full text-white shadow-lg animate-bounce">
@@ -179,59 +147,29 @@ export default function EmployeeActivitiesPage() {
           </div>
 
           {/* ── My Curriculum ── */}
-          <TabsContent value="enrolled" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-0 m-0 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <TabsContent value="enrolled" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 p-0 m-0 animate-in fade-in slide-in-from-bottom-8 duration-700">
             {enrolledActivities.length === 0 ? (
-              <div className="col-span-full bg-white rounded-[40px] border border-orange-100 py-32 text-center shadow-xl shadow-orange-900/5">
-                <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Target className="w-10 h-10 text-orange-200" />
+              <div className="col-span-full bg-white rounded-3xl border border-orange-100 py-20 text-center shadow-xl shadow-orange-900/5">
+                <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-8 h-8 text-orange-200" />
                 </div>
-                <h4 className="text-xl font-bold text-slate-900 mb-2">No active courses</h4>
-                <p className="text-slate-500 text-sm max-w-xs mx-auto">Explore the catalog or wait for manager invitations.</p>
+                <h4 className="text-lg font-bold text-slate-900 mb-1">No active courses</h4>
+                <p className="text-slate-500 text-xs max-w-xs mx-auto">Explore the catalog or wait for manager invitations.</p>
               </div>
-            ) : (
-              enrolledActivities.map(activity => (
-                <ActivityCard
-                  key={activity.id || activity._id}
-                  activity={activity}
-                  enrolled
-                  employeeId={employeeId}
-                  enrollEmployee={enrollEmployee}
-                  updateParticipationProgress={updateParticipationProgress}
-                  getStatusBadge={getStatusBadge}
-                  canWithdraw={WITHDRAWABLE_STATUSES.includes(activity.participation?.status)}
-                  onWithdraw={() => setWithdrawTarget({
-                    activityId: activity.id || activity._id,
-                    title: activity.title,
-                  })}
-                />
-              ))
-            )}
+            </ScrollArea>
           </TabsContent>
 
           {/* ── Invitations ── */}
-          <TabsContent value="invitations" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-0 m-0 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <TabsContent value="invitations" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 p-0 m-0 animate-in fade-in slide-in-from-bottom-8 duration-700">
             {invitations.length === 0 ? (
-              <div className="col-span-full bg-white rounded-[40px] border border-orange-100 py-32 text-center shadow-xl shadow-orange-900/5">
-                <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Zap className="w-10 h-10 text-orange-200" />
+              <div className="col-span-full bg-white rounded-3xl border border-orange-100 py-20 text-center shadow-xl shadow-orange-900/5">
+                <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-8 h-8 text-orange-200" />
                 </div>
-                <h4 className="text-xl font-bold text-slate-900 mb-2">No active invitations</h4>
-                <p className="text-slate-500 text-sm max-w-xs mx-auto">Managers will send you recommendations here when they identify a good fit for your career growth.</p>
+                <h4 className="text-lg font-bold text-slate-900 mb-1">No active invitations</h4>
+                <p className="text-slate-500 text-xs max-w-xs mx-auto">Managers will send you recommendations here when they identify a good fit for your career growth.</p>
               </div>
-            ) : (
-              invitations.map(activity => (
-                <ActivityCard
-                  key={activity.id || activity._id}
-                  activity={activity}
-                  invitation
-                  employeeId={employeeId}
-                  getStatusBadge={getStatusBadge}
-                  acceptInvitation={() => acceptRecommendation(activity.assignment.id)}
-                  rejectInvitation={() => rejectRecommendation(activity.assignment.id, "Declined by employee")}
-
-                />
-              ))
-            )}
+            </ScrollArea>
           </TabsContent>
 
           {/* ── Marketplace ── */}
@@ -262,7 +200,7 @@ export default function EmployeeActivitiesPage() {
               placeholder="e.g., Schedule conflict due to an urgent project deadline, personal emergency, etc."
               value={withdrawReason}
               onChange={e => setWithdrawReason(e.target.value)}
-              className="min-h-[110px] bg-slate-50 border-slate-200 rounded-2xl p-4 text-sm resize-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300"
+              className="min-h-27.5 bg-slate-50 border-slate-200 rounded-2xl p-4 text-sm resize-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300"
             />
             {withdrawReason.trim().length === 0 && withdrawReason.length > 0 && (
               <p className="text-xs text-rose-500">Reason cannot be empty.</p>
@@ -351,13 +289,13 @@ function ActivityCard({
   return (
     <div className="group card-premium bg-white border-none shadow-sm flex flex-col font-sans">
       {/* Card header gradient */}
-      <div className="h-40 bg-[#2C2C2C] relative overflow-hidden flex items-center justify-center p-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1E5FA8]/20 to-[#F28C1B]/20 blur-xl"></div>
+      <div className="h-30 bg-[#2C2C2C] relative overflow-hidden flex items-center justify-center p-5">
+        <div className="absolute inset-0 bg-linear-to-br from-accent-blue/20 to-primary/20 blur-xl"></div>
         <div className="relative text-white/10 group-hover:scale-125 transition-transform duration-1000">
-          <Brain className="w-24 h-24" />
+          <Brain className="w-16 h-16" />
         </div>
-        <div className="absolute top-6 right-6">
-          <Badge className="bg-white/10 backdrop-blur-md text-white border-white/20 text-[10px] font-black uppercase tracking-widest px-3 py-1">
+        <div className="absolute top-4 right-4">
+          <Badge className="bg-white/10 backdrop-blur-md text-white border-white/20 text-[9px] font-black uppercase tracking-widest px-2 py-0.5">
             {activity.level || "INTERMEDIATE"}
           </Badge>
         </div>
@@ -369,16 +307,16 @@ function ActivityCard({
         )}
       </div>
 
-      <div className="p-8 flex-1 flex flex-col">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-2 h-2 rounded-full bg-[#1E5FA8] animate-pulse"></div>
-          <span className="text-[10px] font-bold text-[#1E5FA8] uppercase tracking-[0.2em]">{activity.type || "Training"}</span>
+      <div className="p-5 flex-1 flex flex-col">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 rounded-full bg-accent-blue animate-pulse"></div>
+          <span className="text-[10px] font-bold text-accent-blue uppercase tracking-[0.2em]">{activity.type || "Training"}</span>
         </div>
 
-        <h3 className="text-xl font-bold text-slate-900 mb-3 tracking-tight group-hover:text-primary transition-colors leading-tight">{activity.title}</h3>
-        <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed mb-6">{activity.description}</p>
+        <h3 className="text-lg font-bold text-slate-900 mb-2 tracking-tight group-hover:text-primary transition-colors leading-tight">{activity.title}</h3>
+        <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed mb-4">{activity.description}</p>
 
-        <div className="grid grid-cols-2 gap-4 mb-8 pt-6 border-t border-slate-50">
+        <div className="grid grid-cols-2 gap-3 mb-5 pt-4 border-t border-slate-50">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary/50" />
             <span className="text-[11px] font-bold text-slate-600 uppercase tracking-widest">{activity.duration || "4h"}</span>
@@ -389,11 +327,11 @@ function ActivityCard({
           </div>
         </div>
 
-        <div className="mt-auto pt-4 space-y-4">
+        <div className="mt-auto pt-3 space-y-3">
           {/* ── Invitation actions ── */}
           {invitation && (
             <div className="grid grid-cols-1 gap-3">
-              <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 mb-2">
+              <div className="p-3 bg-primary/5 rounded-xl border border-primary/10 mb-1">
                 <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Manager Feedback</p>
                 <p className="text-[10px] text-slate-600 font-medium italic">"{activity.assignment?.metadata?.reason || 'Identified as a strong fit for your current skill progression requirements.'}"</p>
               </div>
@@ -401,7 +339,7 @@ function ActivityCard({
                 <button
                   onClick={handleRejectInvitation}
                   disabled={!!processing}
-                  className="flex-1 py-4 rounded-2xl border border-rose-100 text-rose-500 text-[10px] font-bold uppercase tracking-widest hover:bg-rose-50 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                  className="flex-1 py-3 rounded-xl border border-rose-100 text-rose-500 text-[10px] font-bold uppercase tracking-widest hover:bg-rose-50 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
                   {processing === 'reject' ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
                   Decline
@@ -409,7 +347,7 @@ function ActivityCard({
                 <button
                   onClick={handleAcceptInvitation}
                   disabled={!!processing}
-                  className="flex-[2] py-4 rounded-2xl bg-primary hover:bg-[#D97706] text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-primary/20"
+                  className="flex-2 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-primary/20"
                 >
                   {processing === 'accept' ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                   Accept & Enroll
@@ -420,10 +358,10 @@ function ActivityCard({
 
           {/* ── Enrolled actions ── */}
           {enrolled && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Progress bar */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest mb-1.5 px-1">
+<div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest mb-1.5 px-1">
                   <span className="text-primary">{status === 'validated' ? "Validated ✓" : status === 'awaiting_manager' ? "Awaiting manager approval" : status === 'awaiting_organizer' ? "Completion under review" : status === 'organizer_submitted' ? "Review in progress" : "In Progress"}</span>
                   <span className="text-slate-400">{progress}%</span>
                 </div>
@@ -451,7 +389,7 @@ function ActivityCard({
                     }
                   }}
                   disabled={!!processing}
-                  className="w-full py-4 rounded-2xl bg-[#1E5FA8] hover:bg-[#1E5FA8]/90 text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-blue-900/20 mb-2"
+                  className="w-full py-3 rounded-xl bg-accent-blue hover:bg-accent-blue/90 text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-blue-900/20 mb-1"
                 >
                   {processing === 'complete' ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                   I Have Completed This Activity
@@ -463,14 +401,14 @@ function ActivityCard({
                 <button
                   onClick={onWithdraw}
                   disabled={!!processing}
-                  className="w-full py-4 rounded-2xl border border-rose-100 text-rose-500 text-[10px] font-bold uppercase tracking-widest hover:bg-rose-50 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                  className="w-full py-3 rounded-xl border border-rose-100 text-rose-500 text-[10px] font-bold uppercase tracking-widest hover:bg-rose-50 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
                   <LogOut className="w-3 h-3" />
                   Withdraw from Activity
                 </button>
               ) : (
                 /* Status info pill for post-withdrawal-window states */
-                <div className="w-full py-3 rounded-2xl bg-slate-50 border border-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center justify-center gap-2">
+                <div className="w-full py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center justify-center gap-2">
                   <ShieldAlert className="w-3 h-3" />
                   {status === 'validated' ? "Completion validated by manager" : "Completed — awaiting manager confirmation"}
                 </div>
@@ -483,7 +421,7 @@ function ActivityCard({
             <button
               onClick={handleEnroll}
               disabled={processing === 'enroll'}
-              className="w-full py-5 rounded-2xl bg-[#F28C1B] hover:bg-[#D97706] text-white text-xs font-bold uppercase tracking-widest shadow-xl shadow-orange-900/10 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+              className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-white text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-orange-900/10 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
             >
               {processing === 'enroll' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
               Enroll in Program

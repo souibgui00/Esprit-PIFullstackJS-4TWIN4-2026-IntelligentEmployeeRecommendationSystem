@@ -238,16 +238,16 @@ export default function UnifiedProfile() {
                         <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-2">
                             <Target className="w-7 h-7" />
                         </div>
-                        <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter">Skill Assessment</DialogTitle>
-                        <DialogDescription className="text-slate-400 font-medium text-base leading-relaxed">
+                        <DialogTitle className="text-xl font-display text-slate-900 tracking-tight">Skill Assessment</DialogTitle>
+                        <DialogDescription className="text-slate-500 text-sm leading-relaxed">
                             Rate your proficiency in <span className="text-primary font-black uppercase">{selectedSkill?.skill?.name}</span>.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="py-10 space-y-10">
+                    <div className="py-5 space-y-5">
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CURRENT_RATING</span>
-                            <span className="text-4xl font-black text-primary tracking-tighter italic">{evalScore}%</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Rating</span>
+                            <span className="text-2xl font-semibold text-primary tracking-tight">{evalScore}%</span>
                         </div>
 
                         <Slider
@@ -276,7 +276,7 @@ export default function UnifiedProfile() {
                                 }
                             }}
                             disabled={isUpdatingEval}
-                            className="w-full h-14 rounded-xl bg-slate-900 hover:bg-primary text-white font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
+                            className="w-full h-11 rounded-lg bg-slate-900 hover:bg-primary text-white font-bold text-[10px] uppercase tracking-widest transition-all shadow-sm active:scale-95"
                         >
                             {isUpdatingEval ? "Synchronizing..." : "Update Evaluation"}
                         </Button>

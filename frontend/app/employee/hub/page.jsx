@@ -39,18 +39,18 @@ export default function EmployeeHubPage() {
     })
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5] pt-24 pb-12 font-sans text-[#1c1e21]">
-      <div className="max-w-[1200px] mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div className="min-h-screen bg-[#f0f2f5] pt-20 pb-8 font-sans text-[#1c1e21]">
+      <div className="max-w-300 mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Left Sidebar (Navigation) */}
-          <div className="hidden lg:block lg:col-span-3 sticky top-24 space-y-2">
-            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer group">
+          <div className="hidden lg:block lg:col-span-3 sticky top-20 space-y-1.5">
+            <div className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer group">
               <Avatar className="h-9 w-9 border-none shadow-sm">
                 <AvatarImage src={user?.avatar} />
                 <AvatarFallback className="bg-slate-200 text-slate-600 font-bold">{user?.name?.charAt(0)}</AvatarFallback>
               </Avatar>
-              <span className="font-semibold text-sm">{user?.name}</span>
+              <span className="font-semibold text-xs">{user?.name}</span>
             </div>
             
             {[
@@ -60,17 +60,17 @@ export default function EmployeeHubPage() {
               { label: "Learning Center", icon: Brain, color: "text-purple-500" },
               { label: "Recent activities", icon: Activity, color: "text-rose-500" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer group">
-                <item.icon className={cn("w-6 h-6", item.color)} />
-                <span className="font-semibold text-sm">{item.label}</span>
+              <div key={item.label} className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer group">
+                <item.icon className={cn("w-5 h-5", item.color)} />
+                <span className="font-semibold text-xs">{item.label}</span>
               </div>
             ))}
           </div>
 
           {/* Center Column (Feed) */}
-          <div className="col-span-1 lg:col-span-6 space-y-4">
+          <div className="col-span-1 lg:col-span-6 space-y-3">
             {/* Search and Filters merged into a clean bar */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -79,7 +79,7 @@ export default function EmployeeHubPage() {
                     placeholder="Search in feed..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 h-10 bg-[#f0f2f5] border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    className="w-full pl-9 pr-4 h-9 bg-[#f0f2f5] border-none rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
               </div>
@@ -95,7 +95,7 @@ export default function EmployeeHubPage() {
                     key={item.id}
                     onClick={() => setFilter(item.id)}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap",
+                      "flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap",
                       filter === item.id
                         ? "bg-blue-50 text-blue-600"
                         : "bg-[#f0f2f5] text-slate-600 hover:bg-slate-200"
@@ -108,12 +108,12 @@ export default function EmployeeHubPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3">
               <CreatePost />
             </div>
 
             {/* Signal Feed */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredPosts.length > 0 ? (
                 filteredPosts.map((post) => (
                   <div key={post.id}>
@@ -121,12 +121,12 @@ export default function EmployeeHubPage() {
                   </div>
                 ))
               ) : (
-                <div className="bg-white rounded-xl border border-slate-200 p-12 text-center space-y-4">
+                <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-3">
                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
                     <Globe className="w-8 h-8" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900">No posts found</h3>
+                    <h3 className="text-base font-bold text-slate-900">No posts found</h3>
                     <p className="text-sm text-slate-500">Try adjusting your filters or search.</p>
                   </div>
                 </div>
@@ -135,14 +135,14 @@ export default function EmployeeHubPage() {
           </div>
 
           {/* Right Column (Trends & Suggested) */}
-          <div className="hidden lg:block lg:col-span-3 sticky top-24 space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 overflow-hidden group">
+          <div className="hidden lg:block lg:col-span-3 sticky top-20 space-y-3">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 overflow-hidden group">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-slate-600 text-sm">Trending Now</h3>
                 <TrendingUp className="w-4 h-4 text-blue-500" />
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {[
                   { tag: "Skill Sharing", count: "1.2K Posts", icon: Brain },
                   { tag: "New Projects", count: "842 Posts", icon: Rocket },
@@ -153,7 +153,7 @@ export default function EmployeeHubPage() {
                       <trend.icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-900">#{trend.tag}</p>
+                      <p className="text-xs font-bold text-slate-900">#{trend.tag}</p>
                       <p className="text-[11px] text-slate-500">{trend.count}</p>
                     </div>
                   </div>
@@ -169,7 +169,7 @@ export default function EmployeeHubPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3">
                 <h3 className="font-bold text-slate-600 text-sm mb-4">Suggested Activities</h3>
                 <h4 className="text-xs text-slate-400 italic">No recommendations available at the moment.</h4>
             </div>

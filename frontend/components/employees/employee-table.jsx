@@ -197,7 +197,7 @@ export function EmployeeTable({
 
       {/* Stats Summary Panel */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="group bg-white border border-slate-100 rounded-[32px] p-10 shadow-premium hover:translate-y-[-5px] transition-all duration-500">
+        <div className="group bg-white border border-slate-100 rounded-4xl p-10 shadow-premium hover:-translate-y-1.25 transition-all duration-500">
           <div className="flex items-center gap-8">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-lg shadow-primary/5">
               <Users className="w-8 h-8" />
@@ -209,7 +209,7 @@ export function EmployeeTable({
           </div>
         </div>
 
-        <div className="group bg-white border border-slate-100 rounded-[32px] p-10 shadow-premium hover:translate-y-[-5px] transition-all duration-500">
+        <div className="group bg-white border border-slate-100 rounded-4xl p-10 shadow-premium hover:-translate-y-1.25 transition-all duration-500">
           <div className="flex items-center gap-8">
             <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-lg shadow-emerald-500/5">
               <UserCheck className="w-8 h-8" />
@@ -249,7 +249,7 @@ export function EmployeeTable({
                     key={employee.id || employee._id}
                     className={cn(
                       "group hover:bg-slate-50/30 cursor-pointer transition-all duration-300 border-b border-slate-50 last:border-0",
-                      isSelected && "bg-primary/[0.03]"
+                      isSelected && "bg-primary/3"
                     )}
                     onClick={() => onSelectEmployee?.(employee)}
                   >
