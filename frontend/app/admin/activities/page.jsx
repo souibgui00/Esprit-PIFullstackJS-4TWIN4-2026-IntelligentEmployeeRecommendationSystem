@@ -304,9 +304,24 @@ export default function AdminActivitiesPage() {
                       </div>
                   </SelectTrigger>
                   <SelectContent className="rounded-[2.5rem] border-none shadow-mega p-3 bg-white/95 backdrop-blur-xl">
-                      <SelectItem value="date-asc" className="rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest mb-2 transition-all hover:bg-slate-50">Closest Launch 🚀</SelectItem>
-                      <SelectItem value="date-desc" className="rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest mb-2 transition-all hover:bg-slate-50">Distant Roadmap 📅</SelectItem>
-                      <SelectItem value="occupancy-desc" className="rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-slate-50">Highest Attendance 🔥</SelectItem>
+                      <SelectItem value="date-asc" className="rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest mb-2 transition-all hover:bg-slate-50">
+                        <span className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          Closest Launch
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="date-desc" className="rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest mb-2 transition-all hover:bg-slate-50">
+                        <span className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Distant Roadmap
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="occupancy-desc" className="rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-slate-50">
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Highest Attendance
+                        </span>
+                      </SelectItem>
                   </SelectContent>
               </Select>
 
@@ -334,7 +349,7 @@ export default function AdminActivitiesPage() {
         {activityRequests && activityRequests.length > 0 && (
           <div className="pt-24 space-y-16 border-t-2 border-dashed border-slate-100">
             <div className="space-y-4 text-center relative">
-               <Badge className="bg-orange-50 text-orange-600 border-orange-100 font-black uppercase text-[10px] tracking-widest px-6 py-2 rounded-2xl mb-4">Pending Approval 🛡️</Badge>
+               <Badge className="bg-orange-50 text-orange-600 border-orange-100 font-black uppercase text-[10px] tracking-widest px-6 py-2 rounded-2xl mb-4 inline-flex items-center gap-2"><ShieldAlert className="w-3.5 h-3.5" />Pending Approval</Badge>
                <h2 className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-none">Activity Requests<span className="text-primary">.</span></h2>
                <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] opacity-60">Requests from managers awaiting review</p>
              </div>
@@ -396,7 +411,7 @@ export default function AdminActivitiesPage() {
             <DialogContent className="sm:max-w-2xl p-0 bg-transparent border-none shadow-none overflow-hidden">
                 <div className="bg-white rounded-[4rem] shadow-mega p-16 space-y-12 animate-in zoom-in-95 duration-500 relative ring-1 ring-slate-100">
                     <div className="space-y-4">
-                        <Badge className="bg-rose-50 text-rose-600 border-none font-black uppercase text-[10px] tracking-[0.2em] px-6 py-2 rounded-xl mb-4">Rejection Reason 🛡️</Badge>
+                    <Badge className="bg-rose-50 text-rose-600 border-none font-black uppercase text-[10px] tracking-[0.2em] px-6 py-2 rounded-xl mb-4 inline-flex items-center gap-2"><ShieldAlert className="w-3.5 h-3.5" />Rejection Reason</Badge>
                         <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">Reject Activity</h2>
                         <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] opacity-60">Explain why you are rejecting this activity.</p>
                     </div>

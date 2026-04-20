@@ -5,15 +5,6 @@ import { useData } from "@/lib/data-store"
 import { useAuth } from "@/lib/auth-context"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import {
   Calendar,
@@ -26,7 +17,6 @@ import {
   Target,
   Trophy,
   Brain,
-  AlertTriangle,
   X,
   LogOut,
 } from "lucide-react"
@@ -54,6 +44,7 @@ export default function EmployeeActivitiesPage() {
   const { user } = useAuth()
   const employeeId = user?.id || user?._id
   const userDeptId = user?.department_id?._id || user?.department_id?.id || user?.department_id
+  const navigate = useNavigate()
 
   const enrolledActivities = participations
     ?.filter(p => ACTIVE_STATUSES.includes(p.status))
@@ -84,28 +75,6 @@ export default function EmployeeActivitiesPage() {
     return activity ? { ...activity, assignment: inv } : null
   }).filter(Boolean) || []
 
-  const [withdrawTarget, setWithdrawTarget] = useState(null)
-  const [withdrawReason, setWithdrawReason] = useState("")
-  const [withdrawing, setWithdrawing] = useState(false)
-
-  const handleWithdraw = async () => {
-    if (!withdrawTarget?.participation?._id || !withdrawReason.trim()) return
-    setWithdrawing(true)
-    try {
-      await api.patch(`/participations/${withdrawTarget.participation._id}/withdraw`, {
-        reason: withdrawReason.trim(),
-      })
-      await refreshParticipations?.()
-      toast.success("Withdrawal submitted", { description: "Your manager has been notified." })
-      setWithdrawTarget(null)
-      setWithdrawReason("")
-    } catch {
-      toast.error("Unable to withdraw", { description: "Please try again." })
-    } finally {
-      setWithdrawing(false)
-    }
-  }
-
   const handleAcceptRecommendation = async (assignment) => {
     await acceptRecommendation?.(assignment.id || assignment._id)
     await refreshParticipations?.()
@@ -123,7 +92,7 @@ export default function EmployeeActivitiesPage() {
       awaiting_organizer: { label: "Completion Pending Review", cls: "bg-amber-50 text-amber-600" },
       organizer_submitted: { label: "Under Review", cls: "bg-violet-50 text-violet-600" },
       awaiting_manager: { label: "Awaiting Manager Approval", cls: "bg-sky-50 text-sky-600" },
-      validated: { label: "✓ Validated", cls: "bg-emerald-100 text-emerald-700" },
+      validated: { label: "Validated", cls: "bg-emerald-100 text-emerald-700" },
       withdrawn: { label: "Withdrawn", cls: "bg-rose-50 text-rose-400" },
     }
     const s = map[status]
@@ -200,7 +169,12 @@ export default function EmployeeActivitiesPage() {
                   updateParticipationProgress={updateParticipationProgress}
                   getStatusBadge={getStatusBadge}
                   canWithdraw={WITHDRAWABLE_STATUSES.includes(activity.participation?.status)}
-                  onWithdraw={() => setWithdrawTarget(activity)}
+                  onWithdraw={() => {
+                    const participationId = activity.participation?._id || activity.participation?.id
+                    if (participationId) {
+                      navigate(`/employee/activities/withdraw/${participationId}`)
+                    }
+                  }}
                 />
               ))
             )}
@@ -237,57 +211,6 @@ export default function EmployeeActivitiesPage() {
 
         </Tabs>
       </div>
-
-      {/* ── Withdrawal Modal ──────────────────────────────────────────────────── */}
-      <Dialog open={!!withdrawTarget} onOpenChange={(open) => { if (!open && !withdrawing) { setWithdrawTarget(null); setWithdrawReason("") } }}>
-        <DialogContent className="sm:max-w-md bg-white rounded-3xl border-none shadow-2xl">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-amber-500" />
-              </div>
-              <DialogTitle className="text-xl font-bold text-slate-900">Withdraw from Activity</DialogTitle>
-            </div>
-            <DialogDescription className="text-slate-500">
-              You are about to withdraw from <strong className="text-slate-700">"{withdrawTarget?.title}"</strong>. Your manager will be notified immediately. This action is logged in your history but will <strong>not</strong> affect your skill scores.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4 space-y-3">
-            <p className="text-[11px] font-black uppercase tracking-widest text-rose-500">
-              Reason for withdrawal <span className="text-rose-400">*</span>
-            </p>
-            <Textarea
-              placeholder="e.g., Schedule conflict due to an urgent project deadline, personal emergency, etc."
-              value={withdrawReason}
-              onChange={e => setWithdrawReason(e.target.value)}
-              className="min-h-27.5 bg-slate-50 border-slate-200 rounded-2xl p-4 text-sm resize-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300"
-            />
-            {withdrawReason.trim().length === 0 && withdrawReason.length > 0 && (
-              <p className="text-xs text-rose-500">Reason cannot be empty.</p>
-            )}
-          </div>
-
-          <DialogFooter className="flex gap-3">
-            <Button
-              variant="outline"
-              disabled={withdrawing}
-              onClick={() => { setWithdrawTarget(null); setWithdrawReason("") }}
-              className="flex-1 rounded-xl h-12 font-bold text-[10px] uppercase tracking-widest"
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={!withdrawReason.trim() || withdrawing}
-              onClick={handleWithdraw}
-              className="flex-1 bg-rose-500 hover:bg-rose-600 text-white rounded-xl h-12 font-bold text-[10px] uppercase tracking-widest"
-            >
-              {withdrawing ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <LogOut className="w-3 h-3 mr-2" />}
-              Confirm Withdrawal
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
@@ -423,7 +346,7 @@ function ActivityCard({
               {/* Progress bar */}
               <div className="space-y-2">
 <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest mb-1.5 px-1">
-                  <span className="text-primary">{status === 'validated' ? "Validated ✓" : status === 'awaiting_manager' ? "Awaiting manager approval" : status === 'awaiting_organizer' ? "Completion under review" : status === 'organizer_submitted' ? "Review in progress" : "In Progress"}</span>
+                  <span className="text-primary">{status === 'validated' ? "Validated" : status === 'awaiting_manager' ? "Awaiting manager approval" : status === 'awaiting_organizer' ? "Completion under review" : status === 'organizer_submitted' ? "Review in progress" : "In Progress"}</span>
                   <span className="text-slate-400">{progress}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-orange-50 rounded-full overflow-hidden mb-1">

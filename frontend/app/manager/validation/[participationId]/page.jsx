@@ -215,7 +215,7 @@ export default function ManagerValidationReportPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-xs font-bold ${skillAssessments[skill.skillId] ? 'text-emerald-500' : 'text-rose-400'}`}>
-                         {skillAssessments[skill.skillId] ? '✓ IMPROVED' : '✗ DID NOT IMPROVE'}
+                         {skillAssessments[skill.skillId] ? 'IMPROVED' : 'NOT IMPROVED'}
                       </span>
                       <Switch 
                         checked={skillAssessments[skill.skillId]}

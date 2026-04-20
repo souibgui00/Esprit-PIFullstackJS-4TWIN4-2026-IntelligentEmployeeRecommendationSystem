@@ -4,6 +4,7 @@ import { Trophy, TrendingUp, CheckCircle2, Loader2, Star } from "lucide-react"
 
 import EmployeeHome from "../app/employee/page"
 import EmployeeActivitiesPage from "../app/employee/activities/page"
+import EmployeeWithdrawPage from "../app/employee/activities/withdraw/page"
 import EmployeeRecommendationsPage from "../app/employee/recommendations/page"
 import EmployeeProfilePage from "../app/employee/profile/page"
 import EmployeeHubPage from "../app/employee/hub/page"
@@ -20,6 +21,7 @@ export default function EmployeeApp() {
         <Route index element={<EmployeeHome />} />
         <Route path="hub" element={<EmployeeHubPage />} />
         <Route path="activities" element={<EmployeeActivitiesPage />} />
+        <Route path="activities/withdraw/:participationId" element={<EmployeeWithdrawPage />} />
         <Route path="recommendations" element={<EmployeeRecommendationsPage />} />
         <Route path="profile" element={<EmployeeProfilePage />} />
         <Route path="progress" element={<EmployeeProgress />} />

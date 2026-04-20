@@ -104,7 +104,7 @@ export function OrganizerAttendancePanel({
       const result = await api.post(`/participations/${activityId}/organizer-report`, {
         report: reportArray
       })
-      toast.success("✅ Attendance Report Submitted!", {
+      toast.success("Attendance Report Submitted", {
         description: `${result.awaitingValidation} completed, ${result.notCompleted} not completed. HR has been notified.`
       })
       onSubmitted?.()

@@ -100,7 +100,7 @@
     border-radius: 9999px;
     background: var(--color-slate-900);
     color: white;
-    font-weight: 700;
+    font-weight: 500;
     transform: translateY(-200%);
     transition: transform 0.2s ease;
   }
@@ -125,7 +125,7 @@
     font-family: var(--font-display);
     color: var(--color-slate-900);
     letter-spacing: -0.02em;
-    font-weight: 700;
+    font-weight: 500;
   }
 
   h1 {
@@ -157,11 +157,24 @@
   /* Keep display typography consistent for brand/page/module titles using font-display utility */
   .font-display {
     font-family: var(--font-display) !important;
-    font-weight: 700 !important;
+    font-weight: 500 !important;
   }
 
   .font-sans {
     font-family: var(--font-sans) !important;
+  }
+
+  b,
+  strong {
+    font-weight: 500;
+  }
+
+  /* Global typography policy: neutralize heavy bold utilities across the app. */
+  .font-semibold,
+  .font-bold,
+  .font-extrabold,
+  .font-black {
+    font-weight: 500 !important;
   }
 
   /* Premium Cards */

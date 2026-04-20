@@ -318,7 +318,7 @@ export default function ActivityEnrollmentView() {
                                         if (creatorId) {
                                             await import('@/lib/api').then(m => m.api.post('/notifications', {
                                                 recipientId: creatorId,
-                                                title: '🧠 AI Sweep Requested',
+                                                title: 'AI Sweep Requested',
                                                 message: `The manager for your activity "${activity.title}" has requested a new AI recommendation sweep to identify additional personnel.`,
                                                 type: 'system_alert'
                                             }))

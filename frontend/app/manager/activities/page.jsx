@@ -226,7 +226,7 @@ export default function ManagerActivitiesPage() {
         validate,
         rejectionReason: reason || undefined,
       })
-      toast.success(validate ? "✅ Completion Validated" : "❌ Completion Rejected", {
+      toast.success(validate ? "Completion Validated" : "Completion Rejected", {
         description: validate
           ? "Skill scores have been automatically updated."
           : `Rejected: ${reason}`
@@ -572,7 +572,7 @@ const ActivityCard = ({ activity, deptEmployees, enrollments, getTypeIcon, forma
                                     : "bg-white text-rose-500 border-rose-200 hover:bg-rose-50"
                                 )}
                               >
-                                {report.completed ? "✓ Completed" : "✗ Not Completed"}
+                                {report.completed ? "Completed" : "Not Completed"}
                               </button>
                             </div>
                             {report.completed && (

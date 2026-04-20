@@ -92,7 +92,7 @@ export function PendingValidationsPanel({ onValidated }) {
     setSubmitting(participationId)
     try {
       await api.post(`/participations/${participationId}/validate`, { validate: true })
-      toast.success("🎓 Completion Validated!", {
+      toast.success("Completion Validated", {
         description: "Skill scores have been automatically updated for this employee."
       })
       await fetchPending()

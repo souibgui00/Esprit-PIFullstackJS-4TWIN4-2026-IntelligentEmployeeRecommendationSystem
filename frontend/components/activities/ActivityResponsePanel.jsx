@@ -48,7 +48,7 @@ export function ActivityResponsePanel() {
     setSubmitting(true)
     try {
       await api.post(`/participations/${activityId}/respond`, { accept: true })
-      toast.success("✅ Participation Confirmed!", {
+      toast.success("Participation Confirmed", {
         description: `You are now enrolled in "${activityTitle}".`
       })
       await fetchPending()

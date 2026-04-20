@@ -17,6 +17,7 @@ import AdminActivityAddPage from "../app/admin/activities/add-page"
 import AdminActivityEditPage from "../app/admin/activities/edit-page"
 import ActivityDetailsView from "../app/manager/activities/ActivityDetailsView"
 import { PortalLayout } from "@/components/PortalLayout"
+import { EmployeeProfileRoutePage } from "@/components/employees/employee-profile-route-page"
 
 export default function HRApp() {
   return (
@@ -24,6 +25,7 @@ export default function HRApp() {
       <Routes>
         <Route index element={<AdminDashboardPage />} />
         <Route path="employees" element={<HREmployeesPage />} />
+        <Route path="employees/:employeeId" element={<EmployeeProfileRoutePage rolePrefix="/hr" accentClass="text-orange-500" />} />
         <Route path="employees/add" element={<AdminEmployeeAddPage />} />
         <Route path="employees/edit/:id" element={<AdminEmployeeEditPage />} />
         <Route path="activities" element={<HRActivitiesPage />} />

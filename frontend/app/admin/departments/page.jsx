@@ -20,6 +20,7 @@ import {
     Mail,
     Phone,
     Briefcase,
+    User,
     ArrowUpDown,
     Filter,
     ArrowDownAZ,
@@ -448,7 +449,10 @@ export default function DepartmentsPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Lead 👤</label>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                            <User className="w-3.5 h-3.5" />
+                                            Assigned Lead
+                                        </label>
                                         <select
                                             value={newDeptManagerId}
                                             onChange={(e) => setNewDeptManagerId(e.target.value)}

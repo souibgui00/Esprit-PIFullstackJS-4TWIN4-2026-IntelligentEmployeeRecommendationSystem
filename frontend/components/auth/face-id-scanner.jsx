@@ -66,7 +66,7 @@ export function FaceIdScanner({
             .withFaceDescriptor()
 
         if (detection) {
-            console.log("Face detected in reference photo ✓")
+            console.log("Face detected in reference photo")
             descriptions.push(detection.descriptor)
         } else {
             console.error("No face found in the reference photo. Photo URL:", targetImage)
@@ -212,11 +212,11 @@ export function FaceIdScanner({
             .withFaceLandmarks()
 
         if (!check) {
-            setStatusText("❌ No face detected! Look directly at the camera and try again.")
+            setStatusText("No face detected. Look directly at the camera and try again.")
             return
         }
 
-        setStatusText("Face confirmed ✓ Saving...")
+        setStatusText("Face confirmed. Saving...")
         const canvas = document.createElement("canvas")
         canvas.width = videoRef.current.videoWidth
         canvas.height = videoRef.current.videoHeight
@@ -289,7 +289,7 @@ export function FaceIdScanner({
 
                 {loginResult === "SUCCESS" && (
                     <div className="absolute inset-0 bg-emerald-900/80 flex items-center justify-center">
-                        <p className="text-emerald-300 font-bold text-lg">✓ Identity Confirmed</p>
+                        <p className="text-emerald-300 font-bold text-lg">Identity Confirmed</p>
                     </div>
                 )}
             </div>
@@ -310,7 +310,7 @@ export function FaceIdScanner({
                     className="w-full py-3 bg-primary hover:bg-primary/80 text-white rounded-2xl font-bold text-sm transition-all"
                     aria-label="Capture and save face image"
                 >
-                    📸 Capture & Save Face
+                    Capture and Save Face
                 </button>
             )}
         </div>

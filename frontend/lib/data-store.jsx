@@ -379,7 +379,7 @@ export function DataProvider({ children }) {
           targetManagers.forEach(m => {
             addNotification({
               userId: m._id || m.id,
-              title: "🔄 Activity Revised & Resubmitted",
+              title: "Activity Revised and Resubmitted",
               message: `HR has integrated your feedback and resubmitted "${data.title || existing.title}". Please review and approve the updated program.`,
               link: `/manager/activities`,
               type: "activity",
@@ -409,7 +409,7 @@ export function DataProvider({ children }) {
       recipientIds.forEach(uid => {
         addNotification({
           userId: uid,
-          title: "✅ Activity Accepted by Manager",
+          title: "Activity Accepted by Manager",
           message: `The manager has accepted "${activity?.title || 'the activity'}". The activity is now pending the recommendation phase before enrollment opens.`,
           link: `/hr/activities`,
           type: "success",
@@ -437,7 +437,7 @@ export function DataProvider({ children }) {
       recipientIds.forEach(uid => {
         addNotification({
           userId: uid,
-          title: "❌ Activity Rejected by Manager",
+          title: "Activity Rejected by Manager",
           message: `The manager rejected "${activity?.title || 'the activity'}". Reason: ${reason}`,
           link: `/hr/activities`,
           type: "error",

@@ -1,65 +1,48 @@
 import { useState, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 import {
-    Accessibility, X, Type, Contrast, Eye, AlignLeft,
-    Move, ZapOff, ScanLine, Space, ChevronRight, RotateCcw
+    PersonStanding,
+    X,
+    Type,
+    Contrast,
+    Eye,
+    AlignLeft,
+    Move,
+    ZapOff,
+    ScanLine,
+    Space,
+    RotateCcw,
 } from "lucide-react"
-
-const STORAGE_KEY = "skillmatch_a11y"
-
-const defaultSettings = {
-    fontSize: 0,       // -1 = sm, 0 = normal, 1 = lg, 2 = xl, 3 = 2xl
-    highContrast: false,
-    grayscale: false,
-    dyslexicFont: false,
-    reduceMotion: false,
-    readingGuide: false,
-    focusHighlight: false,
-    letterSpacing: false,
-}
-
-const FONT_LABELS = ["Sm", "Norm", "Lg", "XL", "2XL"]
-const FONT_SCALES = [0.88, 1.0, 1.12, 1.25, 1.4]
-
-function applySettings(settings) {
-    const root = document.documentElement
-
-    // Font size via CSS var
-    root.style.setProperty("--a11y-font-scale", FONT_SCALES[settings.fontSize + 1] ?? 1)
-
-    // Toggle body classes
-    const toggleClass = (cls, active) =>
-        active ? root.classList.add(cls) : root.classList.remove(cls)
-
-    toggleClass("a11y-high-contrast", settings.highContrast)
-    toggleClass("a11y-grayscale", settings.grayscale)
-    toggleClass("a11y-dyslexic", settings.dyslexicFont)
-    toggleClass("a11y-no-motion", settings.reduceMotion)
-    toggleClass("a11y-reading-guide", settings.readingGuide)
-    toggleClass("a11y-focus-highlight", settings.focusHighlight)
-    toggleClass("a11y-letter-spacing", settings.letterSpacing)
-}
+import {
+    applyAccessibilitySettings,
+    saveAccessibilitySettings,
+    hasAnyAccessibilitySetting,
+    loadAccessibilitySettings,
+    defaultAccessibilitySettings,
+    FONT_LABELS,
+} from "@/components/accessibility/accessibility-settings"
 
 export function AccessibilityWidget() {
     const [open, setOpen] = useState(false)
-    const [settings, setSettings] = useState(() => {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY)
-            return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings
-        } catch {
-            return defaultSettings
-        }
-    })
+    const [settings, setSettings] = useState(() => loadAccessibilitySettings())
     const [guideY, setGuideY] = useState(-100)
     const panelRef = useRef(null)
 
-    // Apply settings on mount + any change
     useEffect(() => {
-        applySettings(settings)
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)) } catch { }
+        applyAccessibilitySettings(settings)
+        saveAccessibilitySettings(settings)
     }, [settings])
 
-    // Reading guide: track mouse Y
+    useEffect(() => {
+        const onStorage = (event) => {
+            if (event.key === "skillmatch_a11y") {
+                setSettings(loadAccessibilitySettings())
+            }
+        }
+        window.addEventListener("storage", onStorage)
+        return () => window.removeEventListener("storage", onStorage)
+    }, [])
+
     useEffect(() => {
         if (!settings.readingGuide) return
         const handler = (e) => setGuideY(e.clientY)
@@ -67,27 +50,25 @@ export function AccessibilityWidget() {
         return () => window.removeEventListener("mousemove", handler)
     }, [settings.readingGuide])
 
-    // Close on click outside
     useEffect(() => {
         if (!open) return
         const handler = (e) => {
-            if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false)
+            if (panelRef.current && !panelRef.current.contains(e.target)) {
+                setOpen(false)
+            }
         }
         setTimeout(() => document.addEventListener("mousedown", handler), 0)
         return () => document.removeEventListener("mousedown", handler)
     }, [open])
 
-    const update = (key, value) => setSettings(s => ({ ...s, [key]: value }))
+    const update = (key, value) => setSettings((current) => ({ ...current, [key]: value }))
     const toggle = (key) => update(key, !settings[key])
-    const reset = () => setSettings(defaultSettings)
+    const reset = () => setSettings(defaultAccessibilitySettings)
 
-    const hasAnyActive = Object.entries(settings).some(([k, v]) =>
-        k === "fontSize" ? v !== 0 : v === true
-    )
+    const hasAnyActive = hasAnyAccessibilitySetting(settings)
 
     return (
         <>
-            {/* Reading Guide Line */}
             {settings.readingGuide && (
                 <div
                     className="pointer-events-none fixed left-0 right-0 z-[99999]"
@@ -97,10 +78,9 @@ export function AccessibilityWidget() {
                 </div>
             )}
 
-            {/* Floating Trigger Button */}
             <button
-                onClick={() => setOpen(o => !o)}
-                aria-label="Open accessibility options"
+                onClick={() => setOpen((current) => !current)}
+                aria-label="Open accessibility settings"
                 className={cn(
                     "fixed bottom-8 right-8 z-[9998] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 group",
                     open
@@ -110,14 +90,13 @@ export function AccessibilityWidget() {
             >
                 {open
                     ? <X className="w-6 h-6 text-white" />
-                    : <Accessibility className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+                    : <PersonStanding className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
                 }
-                {hasAnyActive && !open && (
+                {hasAnyActive && (
                     <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F28C1B] rounded-full border-2 border-white animate-pulse" />
                 )}
             </button>
 
-            {/* Panel */}
             <div
                 ref={panelRef}
                 className={cn(
@@ -127,10 +106,7 @@ export function AccessibilityWidget() {
                         : "opacity-0 translate-y-4 pointer-events-none"
                 )}
                 style={{ bottom: "calc(7rem)" }}
-                role="dialog"
-                aria-label="Accessibility settings"
             >
-                {/* Header */}
                 <div className="bg-[#222222] px-8 py-6 flex items-center justify-between">
                     <div>
                         <p className="text-[9px] font-bold text-[#F28C1B] tracking-[0.4em]">Assist Protocol</p>
@@ -149,8 +125,6 @@ export function AccessibilityWidget() {
                 </div>
 
                 <div className="p-6 space-y-3 max-h-[70vh] overflow-y-auto">
-
-                    {/* Font Size */}
                     <div className="bg-[#F8FAFC] border border-[#EEEEEE] rounded-[4px] p-5">
                         <div className="flex items-center gap-3 mb-4">
                             <Type className="w-4 h-4 text-[#F28C1B]" />
@@ -192,7 +166,6 @@ export function AccessibilityWidget() {
                         </div>
                     </div>
 
-                    {/* Toggle Features */}
                     {[
                         {
                             key: "highContrast",
@@ -216,7 +189,7 @@ export function AccessibilityWidget() {
                             key: "reduceMotion",
                             icon: ZapOff,
                             label: "Reduce Motion",
-                            desc: "Disables animations & transitions",
+                            desc: "Disables animations and transitions",
                         },
                         {
                             key: "readingGuide",
@@ -234,7 +207,7 @@ export function AccessibilityWidget() {
                             key: "letterSpacing",
                             icon: Space,
                             label: "Letter Spacing",
-                            desc: "Increases spacing between letters & words",
+                            desc: "Increases spacing between letters and words",
                         },
                     ].map(({ key, icon: Icon, label, desc }) => {
                         const active = settings[key]
@@ -263,10 +236,7 @@ export function AccessibilityWidget() {
                                     )}>
                                         {label}
                                     </p>
-                                    <p className={cn(
-                                        "text-[9px] font-medium leading-relaxed",
-                                        active ? "text-gray-400" : "text-gray-400"
-                                    )}>
+                                    <p className="text-[9px] font-medium leading-relaxed text-gray-400">
                                         {desc}
                                     </p>
                                 </div>
@@ -283,10 +253,9 @@ export function AccessibilityWidget() {
                     })}
                 </div>
 
-                {/* Footer */}
                 <div className="px-6 py-4 border-t border-[#EEEEEE] bg-[#F8FAFC]">
                     <p className="text-[9px] font-bold text-gray-400 tracking-widest text-center">
-                        Settings saved automatically · WCAG 2.1 Compliant
+                        Settings saved automatically - WCAG 2.1 Compliant
                     </p>
                 </div>
             </div>

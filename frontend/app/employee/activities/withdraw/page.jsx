@@ -15,7 +15,7 @@ const WITHDRAWABLE_STATUSES = ["accepted", "in_progress"]
 
 export default function EmployeeWithdrawPage() {
   const navigate = useNavigate()
-  const { activityId } = useParams()
+  const { participationId } = useParams()
   const { activities = [], participations = [], refreshParticipations } = useData()
 
   const [reason, setReason] = useState("")
@@ -23,15 +23,15 @@ export default function EmployeeWithdrawPage() {
 
   const enrollment = useMemo(() => {
     return participations.find((p) => {
-      const rawId = typeof p.activityId === "object" ? p.activityId?._id || p.activityId?.id : p.activityId
-      return String(rawId) === String(activityId)
+      return String(p._id || p.id) === String(participationId)
     })
-  }, [participations, activityId])
+  }, [participations, participationId])
 
   const activity = useMemo(() => {
-    if (!activityId) return null
-    return activities.find((a) => String(a.id || a._id) === String(activityId)) || (typeof enrollment?.activityId === "object" ? enrollment.activityId : null)
-  }, [activities, enrollment, activityId])
+    if (!enrollment) return null
+    const rawId = typeof enrollment.activityId === "object" ? enrollment.activityId?._id || enrollment.activityId?.id : enrollment.activityId
+    return activities.find((a) => String(a.id || a._id) === String(rawId)) || (typeof enrollment.activityId === "object" ? enrollment.activityId : null)
+  }, [activities, enrollment])
 
   const canWithdraw = WITHDRAWABLE_STATUSES.includes(enrollment?.status)
 
@@ -43,7 +43,7 @@ export default function EmployeeWithdrawPage() {
 
     setSubmitting(true)
     try {
-      await api.post(`/participations/${activityId}/withdraw`, { reason: reason.trim() })
+      await api.patch(`/participations/${participationId}/withdraw`, { reason: reason.trim() })
       toast.success("Withdrawal submitted", {
         description: "Your manager has been notified. The seat has been freed for another colleague.",
       })
