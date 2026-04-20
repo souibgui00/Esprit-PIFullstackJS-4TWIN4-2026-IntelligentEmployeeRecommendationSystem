@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 import {
-    Accessibility, X, Type, Contrast, Eye, AlignLeft,
+    X, Type, Contrast, Eye, AlignLeft,
     Move, ZapOff, ScanLine, Space, ChevronRight, RotateCcw
 } from "lucide-react"
 
@@ -110,7 +110,7 @@ export function AccessibilityWidget() {
             >
                 {open
                     ? <X className="w-6 h-6 text-white" />
-                    : <Accessibility className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+                    : <img src="/accessibility-logo.svg" alt="Accessibility" className="w-8 h-8 group-hover:scale-110 transition-transform" />
                 }
                 {hasAnyActive && !open && (
                     <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F28C1B] rounded-full border-2 border-white animate-pulse" />
@@ -132,11 +132,14 @@ export function AccessibilityWidget() {
             >
                 {/* Header */}
                 <div className="bg-[#222222] px-8 py-6 flex items-center justify-between">
-                    <div>
-                        <p className="text-[9px] font-bold text-[#F28C1B] tracking-[0.4em]">Assist Protocol</p>
-                        <h2 className="text-lg font-black font-display text-white tracking-tighter leading-tight">
-                            Accessibility
-                        </h2>
+                    <div className="flex items-center gap-3">
+                        <img src="/accessibility-logo.svg" alt="Accessibility" className="w-10 h-10" />
+                        <div>
+                            <p className="text-[9px] font-bold text-[#F28C1B] tracking-[0.4em]">Assist Protocol</p>
+                            <h2 className="text-lg font-black font-display text-white tracking-tighter leading-tight">
+                                Accessibility
+                            </h2>
+                        </div>
                     </div>
                     <button
                         onClick={reset}
