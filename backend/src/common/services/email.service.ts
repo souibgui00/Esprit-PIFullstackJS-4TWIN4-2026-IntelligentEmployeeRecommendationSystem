@@ -71,9 +71,11 @@ export class EmailService {
   ): string {
     return `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to the HR Platform</title>
         <style>
           body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -172,19 +174,19 @@ export class EmailService {
         </style>
       </head>
       <body>
-        <div class="email-container">
-          <div class="header">
+        <main class="email-container" role="main">
+          <header class="header">
             <h1>🎉 Welcome Aboard!</h1>
             <p>Your account has been created</p>
-          </div>
+          </header>
           
-          <div class="content">
+          <section class="content" aria-labelledby="welcome-title">
             <div class="greeting">
-              <p>Hello <strong>${userName}</strong>,</p>
+              <p id="welcome-title">Hello <strong>${userName}</strong>,</p>
               <p>Your HR platform account has been successfully created. Use the credentials below to log in and get started.</p>
             </div>
 
-            <div class="credentials-box">
+            <section class="credentials-box" aria-label="Login credentials">
               <div class="credential-item">
                 <span class="credential-label">Email:</span>
                 <span class="credential-value">${email}</span>
@@ -197,7 +199,7 @@ export class EmailService {
                 <span class="credential-label">Matricule:</span>
                 <span class="credential-value">${matricule}</span>
               </div>
-            </div>
+            </section>
 
             <div class="cta-section">
               <a href="${this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173'}/login" class="cta-button">
@@ -205,27 +207,27 @@ export class EmailService {
               </a>
             </div>
 
-            <div class="security-note">
+            <aside class="security-note" aria-label="Security note">
               <strong>🔒 Security Note:</strong> Please keep your password confidential. Never share it with anyone. You can change your password after logging in from your account settings.
-            </div>
+            </aside>
 
-            <div style="color: #666; font-size: 14px; line-height: 1.6;">
-              <p><strong>What's Next?</strong></p>
+            <section style="color: #666; font-size: 14px; line-height: 1.6;" aria-labelledby="next-steps-title">
+              <p id="next-steps-title"><strong>What's Next?</strong></p>
               <ul>
                 <li>Log in with the credentials above</li>
                 <li>Update your profile information</li>
                 <li>Change your password (strongly recommended)</li>
                 <li>Start exploring the platform</li>
               </ul>
-            </div>
-          </div>
+            </section>
+          </section>
 
-          <div class="footer">
+          <footer class="footer">
             <p><strong>HR Management Platform</strong></p>
             <p>© 2026 All rights reserved.</p>
             <p>If you did not request this account, please contact your HR administrator.</p>
-          </div>
-        </div>
+          </footer>
+        </main>
       </body>
       </html>
     `;

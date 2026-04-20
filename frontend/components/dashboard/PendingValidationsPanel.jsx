@@ -236,6 +236,7 @@ export function PendingValidationsPanel({ onValidated }) {
                         window.location.href = `/manager/validation/${p._id}`
                     }}
                     size="sm"
+                    aria-label={`Review validation report for ${employee.name || "employee"}`}
                     className="bg-primary hover:bg-primary-dark text-white font-black text-[9px] uppercase tracking-wider px-5 h-9 rounded-2xl gap-1.5 transition-all shadow-md shadow-primary/20"
                   >
                     <CheckCircle2 className="w-3 h-3" /> Review Validation Report

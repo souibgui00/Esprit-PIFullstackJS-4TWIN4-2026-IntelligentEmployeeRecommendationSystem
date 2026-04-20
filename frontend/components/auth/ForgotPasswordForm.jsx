@@ -28,7 +28,7 @@ export default function ForgotPasswordForm() {
 
     if (isSent) {
         return (
-            <main className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4" aria-live="polite">
+            <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4" aria-live="polite">
                 <div className="w-full max-w-md text-center space-y-8 animate-in fade-in zoom-in duration-500">
                     <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto border border-emerald-100">
                         <CheckCircle2 className="w-10 h-10" />
@@ -37,16 +37,16 @@ export default function ForgotPasswordForm() {
                         <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Check your email</h2>
                         <p className="text-slate-500 font-medium">Reset link sent to <span className="text-slate-900 font-bold">{email}</span></p>
                     </div>
-                    <Button onClick={() => navigate("/login")} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold tracking-widest">Return to login</Button>
+                    <Button type="button" onClick={() => navigate("/login")} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold tracking-widest">Return to login</Button>
                 </div>
             </main>
         )
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
-            <div className="w-full max-w-[450px] bg-white rounded-3xl border border-slate-200/60 shadow-xl p-10 lg:p-14 animate-in slide-in-from-bottom-8 duration-700">
-                <button onClick={() => navigate("/login")} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-10 transition-colors">
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
+            <div className="w-full max-w-112.5 bg-white rounded-3xl border border-slate-200/60 shadow-xl p-10 lg:p-14 animate-in slide-in-from-bottom-8 duration-700">
+                <button type="button" aria-label="Back to login page" onClick={() => navigate("/login")} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-10 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> <span className="text-[10px] font-bold tracking-widest">Back to login</span>
                 </button>
                 <div className="mb-10"><h2 className="text-3xl font-bold text-slate-900 mb-3">Recover access</h2></div>

@@ -137,6 +137,8 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-4">
               <button 
+                type="button"
+                aria-label="Open employee demo"
                 onClick={() => handleDemoLogin("employee")}
                 disabled={isLoading}
                 className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors"
@@ -144,6 +146,8 @@ export default function LandingPage() {
                 Demo
               </button>
               <button 
+                type="button"
+                aria-label="Get started with admin demo"
                 onClick={() => handleDemoLogin("admin")}
                 disabled={isLoading}
                 className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
@@ -156,7 +160,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-6 bg-gradient-to-b from-slate-50 to-white">
+      <section className="py-20 px-6 bg-linear-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -174,6 +178,8 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <button 
+                  type="button"
+                  aria-label="Start free trial as admin"
                   onClick={() => handleDemoLogin("admin")}
                   disabled={isLoading}
                   className="px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-semibold flex items-center justify-center gap-2"
@@ -182,6 +188,8 @@ export default function LandingPage() {
                   {isLoading ? "Loading..." : "Start Free Trial"}
                 </button>
                 <button 
+                  type="button"
+                  aria-label="View employee demo"
                   onClick={() => handleDemoLogin("employee")}
                   disabled={isLoading}
                   className="px-6 py-3 bg-white text-slate-900 rounded-lg hover:bg-slate-50 transition-colors font-semibold border border-slate-200 flex items-center justify-center gap-2"
@@ -325,6 +333,8 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
+                type="button"
+                aria-label="Start free trial from call to action"
                 onClick={() => handleDemoLogin("admin")}
                 disabled={isLoading}
                 className="px-6 py-3 bg-white text-slate-900 rounded-lg hover:bg-slate-100 transition-colors font-semibold flex items-center justify-center gap-2"
@@ -333,6 +343,8 @@ export default function LandingPage() {
                 {isLoading ? "Loading..." : "Start Free Trial"}
               </button>
               <button 
+                type="button"
+                aria-label="Schedule employee demo"
                 onClick={() => handleDemoLogin("employee")}
                 disabled={isLoading}
                 className="px-6 py-3 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors font-semibold"
@@ -365,28 +377,28 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><button className="hover:text-white transition-colors">Features</button></li>
-                <li><button className="hover:text-white transition-colors">Pricing</button></li>
-                <li><button className="hover:text-white transition-colors">Demo</button></li>
-                <li><button className="hover:text-white transition-colors">API</button></li>
+                <li><span className="hover:text-white transition-colors">Features</span></li>
+                <li><span className="hover:text-white transition-colors">Pricing</span></li>
+                <li><span className="hover:text-white transition-colors">Demo</span></li>
+                <li><span className="hover:text-white transition-colors">API</span></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><button className="hover:text-white transition-colors">About</button></li>
-                <li><button className="hover:text-white transition-colors">Blog</button></li>
-                <li><button className="hover:text-white transition-colors">Careers</button></li>
-                <li><button className="hover:text-white transition-colors">Contact</button></li>
+                <li><span className="hover:text-white transition-colors">About</span></li>
+                <li><span className="hover:text-white transition-colors">Blog</span></li>
+                <li><span className="hover:text-white transition-colors">Careers</span></li>
+                <li><span className="hover:text-white transition-colors">Contact</span></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><button className="hover:text-white transition-colors">Help Center</button></li>
-                <li><button className="hover:text-white transition-colors">Documentation</button></li>
-                <li><button className="hover:text-white transition-colors">Community</button></li>
-                <li><button className="hover:text-white transition-colors">Status</button></li>
+                <li><span className="hover:text-white transition-colors">Help Center</span></li>
+                <li><span className="hover:text-white transition-colors">Documentation</span></li>
+                <li><span className="hover:text-white transition-colors">Community</span></li>
+                <li><span className="hover:text-white transition-colors">Status</span></li>
               </ul>
             </div>
           </div>

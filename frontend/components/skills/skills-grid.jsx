@@ -123,6 +123,13 @@ export function SkillsGrid({ onSelectSkill }) {
     setDeleteDialogOpen(false)
   }
 
+  const handleSkillCardKeyDown = (event, skill) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      onSelectSkill?.(skill)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -130,6 +137,7 @@ export function SkillsGrid({ onSelectSkill }) {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            aria-label="Search skills"
             placeholder="Search skills..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -206,6 +214,10 @@ export function SkillsGrid({ onSelectSkill }) {
               key={skill.id}
               className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
               onClick={() => onSelectSkill?.(skill)}
+              onKeyDown={(event) => handleSkillCardKeyDown(event, skill)}
+              tabIndex={0}
+              role="button"
+              aria-label={`Open details for skill ${skill.name}`}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -220,7 +232,7 @@ export function SkillsGrid({ onSelectSkill }) {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Open actions for ${skill.name}`}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

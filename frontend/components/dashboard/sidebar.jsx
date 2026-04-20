@@ -41,6 +41,7 @@ export function Sidebar() {
   return (
     <TooltipProvider delayDuration={0}>
       <aside
+        aria-label="Admin navigation"
         className={cn(
           "fixed left-0 top-0 z-40 flex h-screen flex-col bg-sidebar text-sidebar-foreground transition-all duration-300",
           collapsed ? "w-16" : "w-64"
@@ -60,7 +61,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1 p-3" aria-label="Admin sidebar navigation">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon
@@ -150,6 +151,7 @@ export function Sidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="absolute -right-3 top-20 h-6 w-6 rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm hover:bg-sidebar-accent"
         >
           {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}

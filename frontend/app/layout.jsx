@@ -11,25 +11,25 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata = {
-  title,
-  description,
-  generator,
+  title: 'SkillMatch',
+  description: 'Plateforme RH intelligente pour la gestion des compétences et des recommandations.',
+  generator: 'Next.js',
   icons: {
     icon: [
       {
-        url,
-        media,
+        url: '/favicon.ico',
+        media: '(prefers-color-scheme: light)',
       },
       {
-        url,
-        media,
+        url: '/favicon.ico',
+        media: '(prefers-color-scheme: dark)',
       },
       {
-        url,
-        type,
+        url: '/favicon.ico',
+        type: 'image/x-icon',
       },
     ],
-    apple,
+    apple: '/favicon.ico',
   },
 }
 
@@ -39,8 +39,11 @@ export default function RootLayout({
   children
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body className={`font-sans antialiased`}>
+        <a href="#main-content" className="skip-link">
+          Aller au contenu principal
+        </a>
         <AuthProvider>
           <DataProvider>
             {children}

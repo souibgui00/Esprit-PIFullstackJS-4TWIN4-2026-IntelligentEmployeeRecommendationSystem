@@ -40,7 +40,7 @@ export default function LoginPage() {
     setIsLoading(false)
   }
 
-  const [faceLoginOpen, setFaceLoginOpen] = useState(false)
+    <main id="main-content" className="min-h-screen flex">
   const [faceTarget, setFaceTarget] = useState(null)
   const [faceVerifyStep, setFaceVerifyStep] = useState('email') // email -> scan
 
@@ -138,6 +138,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
+                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -201,7 +202,7 @@ export default function LoginPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
-            </Button>
+    </main>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

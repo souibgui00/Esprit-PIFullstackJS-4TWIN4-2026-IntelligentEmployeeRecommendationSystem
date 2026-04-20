@@ -124,7 +124,7 @@ export default function ActivityDetailsView() {
                                     </h2>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Button variant="ghost" onClick={() => navigate(-1)} className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-900 transition-all">
+                                    <Button type="button" aria-label="Go back to previous page" variant="ghost" onClick={() => navigate(-1)} className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-900 transition-all">
                                         <ArrowLeft className="w-6 h-6" />
                                     </Button>
                                     {isManager && (

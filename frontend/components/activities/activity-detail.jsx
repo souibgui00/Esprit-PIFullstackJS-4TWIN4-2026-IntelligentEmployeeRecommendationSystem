@@ -71,6 +71,8 @@ export function ActivityDetail({ activity: initialActivity, onClose, onGetRecomm
 
       <CardHeader className="relative p-10 pb-10 border-b border-[#EEEEEE]">
         <button
+          type="button"
+          aria-label="Close activity details"
           onClick={onClose}
           className="absolute right-8 top-8 p-3 bg-[#EEEEEE] rounded-[4px] hover:bg-primary hover:text-white text-[#222222] transition-all z-10"
         >
@@ -106,6 +108,8 @@ export function ActivityDetail({ activity: initialActivity, onClose, onGetRecomm
         {/* Quick Actions */}
         <div className="flex gap-4">
           <button
+            type="button"
+            aria-label="Edit this activity"
             onClick={() => setActivityDialogOpen(true)}
             className="flex-1 bg-[#EEEEEE] text-[#222222] font-bold rounded-[4px] text-[10px] h-14 tracking-widest hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-3 active:scale-95 "
           >
@@ -113,6 +117,8 @@ export function ActivityDetail({ activity: initialActivity, onClose, onGetRecomm
             Edit Activity
           </button>
           <button
+            type="button"
+            aria-label="Manage activity participants"
             onClick={() => setEnrollmentDialogOpen(true)}
             className="flex-1 bg-[#222222] text-white font-bold rounded-[4px] text-[10px] h-14 tracking-widest hover:bg-primary transition-all flex items-center justify-center gap-3 active:scale-95 "
           >
@@ -219,6 +225,8 @@ export function ActivityDetail({ activity: initialActivity, onClose, onGetRecomm
         {/* Actions */}
         <div className="pt-6 relative">
           <button
+            type="button"
+            aria-label="Generate AI recommendations for this activity"
             className="w-full bg-[#f28c1b] text-white font-black hover:bg-[#D97812] tracking-[0.2em] text-[11px] h-20 rounded-[4px] shadow-2xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-4 group "
             onClick={onGetRecommendations}
           >

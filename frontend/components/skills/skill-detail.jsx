@@ -92,6 +92,8 @@ export function SkillDetail({ skill: initialSkill, onClose }) {
         <Button
           variant="ghost"
           size="icon"
+          type="button"
+          aria-label="Close skill details"
           className="absolute right-4 top-4 h-8 w-8"
           onClick={onClose}
         >
@@ -113,7 +115,7 @@ export function SkillDetail({ skill: initialSkill, onClose }) {
 
       <CardContent className="space-y-6">
         {/* Quick Actions */}
-        <Button variant="outline" size="sm" onClick={() => setSkillDialogOpen(true)} className="bg-transparent">
+        <Button type="button" variant="outline" size="sm" onClick={() => setSkillDialogOpen(true)} className="bg-transparent">
           <Edit className="mr-1 h-3 w-3" />
           Edit Skill
         </Button>
@@ -177,10 +179,12 @@ export function SkillDetail({ skill: initialSkill, onClose }) {
               .sort((a, b) => b.skill.score - a.skill.score)
               .slice(0, 8)
               .map(({ employee, skill: empSkill }) => (
-                <div
+                <button
+                  type="button"
                   key={employee.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer group"
+                  className="w-full text-left flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors group"
                   onClick={() => handleEditEmployeeSkill(employee, empSkill)}
+                  aria-label={`Edit skill level for ${employee.name}`}
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={employee.avatar || "/placeholder.svg"} />
@@ -204,7 +208,7 @@ export function SkillDetail({ skill: initialSkill, onClose }) {
                     </Badge>
                     <Edit className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                </div>
+                </button>
               ))}
             {employeesWithSkill.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">No employees have this skill yet</p>

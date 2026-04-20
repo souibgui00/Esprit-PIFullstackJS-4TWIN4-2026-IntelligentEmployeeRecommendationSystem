@@ -97,70 +97,70 @@ export default function AdminAnalyticsPage() {
     <div className="flex flex-col bg-[#F8FAFC] min-h-screen text-slate-600 pb-20 overflow-x-hidden">
       <DashboardHeader title="Company Analytics" description="Detailed insights into department performance, skill distribution, and training progress." />
 
-      <div className="flex-1 p-4 md:p-6 max-w-[1400px] mx-auto w-full animate-in fade-in duration-1000 space-y-8">
+      <div className="flex-1 p-6 md:p-10 max-w-[1400px] mx-auto w-full animate-in fade-in duration-1000 space-y-16">
         
         {/* Core KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pt-4">
            {/* Org Score */}
-           <div className="bg-white border-2 border-slate-50 rounded-2xl p-6 shadow-premium group hover:translate-y-[-5px] transition-all duration-500">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                    <Target className="w-5 h-5" />
+           <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 shadow-premium group hover:translate-y-[-5px] transition-all duration-500">
+              <div className="flex items-center justify-between mb-6">
+                <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                    <Target className="w-7 h-7" />
                 </div>
                 <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 text-[9px] font-black uppercase tracking-widest">+4.2%</Badge>
               </div>
-              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Organization Score</p>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{analytics.avgScore}%</h3>
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">Organization Score</p>
+              <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{analytics.avgScore}%</h3>
            </div>
 
            {/* Active Training */}
-           <div className="bg-white border-2 border-slate-50 rounded-2xl p-6 shadow-premium group hover:translate-y-[-5px] transition-all duration-500">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
-                    <BookOpen className="w-5 h-5" />
+           <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 shadow-premium group hover:translate-y-[-5px] transition-all duration-500">
+              <div className="flex items-center justify-between mb-6">
+                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
+                    <BookOpen className="w-7 h-7" />
                 </div>
               </div>
-              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Active Trainings</p>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{analytics.activeTrainings}</h3>
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">Active Trainings</p>
+              <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{analytics.activeTrainings}</h3>
            </div>
 
            {/* Skills Warning */}
-           <div className="bg-white border-2 border-slate-50 rounded-2xl p-6 shadow-premium group hover:translate-y-[-5px] transition-all duration-500">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
-                    <AlertTriangle className="w-5 h-5" />
+           <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 shadow-premium group hover:translate-y-[-5px] transition-all duration-500">
+              <div className="flex items-center justify-between mb-6">
+                <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500">
+                    <AlertTriangle className="w-7 h-7" />
                 </div>
               </div>
-              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Low Skill Count</p>
-              <h3 className="text-2xl font-black text-rose-500 tracking-tighter">{analytics.skillsAtRisk}</h3>
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">Low Skill Count</p>
+              <h3 className="text-4xl font-black text-rose-500 tracking-tighter">{analytics.skillsAtRisk}</h3>
            </div>
 
            {/* Total Sectors */}
-           <div className="bg-slate-950 border-none rounded-2xl p-6 shadow-mega group hover:translate-y-[-5px] transition-all duration-500 text-white">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-primary">
-                    <PieIcon className="w-5 h-5" />
+           <div className="bg-slate-950 border-none rounded-[3rem] p-10 shadow-mega group hover:translate-y-[-5px] transition-all duration-500 text-white">
+              <div className="flex items-center justify-between mb-6">
+                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-primary">
+                    <PieIcon className="w-7 h-7" />
                 </div>
               </div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Departments</p>
-              <h3 className="text-2xl font-black text-white tracking-tighter">{analytics.totalSectors}</h3>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Departments</p>
+              <h3 className="text-4xl font-black text-white tracking-tighter">{analytics.totalSectors}</h3>
            </div>
         </div>
 
         {/* Main Analytics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             {/* Department Comparison Chart */}
-            <div className="lg:col-span-8 bg-white border-2 border-slate-50 rounded-2xl p-6 shadow-premium space-y-6">
-                <div className="flex items-center justify-between pr-2">
+            <div className="lg:col-span-8 bg-white border-2 border-slate-50 rounded-[4rem] p-12 shadow-premium space-y-12">
+                <div className="flex items-center justify-between pr-4">
                     <div className="space-y-1">
-                        <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter">Department Performance</h4>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Ranking departments by average score</p>
+                        <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Department Performance</h4>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Ranking departments by average score</p>
                     </div>
-                    <Button onClick={() => setShowComparison(true)} variant="ghost" className="rounded-xl h-10 px-4 text-[8px] font-black uppercase tracking-widest bg-slate-50 transition-all hover:bg-slate-100 hover:scale-105 active:scale-95">Compare</Button>
+                    <Button onClick={() => setShowComparison(true)} variant="ghost" className="rounded-2xl h-14 px-6 text-[10px] font-black uppercase tracking-widest bg-slate-50 transition-all hover:bg-slate-100 hover:scale-105 active:scale-95">Compare Data</Button>
                 </div>
 
-                <div className="h-[280px] w-full pt-2">
+                <div className="h-[400px] w-full pt-4">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={sectorPerformance} layout="vertical" margin={{ left: 20, right: 30, top: 10, bottom: 10 }}>
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F1F5F9" />
@@ -191,20 +191,20 @@ export default function AdminAnalyticsPage() {
             </div>
 
             {/* Skill Composition Pie */}
-            <div className="lg:col-span-4 bg-white border-2 border-slate-50 rounded-2xl p-6 shadow-premium flex flex-col items-center">
-                <h4 className="text-base font-black text-slate-900 uppercase tracking-tighter mb-1">Skill Balance</h4>
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-4">Skill distribution by category</p>
+            <div className="lg:col-span-4 bg-white border-2 border-slate-50 rounded-[4rem] p-12 shadow-premium flex flex-col items-center">
+                <h4 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-2">Skill Balance</h4>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-10">Skill distribution by category</p>
                 
-                <div className="h-[200px] w-full relative">
+                <div className="h-[280px] w-full relative">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie 
                             data={analytics.pieData} 
                             cx="50%" 
                             cy="50%" 
-                            innerRadius={50} 
-                            outerRadius={80} 
-                            paddingAngle={6} 
+                            innerRadius={70} 
+                            outerRadius={100} 
+                            paddingAngle={8} 
                             dataKey="value"
                             stroke="none"
                           >
@@ -219,19 +219,19 @@ export default function AdminAnalyticsPage() {
                         </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <p className="text-[7px] font-black text-slate-300 uppercase tracking-widest leading-none">Global</p>
-                        <p className="text-sm font-black text-slate-900 leading-none">Skills</p>
+                        <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Global</p>
+                        <p className="text-2xl font-black text-slate-900 leading-none">Skills</p>
                     </div>
                 </div>
 
-                <div className="w-full space-y-2 pt-4">
+                <div className="w-full space-y-4 pt-10">
                     {analytics.pieData.map((item, i) => (
-                        <div key={i} className="flex items-center justify-between bg-slate-50/50 p-2.5 rounded-lg border border-slate-50/50">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }}"></div>
-                                <span className="text-[8px] font-black text-slate-600 uppercase tracking-tight">{item.name}</span>
+                        <div key={i} className="flex items-center justify-between bg-slate-50/50 p-4 rounded-2xl border border-slate-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
+                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{item.name}</span>
                             </div>
-                            <span className="text-xs font-black text-slate-900">{item.value}</span>
+                            <span className="text-sm font-black text-slate-900">{item.value}</span>
                         </div>
                     ))}
                 </div>
@@ -239,17 +239,17 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Analysis Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Future Talent Growth */}
-            <div className="bg-slate-950 border-none rounded-2xl p-6 shadow-mega relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-[60px] -mr-24 -mt-24"></div>
-                 <div className="relative z-10 space-y-4 text-white">
+            <div className="bg-slate-950 border-none rounded-[4rem] p-12 shadow-mega relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+                 <div className="relative z-10 space-y-10 text-white">
                     <div>
-                        <h4 className="text-lg font-black uppercase tracking-tighter leading-none mb-1">Growth Tracker</h4>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Skill score improvement forecast (6 Months)</p>
+                        <h4 className="text-3xl font-black uppercase tracking-tighter leading-none mb-2">Growth Tracker</h4>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Skill score improvement forecast (6 Months)</p>
                     </div>
 
-                    <div className="h-[180px] w-full pt-2">
+                    <div className="h-[250px] w-full pt-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={[
                                 { name: 'Jan', val: 56 }, { name: 'Feb', val: 62 }, { name: 'Mar', val: 60 },
@@ -266,14 +266,14 @@ export default function AdminAnalyticsPage() {
                         </ResponsiveContainer>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/5 border border-white/10 rounded-lg p-3 backdrop-blur-xl">
-                            <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest mb-1">Growth Forecast</p>
-                            <p className="text-base font-black text-emerald-400">+18%</p>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Growth Forecast</p>
+                            <p className="text-2xl font-black text-emerald-400">+18%</p>
                         </div>
-                        <div className="bg-white/5 border border-white/10 rounded-lg p-3 backdrop-blur-xl">
-                            <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest mb-1">Confidence</p>
-                            <p className="text-base font-black text-white">95%</p>
+                        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Confidence Layer</p>
+                            <p className="text-2xl font-black text-white">95%</p>
                         </div>
                     </div>
                  </div>
@@ -281,32 +281,32 @@ export default function AdminAnalyticsPage() {
 
             {/* Strategic Insights Panel */}
             {(user?.role === 'hr' || user?.role === 'admin') && (
-              <div className="bg-white border-2 border-slate-50 rounded-2xl p-6 shadow-premium flex flex-col justify-between">
+              <div className="bg-white border-2 border-slate-50 rounded-[4rem] p-12 shadow-premium flex flex-col justify-between">
                 <div>
-                  <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-1">What to do next</h4>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic mb-4">Quick advice based on your company data</p>
+                  <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">What to do next</h4>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic mb-12">Quick advice based on your company data</p>
                   
-                  <div className="space-y-4">
-                      <div className="flex gap-3 group hover:translate-x-2 transition-transform duration-500">
-                          <div className="w-10 h-10 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
-                              <ShieldAlert className="w-5 h-5" />
+                  <div className="space-y-8">
+                      <div className="flex gap-6 group hover:translate-x-2 transition-transform duration-500">
+                          <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center shrink-0 shadow-sm border border-rose-100">
+                              <ShieldAlert className="w-6 h-6" />
                           </div>
-                          <div className="space-y-0.5 pt-1">
-                              <h5 className="text-[9px] font-black uppercase text-rose-500 tracking-[0.05em]">People needing training</h5>
-                              <p className="text-[11px] text-slate-500 font-medium leading-snug">
-                                 {analytics.skillsAtRisk} team members have very few skills. Consider training sessions.
+                          <div className="space-y-1 pt-1">
+                              <h5 className="text-[11px] font-black uppercase text-rose-500 tracking-[0.1em]">People needing training</h5>
+                              <p className="text-[13px] text-slate-500 font-medium leading-relaxed">
+                                 {analytics.skillsAtRisk} team members have very few skills. You should suggest some new training sessions for them.
                               </p>
                           </div>
                       </div>
 
-                      <div className="flex gap-3 group hover:translate-x-2 transition-transform duration-500">
-                          <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-lg flex items-center justify-center shrink-0 shadow-sm border border-emerald-100">
-                              <UserCheck className="w-5 h-5" />
+                      <div className="flex gap-6 group hover:translate-x-2 transition-transform duration-500">
+                          <div className="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center shrink-0 shadow-sm border border-emerald-100">
+                              <UserCheck className="w-6 h-6" />
                           </div>
-                          <div className="space-y-0.5 pt-1">
-                              <h5 className="text-[9px] font-black uppercase text-emerald-500 tracking-[0.05em]">Best Department</h5>
-                              <p className="text-[11px] text-slate-500 font-medium leading-snug">
-                                 {sectorPerformance[0]?.name} is doing great! Consider knowledge sharing.
+                          <div className="space-y-1 pt-1">
+                              <h5 className="text-[11px] font-black uppercase text-emerald-500 tracking-[0.1em]">Best Department</h5>
+                              <p className="text-[13px] text-slate-500 font-medium leading-relaxed">
+                                 {sectorPerformance[0]?.name} is doing great! Maybe their top people can help teach other departments.
                               </p>
                           </div>
                       </div>
@@ -319,47 +319,47 @@ export default function AdminAnalyticsPage() {
         {/* Detailed Comparison Modal */}
         <Dialog open={showComparison} onOpenChange={setShowComparison}>
            <DialogContent className="sm:max-w-4xl max-h-[85vh] p-0 bg-transparent border-none shadow-none focus:outline-none">
-              <div className="bg-white rounded-2xl shadow-mega w-full h-full overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-500">
-                 <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-950 text-white">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center text-primary">
-                            <Globe className="w-6 h-6" />
+              <div className="bg-white rounded-[4rem] shadow-mega w-full h-full overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-500">
+                 <div className="p-12 border-b border-slate-50 flex justify-between items-center bg-slate-950 text-white">
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-primary">
+                            <Globe className="w-8 h-8" />
                         </div>
                         <div>
-                            <DialogTitle className="text-lg font-black uppercase tracking-tighter">Department Checklist</DialogTitle>
-                            <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-0.5">How each group is doing compared to others</div>
+                            <DialogTitle className="text-3xl font-black uppercase tracking-tighter">Department Checklist</DialogTitle>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">How each group is doing compared to others</div>
                         </div>
                     </div>
                     <Button 
                         variant="ghost" 
                         onClick={() => setShowComparison(false)}
-                        className="text-white/50 hover:text-white hover:bg-white/10 rounded-lg"
+                        className="text-white/50 hover:text-white hover:bg-white/10 rounded-xl"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-6 h-6" />
                     </Button>
                  </div>
 
-                 <div className="flex-1 overflow-y-auto p-6 no-scrollbar space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="flex-1 overflow-y-auto p-12 no-scrollbar space-y-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                        {sectorPerformance.map((dept, i) => (
-                           <div key={i} className="bg-slate-50/50 p-6 rounded-lg border border-slate-100 flex flex-col justify-between group hover:bg-white hover:shadow-premium transition-all duration-500">
-                             <div className="flex justify-between items-start mb-4">
-                                <div className="space-y-2">
-                                    <h5 className="text-base font-black text-slate-900 uppercase tracking-tighter leading-none group-hover:text-primary transition-colors">{dept.name}</h5>
-                                    <Badge className="bg-slate-900 text-white border-none px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest">{dept.count} Members</Badge>
+                           <div key={i} className="bg-slate-50/50 p-10 rounded-[3rem] border border-slate-100 flex flex-col justify-between group hover:bg-white hover:shadow-premium transition-all duration-500">
+                             <div className="flex justify-between items-start mb-8">
+                                <div className="space-y-4">
+                                    <h5 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none group-hover:text-primary transition-colors">{dept.name}</h5>
+                                    <Badge className="bg-slate-900 text-white border-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest">{dept.count} Members</Badge>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Score</p>
-                                    <p className="text-2xl font-black text-slate-950 tracking-tighter">{dept.score}%</p>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Score</p>
+                                    <p className="text-4xl font-black text-slate-950 tracking-tighter">{dept.score}%</p>
                                 </div>
                              </div>
                              
-                             <div className="space-y-2">
-                                <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                             <div className="space-y-4">
+                                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                     <span>Number of Skills</span>
                                     <span className="text-slate-950">{dept.totalSkills} Skills</span>
                                 </div>
-                                <div className="h-2 bg-white border border-slate-100 rounded-full overflow-hidden p-0.5">
+                                <div className="h-2.5 bg-white border border-slate-100 rounded-full overflow-hidden p-0.5">
                                     <div 
                                         className="h-full bg-primary rounded-full" 
                                         style={{ width: `${dept.score}%` }}

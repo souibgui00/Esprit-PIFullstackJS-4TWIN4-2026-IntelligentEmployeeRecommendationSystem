@@ -7,6 +7,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
+  TableCaption,
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -180,6 +181,13 @@ export function EmployeeTable({
     navigate(`${rolePrefix}/employees/edit/${employee.id || employee._id}`)
   }
 
+  const handleRowKeyDown = (employee, event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      onSelectEmployee?.(employee)
+    }
+  }
+
   const getStatusConfig = (employee) => {
     if (employee.status?.toLowerCase() === "suspended") {
       return { color: "bg-rose-500/10 text-rose-500 border-rose-500/20", icon: <XCircle className="w-3 h-3" />, label: "Suspended" }
@@ -228,15 +236,18 @@ export function EmployeeTable({
       <div className="bg-white border border-slate-100 rounded-[40px] shadow-premium overflow-hidden" id="user-table-top">
         <div className="overflow-x-auto">
           <Table>
+            <TableCaption className="sr-only">
+              Employee directory with department, manager, position, status, and score columns.
+            </TableCaption>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 border-b border-slate-100">
-                <TableHead className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">User Name</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Department</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Manager</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Position</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Score</TableHead>
-                <TableHead className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</TableHead>
+                <TableHead scope="col" className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">User Name</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Department</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Manager</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Position</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Score</TableHead>
+                <TableHead scope="col" className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -252,6 +263,10 @@ export function EmployeeTable({
                       isSelected && "bg-primary/3"
                     )}
                     onClick={() => onSelectEmployee?.(employee)}
+                    onKeyDown={(event) => handleRowKeyDown(employee, event)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View details for ${employee.name}`}
                   >
                     <TableCell className="px-10 py-6">
                       <div className="flex items-center gap-5">
@@ -353,7 +368,7 @@ export function EmployeeTable({
                     <TableCell className="px-10 py-6 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-12 w-12 p-0 hover:bg-white hover:shadow-premium rounded-2xl transition-all">
+                          <Button variant="ghost" className="h-12 w-12 p-0 hover:bg-white hover:shadow-premium rounded-2xl transition-all" aria-label={`Open actions for ${employee.name}`}>
                             <MoreVertical className="h-5 w-5 text-slate-400" />
                           </Button>
                         </DropdownMenuTrigger>

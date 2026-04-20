@@ -241,7 +241,7 @@ export function FaceIdScanner({
     // ── Main UI ──────────────────────────────────────────────────────────────
     return (
         <div className="w-full flex flex-col items-center gap-4">
-            <p className="text-sm font-semibold text-slate-300 tracking-wide min-h-[20px]">
+            <p className="text-sm font-semibold text-slate-300 tracking-wide min-h-5" aria-live="polite">
                 {statusText}
             </p>
 
@@ -256,6 +256,7 @@ export function FaceIdScanner({
                     width={videoWidth}
                     height={videoHeight}
                     onPlay={mode === "verify" ? scanFace : undefined}
+                    aria-hidden="true"
                     style={{
                         objectFit: "fill",
                         width: "100%",
@@ -266,6 +267,7 @@ export function FaceIdScanner({
                 />
                 <canvas
                     ref={canvasRef}
+                    aria-hidden="true"
                     style={{
                         position: "absolute",
                         top: 0,
@@ -296,6 +298,7 @@ export function FaceIdScanner({
                 <button
                     onClick={getLocalUserVideo}
                     className="w-full py-3 bg-primary hover:bg-primary/80 text-white rounded-2xl font-bold text-sm transition-all"
+                    aria-label="Open camera for face verification"
                 >
                     Open Camera
                 </button>
@@ -305,6 +308,7 @@ export function FaceIdScanner({
                 <button
                     onClick={captureImage}
                     className="w-full py-3 bg-primary hover:bg-primary/80 text-white rounded-2xl font-bold text-sm transition-all"
+                    aria-label="Capture and save face image"
                 >
                     📸 Capture & Save Face
                 </button>

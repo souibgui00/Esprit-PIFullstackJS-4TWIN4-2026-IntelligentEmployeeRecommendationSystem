@@ -36,6 +36,12 @@ export function ProfileSettings() {
 
     // Face ID State
     const [faceDialogOpen, setFaceDialogOpen] = useState(false)
+    const nameId = "profile-name"
+    const emailId = "profile-email"
+    const phoneId = "profile-phone"
+    const currentPasswordId = "current-password"
+    const newPasswordId = "new-password"
+    const confirmPasswordId = "confirm-password"
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault()
@@ -113,10 +119,11 @@ export function ProfileSettings() {
                     <form onSubmit={handleUpdateProfile} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Full Name</Label>
+                                <Label htmlFor={nameId} className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Full Name</Label>
                                 <div className="relative">
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                     <Input 
+                                        id={nameId}
                                         value={profileData.name} 
                                         onChange={e => setProfileData({...profileData, name: e.target.value})}
                                         className="pl-12 h-14 bg-slate-50 border-slate-100 rounded-xl font-bold text-slate-900" 
@@ -124,10 +131,11 @@ export function ProfileSettings() {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Email Address</Label>
+                                <Label htmlFor={emailId} className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Email Address</Label>
                                 <div className="relative">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                     <Input 
+                                        id={emailId}
                                         type="email" 
                                         value={profileData.email} 
                                         onChange={e => setProfileData({...profileData, email: e.target.value})}
@@ -136,10 +144,11 @@ export function ProfileSettings() {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Phone Number</Label>
+                                <Label htmlFor={phoneId} className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Phone Number</Label>
                                 <div className="relative">
                                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                     <Input 
+                                        id={phoneId}
                                         value={profileData.phone} 
                                         onChange={e => setProfileData({...profileData, phone: e.target.value})}
                                         className="pl-12 h-14 bg-slate-50 border-slate-100 rounded-xl font-bold text-slate-900" 
@@ -178,8 +187,9 @@ export function ProfileSettings() {
                     <CardContent className="px-8 pb-8 space-y-6">
                         <form onSubmit={handleChangePassword} className="space-y-4">
                             <div className="relative">
-                                <Label className="text-[9px] font-black text-slate-300 tracking-[0.2em] mb-2 block uppercase">Current Password</Label>
+                                <Label htmlFor={currentPasswordId} className="text-[9px] font-black text-slate-300 tracking-[0.2em] mb-2 block uppercase">Current Password</Label>
                                 <Input 
+                                    id={currentPasswordId}
                                     type={showPasswords ? "text" : "password"}
                                     value={passwords.current}
                                     onChange={e => setPasswords({...passwords, current: e.target.value})}
@@ -187,8 +197,9 @@ export function ProfileSettings() {
                                 />
                             </div>
                             <div className="relative">
-                                <Label className="text-[9px] font-black text-slate-300 tracking-[0.2em] mb-2 block uppercase">New Password</Label>
+                                <Label htmlFor={newPasswordId} className="text-[9px] font-black text-slate-300 tracking-[0.2em] mb-2 block uppercase">New Password</Label>
                                 <Input 
+                                    id={newPasswordId}
                                     type={showPasswords ? "text" : "password"}
                                     value={passwords.new}
                                     onChange={e => setPasswords({...passwords, new: e.target.value})}
@@ -197,14 +208,16 @@ export function ProfileSettings() {
                                 <button 
                                     type="button" 
                                     onClick={() => setShowPasswords(!showPasswords)}
+                                    aria-label={showPasswords ? "Hide passwords" : "Show passwords"}
                                     className="absolute right-4 bottom-3 text-slate-300 hover:text-primary transition-colors"
                                 >
                                     {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
                             <div className="relative">
-                                <Label className="text-[9px] font-black text-slate-300 tracking-[0.2em] mb-2 block uppercase">Confirm New Password</Label>
+                                <Label htmlFor={confirmPasswordId} className="text-[9px] font-black text-slate-300 tracking-[0.2em] mb-2 block uppercase">Confirm New Password</Label>
                                 <Input 
+                                    id={confirmPasswordId}
                                     type={showPasswords ? "text" : "password"}
                                     value={passwords.confirm}
                                     onChange={e => setPasswords({...passwords, confirm: e.target.value})}
@@ -223,7 +236,7 @@ export function ProfileSettings() {
                 </Card>
 
                 <Card className="card-premium border-none shadow-premium bg-slate-900 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500 opacity-5 blur-[40px]"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500 opacity-5 blur-2xl"></div>
                     <CardHeader className="p-8">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500">
@@ -249,13 +262,14 @@ export function ProfileSettings() {
                             <h4 className="text-xs font-black text-white tracking-[0.2em] uppercase">
                                 {user?.faceIdDescriptor ? "FACE ID ENABLED" : "FACE ID DISABLED"}
                             </h4>
-                            <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[200px] mx-auto">
+                            <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-50 mx-auto">
                                 Enable Face ID to sign in faster without typing your password.
                             </p>
                         </div>
 
                         <Button 
                             onClick={() => setFaceDialogOpen(true)}
+                            aria-label={user?.faceIdDescriptor ? "Update Face ID" : "Set up Face ID"}
                             className="w-full h-12 bg-white text-slate-900 font-black rounded-xl hover:bg-slate-100 transition-all shadow-xl active:scale-95 text-[10px] tracking-widest uppercase mt-2"
                         >
                             {user?.faceIdDescriptor ? "Update Face ID" : "Setup Face ID"}
@@ -266,7 +280,7 @@ export function ProfileSettings() {
 
             {/* Face ID Registration Dialog */}
             <Dialog open={faceDialogOpen} onOpenChange={setFaceDialogOpen}>
-                <DialogContent className="sm:max-w-md bg-white rounded-[32px] border-none shadow-2xl p-0 overflow-hidden">
+                <DialogContent className="sm:max-w-md bg-white rounded-4xl border-none shadow-2xl p-0 overflow-hidden">
                     <div className="p-8 space-y-6">
                         <DialogHeader>
                             <DialogTitle className="text-2xl font-black tracking-tight text-center">Face ID Setup</DialogTitle>

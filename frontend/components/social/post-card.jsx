@@ -52,7 +52,7 @@ export function PostCard({ post }) {
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <h4 className="text-sm font-bold text-slate-900 leading-tight hover:underline cursor-pointer">{post.authorName}</h4>
+                        <h4 className="text-sm font-bold text-slate-900 leading-tight">{post.authorName}</h4>
                         <div className="flex items-center gap-1 mt-0.5">
                             <span className="text-xs text-slate-500">
                                 {formatDistanceToNow(new Date(post.createdAt || Date.now()), { addSuffix: true })}
@@ -62,7 +62,7 @@ export function PostCard({ post }) {
                         </div>
                     </div>
                 </div>
-                <button className="h-8 w-8 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                <button type="button" aria-label="Open post options" className="h-8 w-8 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
                     <MoreHorizontal className="w-5 h-5" />
                 </button>
             </div>
@@ -75,7 +75,7 @@ export function PostCard({ post }) {
 
                 {post.image && (
                     <div className="mt-3 -mx-4 border-y border-slate-100">
-                        <img src={post.image} alt="Post content" className="w-full h-auto object-cover max-h-[500px]" />
+                        <img src={post.image} alt="Post content" className="w-full h-auto object-cover max-h-125" />
                     </div>
                 )}
             </div>
@@ -89,15 +89,15 @@ export function PostCard({ post }) {
                                 <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-white shrink-0">
                                     <Heart className="w-2.5 h-2.5 fill-current" />
                                 </div>
-                                <span className="ml-1.5 hover:underline cursor-pointer">{post.likes.length}</span>
+                                <span className="ml-1.5">{post.likes.length}</span>
                             </div>
                         )}
                     </div>
                     <div className="flex items-center gap-3">
                         {post.comments?.length > 0 && (
-                            <span className="hover:underline cursor-pointer">{post.comments.length} comments</span>
+                            <span>{post.comments.length} comments</span>
                         )}
-                        <span className="hover:underline cursor-pointer">0 shares</span>
+                        <span>0 shares</span>
                     </div>
                 </div>
             )}
@@ -105,7 +105,10 @@ export function PostCard({ post }) {
             {/* Interactions */}
             <div className="px-4 py-1 flex items-center gap-1">
                 <button
+                    type="button"
                     onClick={handleLike}
+                    aria-pressed={isLiked}
+                    aria-label={isLiked ? "Unlike this post" : "Like this post"}
                     className={cn(
                         "flex-1 flex items-center justify-center gap-2 h-9 rounded-lg transition-colors font-semibold text-sm",
                         isLiked ? "text-blue-600" : "text-slate-600 hover:bg-slate-100"
@@ -116,14 +119,18 @@ export function PostCard({ post }) {
                 </button>
 
                 <button
+                    type="button"
                     onClick={() => setShowComments(!showComments)}
+                    aria-expanded={showComments}
+                    aria-controls={`post-comments-${post.id}`}
+                    aria-label="Toggle comments"
                     className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 font-semibold text-sm"
                 >
                     <MessageCircle className="w-5 h-5" />
                     <span>Comment</span>
                 </button>
 
-                <button className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 font-semibold text-sm">
+                <button type="button" aria-label="Share this post" className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 font-semibold text-sm">
                     <Share2 className="w-5 h-5" />
                     <span>Share</span>
                 </button>
@@ -131,7 +138,7 @@ export function PostCard({ post }) {
 
             {/* Comment Section */}
             {showComments && (
-                <div className="px-4 pb-4 pt-2 border-t border-slate-100 bg-white">
+                <div id={`post-comments-${post.id}`} className="px-4 pb-4 pt-2 border-t border-slate-100 bg-white">
                     <div className="space-y-3 mb-4">
                         {post.comments?.map((comment) => (
                             <div key={comment.id} className="flex gap-2">
@@ -142,7 +149,7 @@ export function PostCard({ post }) {
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 bg-slate-100 px-3 py-2 rounded-2xl">
-                                    <p className="text-xs font-bold text-slate-900 hover:underline cursor-pointer">{comment.authorName}</p>
+                                    <p className="text-xs font-bold text-slate-900">{comment.authorName}</p>
                                     <p className="text-sm text-slate-800 leading-snug">{comment.content}</p>
                                 </div>
                             </div>
@@ -159,6 +166,7 @@ export function PostCard({ post }) {
                         <div className="flex-1 relative">
                             <input
                                 type="text"
+                                aria-label="Write a comment"
                                 placeholder="Write a comment..."
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
