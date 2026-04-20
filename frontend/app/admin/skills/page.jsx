@@ -69,14 +69,15 @@ export default function AdminSkillsPage() {
     const isSelected = selectedSkill?._id === skill._id || selectedSkill?.id === skill.id
 
     return (
-      <div
+      <button
         key={skill.id || skill._id}
+        type="button"
         onClick={() => {
           setSelectedSkill(skill)
           setActiveViewTab("Overview")
         }}
         className={cn(
-          "bg-white border-2 rounded-4xl p-8 transition-all group cursor-pointer hover:shadow-2xl relative",
+          "w-full text-left bg-white border-2 rounded-4xl p-8 transition-all group cursor-pointer hover:shadow-2xl relative",
           isSelected ? "border-primary bg-slate-50/30" : "border-slate-50 shadow-premium"
         )}
       >
@@ -119,7 +120,7 @@ export default function AdminSkillsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </button>
     )
   }
 
@@ -131,8 +132,12 @@ export default function AdminSkillsPage() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pt-4">
           <div className="flex flex-wrap items-center gap-4 w-full justify-between">
             <div className="relative group min-w-[320px]">
+              <label htmlFor="skill-search" className="sr-only">
+                Search skills
+              </label>
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
               <input
+                id="skill-search"
                 type="text"
                 placeholder="Search skills, categories..."
                 value={searchQuery}
@@ -216,13 +221,13 @@ export default function AdminSkillsPage() {
 
           <div className="lg:col-span-1">
             {selectedSkill ? (
-              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 sticky top-8 shadow-2xl shadow-slate-200/50 flex flex-col min-h-[650px] animate-in slide-in-from-right-10 duration-700">
+              <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-10 sticky top-8 shadow-2xl shadow-slate-200/50 flex flex-col min-h-162.5 animate-in slide-in-from-right-10 duration-700">
                 <div className="flex justify-between items-start mb-8">
                   <div className="space-y-1">
                     <Badge className="bg-primary/10 text-primary border-none px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">Skill Details</Badge>
                     <h2 className="text-2xl font-black text-slate-900 uppercase leading-tight pt-2">{selectedSkill.name}</h2>
                   </div>
-                  <button onClick={() => setSelectedSkill(null)} className="w-10 h-10 bg-slate-50 hover:bg-rose-50 text-slate-300 hover:text-rose-500 rounded-xl flex items-center justify-center transition-all">
+                  <button type="button" onClick={() => setSelectedSkill(null)} aria-label="Clear selected skill" className="w-10 h-10 bg-slate-50 hover:bg-rose-50 text-slate-300 hover:text-rose-500 rounded-xl flex items-center justify-center transition-all">
                     <X className="h-5 w-5" />
                   </button>
                 </div>

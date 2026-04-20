@@ -34,6 +34,7 @@ export default function UnifiedProfile() {
     const [isUpdatingEval, setIsUpdatingEval] = useState(false)
 
     const role = user?.role?.toLowerCase() || "employee"
+    const tabs = ["overview", "history", "feedback", "settings"]
 
     // Role-specific data resolution
     const employeeProfile = employees.find(e => e.id === user?.id || e._id === user?.id) || user
@@ -49,8 +50,10 @@ export default function UnifiedProfile() {
                 
                 {/* 1. Header Navigation */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-slate-200 pb-8">
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-8" role="tablist" aria-label="Profile sections">
                         <TabButton 
+                            id="profile-tab-overview"
+                            controls="profile-panel-overview"
                             active={activeTab === "overview"} 
                             onClick={() => setActiveTab("overview")}
                             icon={Compass}
@@ -58,6 +61,8 @@ export default function UnifiedProfile() {
                         />
                         {role !== "admin" && (
                             <TabButton 
+                                id="profile-tab-history"
+                                controls="profile-panel-history"
                                 active={activeTab === "history"} 
                                 onClick={() => setActiveTab("history")}
                                 icon={Activity}
@@ -66,6 +71,8 @@ export default function UnifiedProfile() {
                         )}
                         {role === "employee" && (
                             <TabButton 
+                                id="profile-tab-feedback"
+                                controls="profile-panel-feedback"
                                 active={activeTab === "feedback"} 
                                 onClick={() => setActiveTab("feedback")}
                                 icon={Star}
@@ -73,6 +80,8 @@ export default function UnifiedProfile() {
                             />
                         )}
                         <TabButton 
+                            id="profile-tab-settings"
+                            controls="profile-panel-settings"
                             active={activeTab === "settings"} 
                             onClick={() => setActiveTab("settings")}
                             icon={Settings}
@@ -95,7 +104,7 @@ export default function UnifiedProfile() {
                 </div>
 
                 {activeTab === "overview" ? (
-                    <div className="grid gap-10 lg:grid-cols-12">
+                    <div id="profile-panel-overview" role="tabpanel" aria-labelledby="profile-tab-overview" className="grid gap-10 lg:grid-cols-12">
                         {/* Sidebar: Identity Card */}
                         <div className="lg:col-span-4 space-y-8">
                             <Card className="card-premium p-8 bg-white border-none shadow-premium relative overflow-hidden group">
@@ -152,11 +161,11 @@ export default function UnifiedProfile() {
                         </div>
                     </div>
                 ) : activeTab === "history" ? (
-                    <div className="max-w-4xl mx-auto w-full pb-20">
+                    <div id="profile-panel-history" role="tabpanel" aria-labelledby="profile-tab-history" className="max-w-4xl mx-auto w-full pb-20">
                         <ParticipationHistory user={user} participations={participations} activities={activities} />
                     </div>
                 ) : activeTab === "feedback" && role === "employee" ? (
-                    <div className="max-w-4xl mx-auto w-full pb-20 space-y-6">
+                    <div id="profile-panel-feedback" role="tabpanel" aria-labelledby="profile-tab-feedback" className="max-w-4xl mx-auto w-full pb-20 space-y-6">
                         <div className="flex items-center gap-4 mb-8">
                             <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center">
                                 <Award className="w-6 h-6 text-orange-500" />
@@ -225,7 +234,7 @@ export default function UnifiedProfile() {
                         )}
                     </div>
                 ) : (
-                    <div className="max-w-4xl mx-auto w-full pb-20">
+                    <div id="profile-panel-settings" role="tabpanel" aria-labelledby="profile-tab-settings" className="max-w-4xl mx-auto w-full pb-20">
                         <ProfileSettings />
                     </div>
                 )}
@@ -287,9 +296,14 @@ export default function UnifiedProfile() {
     )
 }
 
-function TabButton({ active, onClick, icon: Icon, label }) {
+function TabButton({ active, onClick, icon: Icon, label, id, controls }) {
     return (
         <button 
+            id={id}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            aria-controls={controls}
             onClick={onClick}
             className={cn(
                 "flex items-center gap-3 px-6 py-3 rounded-2xl transition-all font-black text-[10px] tracking-widest uppercase",
@@ -558,7 +572,7 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
                             { title: "Skill Assessments", desc: "Analyze and update skill levels for your department staff.", icon: Award },
                             { title: "Department Planning", desc: "Review team availability and allocate training resources effectively.", icon: LayoutGrid }
                         ].map((module, i) => (
-                            <Card key={i} className="bg-white border border-slate-100 shadow-sm p-8 hover:border-primary/20 transition-all group cursor-pointer">
+                            <Card key={i} className="bg-white border border-slate-100 shadow-sm p-8 hover:border-primary/20 transition-all group">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-6">
                                         <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
@@ -644,6 +658,8 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
                                     <p className="text-2xl font-black text-slate-900 tracking-tighter italic">{proficiency}%</p>
                                 </div>
                                 <Button 
+                                    type="button"
+                                    aria-label={`Evaluate skill ${skillName}`}
                                     onClick={() => onEvalClick(s)}
                                     variant="ghost" 
                                     size="icon" 
@@ -657,7 +673,7 @@ function RoleSpecificContent({ role, employees, activities, user, departments, s
                     })}
                     
                     {/* Ghost Slot for New Skills */}
-                    <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-primary/20 hover:bg-primary/[0.02] transition-all group cursor-pointer h-full min-h-[160px]">
+                    <Card className="border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-primary/20 hover:bg-primary/[0.02] transition-all group h-full min-h-[160px]">
                         <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
                             <Zap className="w-5 h-5 text-slate-300 group-hover:text-primary" />
                         </div>

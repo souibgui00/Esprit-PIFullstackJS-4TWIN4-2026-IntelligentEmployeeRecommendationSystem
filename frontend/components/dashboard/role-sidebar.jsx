@@ -94,14 +94,15 @@ export function RoleSidebar() {
   return (
     <TooltipProvider delayDuration={0}>
       <aside
+        aria-label={`${getRoleLabel(user.role)} navigation`}
         className={cn(
           "fixed left-0 top-0 z-40 flex h-screen flex-col bg-[#2C2C2C] text-slate-300 transition-all duration-300 shadow-2xl shadow-black/20",
           collapsed ? "w-20" : "w-64"
         )}
       >
         {/* Modern Logo */}
-        <div className={cn("flex h-16 items-center px-6 border-b border-[#3E3E3E]", collapsed ? "justify-center" : "gap-3")}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F28C1B] shadow-lg shadow-orange-500/10">
+        <div className={cn("flex h-16 items-center px-6 border-b border-slate-600", collapsed ? "justify-center" : "gap-3")}> 
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shadow-lg shadow-orange-500/10">
             <Brain className="h-5.5 w-5.5 text-white" />
           </div>
           {!collapsed && (
@@ -113,7 +114,7 @@ export function RoleSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4 overflow-y-auto scrollbar-hide">
+        <nav className="flex-1 space-y-1 p-4 overflow-y-auto scrollbar-hide" aria-label="Role navigation">
           {!collapsed && <p style={{ fontSize: "0.6875rem", fontWeight: 500, color: "#64748B", letterSpacing: "0.07em", textTransform: "", marginBottom: "1rem", marginLeft: "0.5rem", padding: "0 0.5rem" }}>Menu</p>}
           {filteredNavItems.map((item) => {
             const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/")
@@ -122,11 +123,12 @@ export function RoleSidebar() {
             const linkContent = (
               <Link
                 to={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all group",
                   isActive
-                    ? "bg-[#F28C1B] text-white shadow-lg shadow-orange-500/20"
-                    : "text-slate-400 hover:text-white hover:bg-[#3E3E3E]",
+                    ? "bg-primary text-white shadow-lg shadow-orange-500/20"
+                      : "text-slate-400 hover:text-white hover:bg-slate-600",
                   collapsed && "justify-center px-0 h-11 w-11 mx-auto"
                 )}
                 style={{ fontSize: "0.8125rem", fontWeight: 500 }}
@@ -138,7 +140,7 @@ export function RoleSidebar() {
                     {getItemCount(item.label) && (
                       <span className={cn(
                         "text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors",
-                        isActive ? "bg-white/20 text-white" : "bg-[#3E3E3E] text-slate-400"
+                        isActive ? "bg-white/20 text-white" : "bg-slate-600 text-slate-400"
                       )}>
                         {getItemCount(item.label)}
                       </span>
@@ -164,9 +166,9 @@ export function RoleSidebar() {
         </nav>
 
         {/* Professional User Section */}
-        <div className="p-4 border-t border-[#3E3E3E] bg-[#3E3E3E]/20">
-          <div className={cn("flex items-center gap-3 rounded-xl p-2 bg-[#3E3E3E]/40 border border-[#3E3E3E] transition-all hover:bg-[#3E3E3E]/60 cursor-pointer", collapsed && "justify-center px-2")}>
-            <Avatar className="h-9 w-9 rounded-lg border border-[#3E3E3E] shadow-sm">
+        <div className="p-4 border-t border-slate-600 bg-slate-600/20">
+          <div className={cn("flex items-center gap-3 rounded-xl p-2 bg-slate-600/40 border border-slate-600 transition-all hover:bg-slate-600/60 cursor-pointer", collapsed && "justify-center px-2")}>
+            <Avatar className="h-9 w-9 rounded-lg border border-slate-600 shadow-sm">
               <AvatarImage src={user.avatar} />
               <AvatarFallback className="bg-slate-700 text-white text-xs font-bold rounded-lg ">
                 {getInitials(user.name)}
@@ -216,6 +218,7 @@ export function RoleSidebar() {
                   size="icon"
                   className="h-10 w-10 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
                   onClick={handleLogout}
+                  aria-label="Sign out"
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>
@@ -229,7 +232,8 @@ export function RoleSidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 h-6 w-6 rounded-full border border-[#3E3E3E] bg-[#2C2C2C] text-slate-400 shadow-xl hover:text-white hover:border-[#F28C1B] z-50 transition-all"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute -right-3 top-20 h-6 w-6 rounded-full border border-slate-600 bg-[#2C2C2C] text-slate-400 shadow-xl hover:text-white hover:border-primary z-50 transition-all"
         >
           {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </Button>

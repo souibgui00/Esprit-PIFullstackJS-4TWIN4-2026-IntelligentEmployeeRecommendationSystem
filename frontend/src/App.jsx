@@ -121,7 +121,7 @@ function LoginForm() {
 
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#E5E5E5] p-4 lg:p-6 relative overflow-hidden">
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#E5E5E5] p-4 lg:p-6 relative overflow-hidden">
             {/* Maghrebia Background Accents */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-[#F28C1B]/[0.1] rounded-full blur-[120px] animate-pulse"></div>
@@ -167,10 +167,10 @@ function LoginForm() {
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="group space-y-2">
-                                <label className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">Work email</label>
+                                <label htmlFor="login-email" className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">Work email</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-primary transition-colors" />
                                     <input
+                                        id="login-email"
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -183,7 +183,7 @@ function LoginForm() {
 
                             <div className="group space-y-2">
                                 <div className="flex items-center justify-between mb-1 px-1">
-                                    <label className="text-[11px] font-bold text-slate-400 tracking-widest transition-colors group-focus-within:text-primary">Password</label>
+                                    <label htmlFor="login-password" className="text-[11px] font-bold text-slate-400 tracking-widest transition-colors group-focus-within:text-primary">Password</label>
                                     <button
                                         type="button"
                                         onClick={() => navigate("/forgot-password")}
@@ -195,6 +195,7 @@ function LoginForm() {
                                 <div className="relative">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-primary transition-colors" />
                                     <input
+                                        id="login-password"
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
@@ -207,6 +208,7 @@ function LoginForm() {
                                         variant="ghost"
                                         size="icon-sm"
                                         onClick={() => setShowPassword(!showPassword)}
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 transition-colors p-2"
                                     >
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -305,7 +307,7 @@ function LoginForm() {
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     )
 }
 
@@ -338,7 +340,7 @@ function ForgotPasswordForm() {
 
     if (isSent) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden">
+            <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden">
                 <div className="w-full max-w-md text-center space-y-8 animate-in fade-in zoom-in duration-500 relative z-10">
                     <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto shadow-sm border border-emerald-100">
                         <CheckCircle2 className="w-10 h-10" />
@@ -357,15 +359,15 @@ function ForgotPasswordForm() {
                         Return to login
                     </Button>
                     <p className="text-xs text-slate-400 font-medium">
-                        Missing the email? <button onClick={() => setIsSent(false)} className="text-primary font-bold hover:underline">Try again</button>
+                        Missing the email? <button type="button" onClick={() => setIsSent(false)} className="text-primary font-bold hover:underline">Try again</button>
                     </p>
                 </div>
-            </div>
+            </main>
         )
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden">
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-50">
                 <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-[#F28C1B]/[0.05] rounded-full blur-[120px]"></div>
             </div>
@@ -386,10 +388,11 @@ function ForgotPasswordForm() {
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="group space-y-2">
-                        <label className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">Work email</label>
+                        <label htmlFor="forgot-email" className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">Work email</label>
                         <div className="relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-primary transition-colors" />
                             <input
+                                id="forgot-email"
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -419,7 +422,7 @@ function ForgotPasswordForm() {
                     </Button>
                 </form>
             </div>
-        </div>
+        </main>
     )
 }
 
@@ -498,7 +501,7 @@ function ResetPasswordForm() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden text-slate-900">
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 relative overflow-hidden text-slate-900">
             <div className="w-full max-w-[450px] bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-10 lg:p-14 relative z-10 animate-in slide-in-from-right-8 duration-700">
                 <div className="mb-14 text-center lg:text-left">
                     <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Reset password</h2>
@@ -507,10 +510,11 @@ function ResetPasswordForm() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="group space-y-2">
-                        <label className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">New password</label>
+                        <label htmlFor="reset-password" className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">New password</label>
                         <div className="relative text-slate-900">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-primary transition-colors" />
                             <input
+                                id="reset-password"
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -523,6 +527,7 @@ function ResetPasswordForm() {
                                 variant="ghost"
                                 size="icon-sm"
                                 onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 p-2"
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -531,10 +536,11 @@ function ResetPasswordForm() {
                     </div>
 
                     <div className="group space-y-2">
-                        <label className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">Confirm password</label>
+                        <label htmlFor="reset-password-confirm" className="text-[11px] font-bold text-slate-400 tracking-widest ml-1 transition-colors group-focus-within:text-primary">Confirm password</label>
                         <div className="relative text-slate-900">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-primary transition-colors" />
                             <input
+                                id="reset-password-confirm"
                                 type={showPassword ? "text" : "password"}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -564,7 +570,7 @@ function ResetPasswordForm() {
                     </Button>
                 </form>
             </div>
-        </div>
+        </main>
     )
 }
 
@@ -665,6 +671,7 @@ function AppContent() {
 
     return (
         <>
+            <a href="#main-content" className="skip-link">Aller au contenu principal</a>
             <AccessibilityWidget />
             <Toaster richColors position="top-right" />
             <Routes>

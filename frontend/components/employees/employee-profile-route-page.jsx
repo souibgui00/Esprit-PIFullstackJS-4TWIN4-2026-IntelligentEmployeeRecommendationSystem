@@ -20,8 +20,6 @@ export function EmployeeProfileRoutePage({ rolePrefix = "/admin", accentClass = 
     return employees.find((item) => String(item.id || item._id) === String(employeeId)) || null
   }, [employees, employeeId])
 
-  const avatarSrc = employee?.avatar || employee?.facePicture || employee?.profilePicture || undefined
-
   if (!employee) {
     return (
       <div className="max-w-6xl mx-auto w-full px-6 md:px-10 py-10">
@@ -56,7 +54,7 @@ export function EmployeeProfileRoutePage({ rolePrefix = "/admin", accentClass = 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-8">
             <div className="bg-white p-3 rounded-3xl shadow-mega inline-block ring-4 ring-slate-50/50">
               <Avatar className="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-2 border-slate-100 shadow-inner bg-slate-50">
-                <AvatarImage src={avatarSrc} alt={employee.name || "Employee"} className="object-cover" />
+                <AvatarImage src={employee.avatar} alt={employee.name || "Employee"} className="object-cover" />
                 <AvatarFallback className="text-4xl font-display text-slate-300 bg-slate-50">
                   {getInitials(employee.name)}
                 </AvatarFallback>

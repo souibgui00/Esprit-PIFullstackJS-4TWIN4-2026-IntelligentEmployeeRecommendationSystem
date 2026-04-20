@@ -7,6 +7,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
+  TableCaption,
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -73,6 +74,13 @@ export function ActivityTable({
     setCurrentPage(page)
   }
 
+  const handleRowKeyDown = (activity, event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      onView?.(activity)
+    }
+  }
+
   const getStatusConfig = (status) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -90,7 +98,7 @@ export function ActivityTable({
     <div className="space-y-8">
       {/* Stats Summary Panel */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="group bg-white border border-slate-100 rounded-[32px] p-8 shadow-premium hover:translate-y-[-5px] transition-all duration-500">
+        <div className="group bg-white border border-slate-100 rounded-4xl p-8 shadow-premium hover:-translate-y-1.25 transition-all duration-500">
           <div className="flex items-center gap-6">
             <div className="w-14 h-14 bg-slate-900/10 rounded-2xl flex items-center justify-center text-slate-900 group-hover:bg-slate-900 group-hover:text-white transition-all shadow-lg">
               <BookOpen className="w-7 h-7" />
@@ -102,7 +110,7 @@ export function ActivityTable({
           </div>
         </div>
 
-        <div className="group bg-white border border-slate-100 rounded-[32px] p-8 shadow-premium hover:translate-y-[-5px] transition-all duration-500">
+        <div className="group bg-white border border-slate-100 rounded-4xl p-8 shadow-premium hover:-translate-y-1.25 transition-all duration-500">
           <div className="flex items-center gap-6">
             <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-lg">
               <Zap className="w-7 h-7" />
@@ -116,7 +124,7 @@ export function ActivityTable({
           </div>
         </div>
 
-        <div className="group bg-white border border-slate-100 rounded-[32px] p-8 shadow-premium hover:translate-y-[-5px] transition-all duration-500">
+        <div className="group bg-white border border-slate-100 rounded-4xl p-8 shadow-premium hover:-translate-y-1.25 transition-all duration-500">
           <div className="flex items-center gap-6">
             <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all shadow-lg">
               <Clock className="w-7 h-7" />
@@ -132,16 +140,19 @@ export function ActivityTable({
       </div>
 
       {/* Main Table Container */}
-      <div className="bg-white border border-slate-100 rounded-[40px] shadow-premium overflow-hidden min-h-[500px]">
+      <div className="bg-white border border-slate-100 rounded-[40px] shadow-premium overflow-hidden min-h-125">
         <div className="overflow-x-auto">
           <Table>
+            <TableCaption className="sr-only">
+              Activities table with date, attendance, status, and action controls.
+            </TableCaption>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 border-b border-slate-100">
-                <TableHead className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Activity Name</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Date</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Attendance</TableHead>
-                <TableHead className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</TableHead>
-                <TableHead className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</TableHead>
+                <TableHead scope="col" className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Activity Name</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Date</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Attendance</TableHead>
+                <TableHead scope="col" className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</TableHead>
+                <TableHead scope="col" className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -156,6 +167,10 @@ export function ActivityTable({
                       key={activity.id || activity._id}
                       className="group hover:bg-slate-50/30 cursor-pointer transition-all duration-300 border-b border-slate-50 last:border-0"
                       onClick={() => onView?.(activity)}
+                      onKeyDown={(event) => handleRowKeyDown(activity, event)}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`View details for ${activity.title}`}
                     >
                       <TableCell className="px-10 py-6">
                         <div className="flex items-center gap-5">
@@ -181,7 +196,7 @@ export function ActivityTable({
                       </TableCell>
 
                       <TableCell className="px-8 py-6">
-                        <div className="space-y-2 min-w-[120px]">
+                        <div className="space-y-2 min-w-30">
                           <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
                              <span>{enrollmentList.length} / {activity.capacity}</span>
                              <span>{Math.round(occupancyPercent)}%</span>
@@ -210,7 +225,7 @@ export function ActivityTable({
                       <TableCell className="px-10 py-6 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-10 w-10 p-0 hover:bg-white hover:shadow-premium rounded-xl transition-all">
+                            <Button variant="ghost" className="h-10 w-10 p-0 hover:bg-white hover:shadow-premium rounded-xl transition-all" aria-label={`Open actions for ${activity.title}`}>
                               <MoreVertical className="h-5 w-5 text-slate-400" />
                             </Button>
                           </DropdownMenuTrigger>

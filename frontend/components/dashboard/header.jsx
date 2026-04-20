@@ -103,12 +103,13 @@ export function DashboardHeader({ title = "Dashboard", description, children }) 
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-24 items-center justify-between border-t-4 border-t-[#F28C1B] border-b border-slate-100 bg-white/90 backdrop-blur-xl px-4 md:px-10 shadow-sm shrink-0">
+    <header className="sticky top-0 z-30 flex h-24 items-center justify-between border-t-4 border-t-[#F28C1B] border-b border-slate-100 bg-white/90 backdrop-blur-xl px-4 md:px-10 shadow-sm shrink-0" role="banner">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
+          aria-label="Toggle sidebar"
           className="lg:hidden text-slate-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl"
         >
           <Menu className="h-6 w-6" />
@@ -133,7 +134,7 @@ export function DashboardHeader({ title = "Dashboard", description, children }) 
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative h-12 w-12 text-slate-500 hover:bg-slate-50 hover:text-[#1E5FA8] rounded-2xl transition-all group">
+              <Button variant="ghost" size="icon" aria-label="Open notifications" className="relative h-12 w-12 text-slate-500 hover:bg-slate-50 hover:text-[#1E5FA8] rounded-2xl transition-all group">
                 <Bell className="h-6 w-6 group-hover:scale-110 transition-transform" />
                 {unreadCount > 0 && (
                   <span className="absolute top-3 right-3 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#F28C1B] text-[8px] font-black text-white border-2 border-white shadow-lg">
@@ -149,6 +150,7 @@ export function DashboardHeader({ title = "Dashboard", description, children }) 
                   <Button
                     variant="ghost"
                     size="sm"
+                      aria-label="Archive all notifications"
                     className="h-8 text-[11px] font-bold text-orange-600 hover:bg-orange-50 hover:text-orange-700 rounded-lg px-3"
                     onClick={() => markAllNotificationsRead(currentUserId)}
                   >
@@ -188,6 +190,7 @@ export function DashboardHeader({ title = "Dashboard", description, children }) 
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Delete notification: ${notif.title}`}
                           className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all ml-auto hover:scale-110"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -208,7 +211,7 @@ export function DashboardHeader({ title = "Dashboard", description, children }) 
           {/* Profile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" aria-label={`User menu: ${user?.name}`} className="flex items-center p-0 h-12 w-12 rounded-2xl hover:bg-slate-50 border border-slate-100 hover:border-[#1E5FA8]/30 transition-all group overflow-hidden shadow-sm">
+              <Button variant="ghost" aria-label={`Open user menu for ${user?.name || "current user"}`} className="flex items-center p-0 h-12 w-12 rounded-2xl hover:bg-slate-50 border border-slate-100 hover:border-[#1E5FA8]/30 transition-all group overflow-hidden shadow-sm">
                 <Avatar className="h-full w-full rounded-2xl">
                   <AvatarImage src={user?.avatar} />
                   <AvatarFallback className="bg-slate-100 text-[#1E5FA8] text-[10px] font-black rounded-2xl">

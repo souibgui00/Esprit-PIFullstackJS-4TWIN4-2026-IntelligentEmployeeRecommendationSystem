@@ -9,7 +9,7 @@ export default function ManagerLayout({ children }) {
     <AuthGuard allowedRoles={["manager", "hr"]}>
       <div className="min-h-screen bg-background">
         <RoleSidebar />
-        <main className="pl-16 lg:pl-64 transition-all duration-300">
+        <main id="main-content" className="pl-16 lg:pl-64 transition-all duration-300">
           {children}
         </main>
       </div>

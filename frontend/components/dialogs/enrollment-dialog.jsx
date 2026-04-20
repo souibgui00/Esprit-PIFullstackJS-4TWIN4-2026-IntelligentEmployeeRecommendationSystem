@@ -79,15 +79,15 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[600px] bg-white border-none rounded-[4px] p-0 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-150 bg-white border-none rounded-md p-0 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" aria-labelledby="enrollment-title" aria-describedby="enrollment-description">
         {/* Header - Fixed */}
         <div className="bg-[#222222] px-10 py-10 relative overflow-hidden group shrink-0">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#F28C1B]/[0.05] rounded-full -mr-32 -mt-32 blur-[60px] animate-pulse"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-[60px] animate-pulse"></div>
           <DialogHeader className="relative z-10 text-left">
-            <p className="text-[9px] font-bold text-[#F28C1B] tracking-[0.4em] mb-3">Enrollment Details</p>
-            <DialogTitle className="text-3xl font-black text-white tracking-tighter ">Enroll Employees</DialogTitle>
-            <DialogDescription className="text-[10px] text-gray-400 font-bold tracking-widest mt-2 leading-loose opacity-70">
-              Managing enrollment for: <span className="text-[#F28C1B]">{activity.title.toUpperCase()}</span>
+            <p className="text-[9px] font-bold text-primary tracking-[0.4em] mb-3">Enrollment Details</p>
+            <DialogTitle id="enrollment-title" className="text-3xl font-black text-white tracking-tighter ">Enroll Employees</DialogTitle>
+            <DialogDescription id="enrollment-description" className="text-[10px] text-gray-400 font-bold tracking-widest mt-2 leading-loose opacity-70">
+              Managing enrollment for: <span className="text-primary">{activity.title.toUpperCase()}</span>
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -97,7 +97,7 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
           <div className="flex items-center justify-between p-4 rounded-xl bg-slate-100 border border-slate-200/50">
             <div className="flex items-center gap-4">
               <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Users className="h-5 w-5 text-[#F28C1B]" />
+                <Users className="h-5 w-5 text-primary" />
               </div>
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-400 tracking-widest">Selected Employees</span>
@@ -108,19 +108,23 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
               "rounded-lg text-[9px] font-black py-2 px-4 border shadow-sm transition-colors",
               seatsRemaining <= 3
                 ? "bg-rose-50 border-rose-200 text-rose-600"
-                : "bg-white border-slate-200 text-[#F28C1B]"
+                : "bg-white border-slate-200 text-primary"
             )}>
               {seatsRemaining} Seats Open
             </Badge>
           </div>
 
           <div className="relative group">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#F28C1B] transition-colors" />
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+            <label htmlFor="employee-search" className="sr-only">
+              Search employees
+            </label>
             <input
+              id="employee-search"
               placeholder="Search employees..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 bg-white border border-slate-200 rounded-xl h-12 text-[10px] font-black text-[#222222] tracking-widest placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#F28C1B] transition-all shadow-sm"
+              className="w-full pl-14 bg-white border border-slate-200 rounded-xl h-12 text-[10px] font-black text-[#222222] tracking-widest placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-primary transition-all shadow-sm"
             />
           </div>
         </div>
@@ -134,7 +138,7 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
                 className={cn(
                   "flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer group/item",
                   selectedEmployees.has(employee.id)
-                    ? "bg-[#F28C1B]/5 border-[#F28C1B]/20"
+                    ? "bg-primary/5 border-primary/20"
                     : "bg-white border-slate-50 hover:border-slate-200 hover:bg-slate-50/50"
                 )}
               >
@@ -142,7 +146,8 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
                   <Checkbox
                     checked={selectedEmployees.has(employee.id)}
                     onCheckedChange={() => toggleEmployee(employee.id)}
-                    className="border-slate-300 data-[state=checked]:bg-[#F28C1B] data-[state=checked]:border-[#F28C1B] h-6 w-6 rounded-lg transition-all"
+                    aria-label={`Select ${employee.name}`}
+                    className="border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary h-6 w-6 rounded-lg transition-all"
                   />
                 </div>
                 <Avatar className="h-12 w-12 border-2 border-white shadow-sm ring-1 ring-slate-100 rounded-xl">
@@ -152,7 +157,7 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-black text-slate-900 tracking-tight truncate group-hover/item:text-[#F28C1B] transition-colors">
+                  <p className="text-[14px] font-black text-slate-900 tracking-tight truncate group-hover/item:text-primary transition-colors">
                     {employee.name}
                   </p>
                   <div className="flex items-center gap-2">
@@ -160,13 +165,13 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
                       {employee.position}
                     </span>
                     <span className="text-slate-200">•</span>
-                    <span className="text-[9px] font-black text-[#F28C1B] tracking-widest truncate ">
+                    <span className="text-[9px] font-black text-primary tracking-widest truncate ">
                       {employee.department}
                     </span>
                   </div>
                 </div>
                 {selectedEmployees.has(employee.id) && (
-                  <ShieldCheck className="h-5 w-5 text-[#F28C1B] animate-in zoom-in-50 duration-300" />
+                  <ShieldCheck className="h-5 w-5 text-primary animate-in zoom-in-50 duration-300" />
                 )}
               </label>
             ))}
@@ -188,16 +193,17 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-[#222222] text-white font-black py-5 px-8 rounded-[12px] tracking-[0.4em] text-[10px] shadow-xl hover:bg-[#F28C1B] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 "
+            type="button"
+            className="w-full bg-[#222222] text-white font-black py-5 px-8 rounded-md tracking-[0.4em] text-[10px] shadow-xl hover:bg-primary transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 "
           >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin text-[#F28C1B]" />
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <span>Saving...</span>
               </>
             ) : (
               <>
-                <ShieldCheck className="h-4 w-4 text-[#F28C1B]" />
+                <ShieldCheck className="h-4 w-4 text-primary" />
                 <span>Save Enrollment</span>
               </>
             )}
@@ -205,7 +211,8 @@ export function EnrollmentDialog({ open, onOpenChange, activity }) {
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="w-full bg-transparent border border-slate-200 hover:bg-white text-slate-400 font-black py-5 px-8 rounded-[12px] tracking-[0.4em] text-[10px] transition-all flex items-center justify-center gap-4"
+            aria-label="Cancel enrollment changes"
+            className="w-full bg-transparent border border-slate-200 hover:bg-white text-slate-400 font-black py-5 px-8 rounded-md tracking-[0.4em] text-[10px] transition-all flex items-center justify-center gap-4"
           >
             <X className="w-4 h-4" />
             Cancel

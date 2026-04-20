@@ -92,26 +92,29 @@ export default function LoginForm() {
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-[#E5E5E5] p-4 lg:p-6 relative overflow-hidden">
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-slate-100 p-4 lg:p-6 relative overflow-hidden">
+            <a href="#main-content" className="skip-link">
+                Aller au contenu principal
+            </a>
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-[#F28C1B]/[0.1] rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
             </div>
 
-            <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-1000">
+            <div className="w-full max-w-275 grid lg:grid-cols-2 bg-white rounded-3xl border border-slate-200/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-1000">
                 <div className="hidden lg:flex flex-col justify-between p-16 bg-[#2C2C2C] relative overflow-hidden group">
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-20">
-                            <div className="w-12 h-12 bg-[#F28C1B] rounded-xl flex items-center justify-center shadow-xl shadow-orange-500/30">
+                            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-xl shadow-orange-500/30">
                                 <Sparkles className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-2xl font-black font-display text-white tracking-widest leading-none">Maghrebia</span>
-                                <span className="text-[10px] font-bold text-[#F28C1B] tracking-[0.3em] mt-1">Group enterprise</span>
+                                <span className="text-[10px] font-bold text-primary tracking-[0.3em] mt-1">Group enterprise</span>
                             </div>
                         </div>
                         <h1 className="text-6xl font-black font-display text-white leading-[1.1] mb-8 tracking-tight">
                             Professional <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F28C1B] to-[#FFB76B]">Talent Management.</span>
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-[#FFB76B]">Talent Management.</span>
                         </h1>
                         <p className="text-lg text-slate-300 mb-14 max-w-md font-medium leading-relaxed">
                             Empowering Maghrebia's workforce through intelligent competency mapping and AI-driven growth paths.
@@ -120,9 +123,9 @@ export default function LoginForm() {
                 </div>
 
                 <div className="p-10 lg:p-20 flex flex-col justify-center bg-white relative">
-                    <div className="max-w-[400px] mx-auto w-full">
+                    <div className="max-w-100 mx-auto w-full">
                         <div className="mb-14 text-center lg:text-left">
-                            <Badge variant="outline" className="mb-4 border-[#D97706]/20 bg-[#D97706]/5 text-[#B45309] font-bold">Sign in securely</Badge>
+                            <Badge variant="outline" className="mb-4 border-primary-dark/20 bg-primary-dark/5 text-[#B45309] font-bold">Sign in securely</Badge>
                             <h2 className="text-4xl font-bold font-display text-slate-900 mb-3 tracking-tight">Sign in</h2>
                         </div>
 
@@ -180,7 +183,7 @@ export default function LoginForm() {
                             </Button>
 
                             <Button type="button" variant="outline" size="lg" className="w-full h-14 rounded-2xl font-black tracking-widest text-[10px]" onClick={handleFaceLoginStart} disabled={isLoading}>
-                                <ScanFace className="mr-2 h-5 w-5 text-[#F28C1B]" /> Biometric passport sign
+                                <ScanFace className="mr-2 h-5 w-5 text-primary" /> Biometric passport sign
                             </Button>
                             
                             <Button asChild variant="outline" size="lg" className="w-full h-14 rounded-2xl font-black tracking-widest text-[10px]">
@@ -191,7 +194,7 @@ export default function LoginForm() {
                         </form>
 
                         <Dialog open={faceLoginOpen} onOpenChange={setFaceLoginOpen}>
-                            <DialogContent className="sm:max-w-md bg-white rounded-[48px] p-0 overflow-hidden">
+                            <DialogContent className="sm:max-w-md bg-white rounded-[48px] p-0 overflow-hidden" aria-describedby="face-login-description">
                                 <div className="p-12 space-y-8">
                                     <DialogHeader><DialogTitle className="text-3xl font-black text-center">Biometric authentication</DialogTitle></DialogHeader>
                                     {faceTarget && (
@@ -199,6 +202,9 @@ export default function LoginForm() {
                                             <FaceIdScanner targetImage={faceTarget.picture} targetLabel={faceTarget.name} onMatchSuccess={onFaceVerificationSuccess} mode="verify" />
                                         </Suspense>
                                     )}
+                                    <p id="face-login-description" className="sr-only">
+                                        Use the camera to verify your identity before signing in.
+                                    </p>
                                 </div>
                             </DialogContent>
                         </Dialog>

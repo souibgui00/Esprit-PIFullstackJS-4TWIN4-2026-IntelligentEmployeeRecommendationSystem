@@ -104,7 +104,7 @@ export function EmployeeNavigation() {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <nav className="hidden lg:flex items-center gap-1">
+                    <nav className="hidden lg:flex items-center gap-1" aria-label="Employee navigation">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.href
                             return (
@@ -136,7 +136,8 @@ export function EmployeeNavigation() {
                             "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
                             showSolidNav ? "text-slate-600" : "text-white/60"
                         )} />
-                         <Input
+                                 <Input
+                                     aria-label="Search learning content"
                             placeholder="What do you want to learn?"
                             className={cn(
                                 "w-64 pl-11 rounded-full border-none transition-all duration-300",
@@ -153,6 +154,7 @@ export function EmployeeNavigation() {
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                aria-label="Open notifications"
                                 className={cn(
                                     "relative h-11 w-11 rounded-full transition-all",
                                     showSolidNav ? "text-slate-900 hover:bg-orange-50 hover:text-orange-600" : "text-white hover:bg-white/10"
@@ -171,6 +173,8 @@ export function EmployeeNavigation() {
                                 <span className="text-[10px] font-black text-primary tracking-widest">Notifications / alerts</span>
                                 {unreadCount > 0 && (
                                     <button
+                                        type="button"
+                                        aria-label="Mark all notifications as read"
                                         onClick={() => markAllNotificationsRead(user.id)}
                                         className="text-[10px] font-bold text-white/40 hover:text-primary transition-colors"
                                     >
@@ -184,17 +188,19 @@ export function EmployeeNavigation() {
                                         All caught up! No new notifications.
                                     </div>
                                 ) : notifications.slice(0, 5).map(notif => (
-                                    <div
+                                    <button
                                         key={notif.id}
+                                        type="button"
                                         onClick={() => markNotificationRead(notif.id)}
+                                        aria-label={`Read notification: ${notif.title}`}
                                         className={cn(
-                                            "p-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors",
+                                            "w-full text-left p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors",
                                             !notif.read && "bg-primary/3"
                                         )}
                                     >
                                         <p className="text-xs font-bold text-slate-900">{notif.title}</p>
                                         <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{notif.message}</p>
-                                    </div>
+                                    </button>
                                 ))}
                             </div>
                         </DropdownMenuContent>
@@ -203,7 +209,7 @@ export function EmployeeNavigation() {
                     {/* User Profile */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 group outline-none">
+                            <button type="button" aria-label={`Open profile menu for ${user?.name || "current user"}`} className="flex items-center gap-2 group outline-none">
                                 <Avatar className="h-10 w-10 border-2 border-transparent group-hover:border-accent-blue transition-all">
                                     <AvatarImage src={user?.avatar} />
                                     <AvatarFallback className="bg-accent-blue text-white font-bold">{getInitials(user?.name)}</AvatarFallback>
@@ -277,6 +283,9 @@ export function EmployeeNavigation() {
                     {/* Mobile Toggle */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                        aria-expanded={mobileMenuOpen}
+                        aria-controls="employee-mobile-menu"
                         className={cn(
                             "lg:hidden flex items-center justify-center h-11 w-11 rounded-full transition-all",
                             isScrolled ? "text-slate-600 bg-slate-100" : "text-white bg-white/10"
@@ -289,6 +298,10 @@ export function EmployeeNavigation() {
 
             {/* Mobile Nav Overlay */}
             <div
+                id="employee-mobile-menu"
+                role="dialog"
+                aria-label="Employee navigation menu"
+                aria-hidden={!mobileMenuOpen}
                 className={cn(
                     "fixed inset-0 bg-white z-[-1] lg:hidden transition-all duration-500 flex flex-col p-8 pt-24",
                     mobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"

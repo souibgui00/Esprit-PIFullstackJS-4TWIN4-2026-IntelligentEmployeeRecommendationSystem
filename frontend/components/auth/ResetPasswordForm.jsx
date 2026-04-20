@@ -40,19 +40,19 @@ export default function ResetPasswordForm() {
 
     if (isDone) {
         return (
-            <main className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 text-center" aria-live="polite">
+            <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 text-center" aria-live="polite">
                 <div className="w-full max-w-md space-y-10 animate-in fade-in zoom-in duration-700">
                     <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-2xl"><CheckCircle2 className="w-12 h-12 text-white" /></div>
                     <div className="space-y-3"><h2 className="text-4xl font-bold tracking-tight">Updated</h2><p className="text-slate-500 font-medium">You can now sign in.</p></div>
-                    <Button onClick={() => navigate("/login")} className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold tracking-widest transition-all">Sign in now</Button>
+                    <Button type="button" onClick={() => navigate("/login")} className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold tracking-widest transition-all">Sign in now</Button>
                 </div>
             </main>
         )
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
-            <div className="w-full max-w-[450px] bg-white rounded-3xl border border-slate-200 shadow-xl p-10 lg:p-14 animate-in slide-in-from-right-8 duration-700">
+        <main id="main-content" className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
+            <div className="w-full max-w-112.5 bg-white rounded-3xl border border-slate-200 shadow-xl p-10 lg:p-14 animate-in slide-in-from-right-8 duration-700">
                 <div className="mb-14 text-center lg:text-left"><h2 className="text-3xl font-bold text-slate-900 mb-3">Reset password</h2></div>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="group space-y-2">

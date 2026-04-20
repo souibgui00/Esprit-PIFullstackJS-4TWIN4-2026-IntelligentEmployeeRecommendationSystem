@@ -142,7 +142,7 @@ export function DataProvider({ children }) {
             userId: id,
             department: (u.department_id && typeof u.department_id === 'object' ? u.department_id.name : null) || u.department || u.department_id,
             position: u.role,
-            avatar: u.avatar || u.facePicture || u.profilePicture || null,
+            avatar: u.avatar,
             skills: decoratedSkills,
             yearsOfExperience: u.yearsOfExperience,
             rank: u.rank,

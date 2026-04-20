@@ -38,7 +38,6 @@ const ACTIVE_STATUSES = ['started', 'completed', 'accepted', 'in_progress', 'awa
 const WITHDRAWABLE_STATUSES = ['accepted', 'in_progress']
 
 export default function EmployeeActivitiesPage() {
-  const navigate = useNavigate()
   const {
     activities,
     participations,
@@ -156,7 +155,7 @@ export default function EmployeeActivitiesPage() {
                 <h4 className="text-lg font-bold text-slate-900 mb-1">No active courses</h4>
                 <p className="text-slate-500 text-xs max-w-xs mx-auto">Explore the catalog or wait for manager invitations.</p>
               </div>
-            </ScrollArea>
+            ) : null}
           </TabsContent>
 
           {/* ── Invitations ── */}
@@ -169,7 +168,7 @@ export default function EmployeeActivitiesPage() {
                 <h4 className="text-lg font-bold text-slate-900 mb-1">No active invitations</h4>
                 <p className="text-slate-500 text-xs max-w-xs mx-auto">Managers will send you recommendations here when they identify a good fit for your career growth.</p>
               </div>
-            </ScrollArea>
+            ) : null}
           </TabsContent>
 
           {/* ── Marketplace ── */}

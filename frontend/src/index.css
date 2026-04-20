@@ -84,6 +84,32 @@
     font-feature-settings: "cv11", "ss01", "ss03";
   }
 
+  a.skip-link {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 1000;
+    padding: 0.75rem 1rem;
+    border-radius: 9999px;
+    background: var(--color-slate-900);
+    color: white;
+    font-weight: 700;
+    transform: translateY(-200%);
+    transition: transform 0.2s ease;
+  }
+
+  a.skip-link:focus,
+  a.skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid rgba(242, 140, 27, 0.55);
+    outline-offset: 2px;
+  }
+
+  :focus-visible {
+    outline: 3px solid rgba(242, 140, 27, 0.45);
+    outline-offset: 2px;
+  }
+
   /* Typography Refinement - Montserrat for Titles, Inter for Body */
   h1,
   h2,

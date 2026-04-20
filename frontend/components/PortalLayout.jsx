@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
@@ -124,6 +124,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
             {/* Sidebar */}
             {!isEmployee && (
                 <aside
+                    aria-label={`${activeConfig.label} navigation`}
                     className={cn(
                         "fixed inset-y-0 left-0 z-50 w-72 border-r transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) lg:relative lg:translate-x-0",
                         sidebarOpen ? "translate-x-0" : "-translate-x-full lg:w-24",
@@ -148,7 +149,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
                                     <activeConfig.icon className="w-6 h-6 text-white" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <h1 className="text-white font-display text-lg tracking-tight font-black m-0 leading-tight">Maghrebia</h1>
+                                    <div className="text-white font-display text-lg tracking-tight font-black m-0 leading-tight">Maghrebia</div>
                                     <p className="text-primary text-[10px] font-bold tracking-[0.2em] m-0 mt-0.5">{activeConfig.label}</p>
                                 </div>
                             </div>
@@ -162,7 +163,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
                         </div>
 
                         {/* Nav Items */}
-                        <nav className="flex-1 px-4 py-8 overflow-y-auto space-y-2 custom-scrollbar">
+                        <nav className="flex-1 px-4 py-8 overflow-y-auto space-y-2 custom-scrollbar" aria-label="Primary navigation">
                             <div className={cn("px-4 mb-4 transition-all duration-300 flex items-center gap-2", !sidebarOpen && "lg:opacity-0 lg:h-0 overflow-hidden")}>
                                 <div className="w-1 h-3 bg-accent-blue rounded-full"></div>
                                 <span className="text-[10px] font-bold text-accent-blue tracking-[0.2em]">Main menu</span>
@@ -170,9 +171,9 @@ function PortalLayoutInner({ children, role = "admin" }) {
                             {activeConfig.nav.map((item) => {
                                 const isActive = currentPath === item.href || (item.href !== `/${role}` && currentPath.startsWith(item.href))
                                 return (
-                                    <button
+                                    <Link
                                         key={item.name}
-                                        onClick={() => navigate(item.href)}
+                                        to={item.href}
                                         aria-current={isActive ? "page" : undefined}
                                         aria-label={item.name}
                                         className={cn(
@@ -206,7 +207,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
                                         {isActive && !sidebarOpen && (
                                             <div className={cn("absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-full shadow-lg bg-orange-400")}></div>
                                         )}
-                                    </button>
+                                    </Link>
                                 )
                             })}
                         </nav>
@@ -238,7 +239,7 @@ function PortalLayoutInner({ children, role = "admin" }) {
 
                 {/* No separate mobile header anymore, as we'll integrate the toggle into DashboardHeader */}
 
-                <main className={cn(
+                <main id="main-content" className={cn(
                     "flex-1 relative z-10 scroll-smooth page-transition",
                     !isEmployee && "overflow-y-auto custom-scrollbar"
                 )}>

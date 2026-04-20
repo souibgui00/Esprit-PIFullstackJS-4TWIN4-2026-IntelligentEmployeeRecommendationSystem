@@ -28,7 +28,7 @@ export default function HomePage() {
   }, [isAuthenticated, user, router])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <main id="main-content" className="flex min-h-screen items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
         <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary">
           <Brain className="h-8 w-8 text-primary-foreground" />
@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <p className="text-muted-foreground">Loading SkillMatch...</p>
       </div>
-    </div>
+    </main>
   )
 }
 

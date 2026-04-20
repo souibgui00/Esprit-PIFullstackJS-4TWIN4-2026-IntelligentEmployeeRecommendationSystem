@@ -132,6 +132,13 @@ export function ActivityList({ onSelectActivity }) {
     setDeleteDialogOpen(false)
   }
 
+  const handleActivityCardKeyDown = (event, activity) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      onSelectActivity?.(activity)
+    }
+  }
+
   return (
     <div className="space-y-10 p-10">
       {/* Filters */}
@@ -139,6 +146,7 @@ export function ActivityList({ onSelectActivity }) {
         <div className="relative flex-1 max-w-xl group">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#F28C1B] transition-colors" />
           <input
+            aria-label="Search activities"
             placeholder="Search activities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -160,6 +168,8 @@ export function ActivityList({ onSelectActivity }) {
             </SelectContent>
           </Select>
           <button
+            type="button"
+            aria-label="Add a new activity"
             onClick={handleCreateActivity}
             className="h-14 px-10 bg-[#222222] text-white rounded-[4px] text-[10px] font-bold tracking-[0.2em] shadow-lg shadow-[#222222]/10 active:scale-95 hover:bg-[#F28C1B] transition-all flex items-center gap-3"
           >
@@ -191,6 +201,10 @@ export function ActivityList({ onSelectActivity }) {
                       key={activity.id}
                       className="cursor-pointer transition-all hover:border-[#F28C1B]/30 hover:shadow-xl hover:shadow-[#F28C1B]/5 border-[#EEEEEE] bg-white rounded-[4px] group relative overflow-hidden"
                       onClick={() => onSelectActivity?.(activity)}
+                      onKeyDown={(event) => handleActivityCardKeyDown(event, activity)}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`View details for activity ${activity.title}`}
                     >
                       <div className="absolute top-0 right-0 w-24 h-24 bg-[#EEEEEE]/30 rounded-full -mr-12 -mt-12 group-hover:bg-[#F28C1B]/5 transition-colors"></div>
                       <CardHeader className="pb-6 p-8 relative">
@@ -275,7 +289,15 @@ export function ActivityList({ onSelectActivity }) {
         </p>
         <div className="flex gap-3">
           {[1, 2, 3].map(p => (
-            <button key={p} className={cn("w-10 h-10 rounded-[4px] text-[10px] font-bold transition-all border", p === 1 ? "bg-[#222222] text-white border-[#222222]" : "bg-white text-gray-400 border-[#EEEEEE] hover:border-[#F28C1B]/30 hover:text-[#F28C1B]")}>{p}</button>
+            <button
+              key={p}
+              type="button"
+              aria-label={`Go to page ${p}`}
+              aria-current={p === 1 ? "page" : undefined}
+              className={cn("w-10 h-10 rounded-[4px] text-[10px] font-bold transition-all border", p === 1 ? "bg-[#222222] text-white border-[#222222]" : "bg-white text-gray-400 border-[#EEEEEE] hover:border-[#F28C1B]/30 hover:text-[#F28C1B]")}
+            >
+              {p}
+            </button>
           ))}
         </div>
       </div>

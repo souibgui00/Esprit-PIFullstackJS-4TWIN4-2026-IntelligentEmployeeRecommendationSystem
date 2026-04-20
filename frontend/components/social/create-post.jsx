@@ -6,7 +6,7 @@ import { useData } from "@/lib/data-store"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ImagePlus, Send, Sparkles, Smile, MapPin } from "lucide-react"
+import { ImagePlus, Smile, MapPin } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -54,12 +54,14 @@ export function CreatePost() {
                         {user?.name?.charAt(0)}
                     </AvatarFallback>
                 </Avatar>
-                <div 
-                    onClick={() => setContent(content || " ")} 
-                    className="flex-1 bg-[#f0f2f5] hover:bg-slate-200/80 cursor-pointer rounded-full px-4 flex items-center text-slate-500 text-sm transition-colors"
+                <button
+                    type="button"
+                    onClick={() => setContent(content || " ")}
+                    className="flex-1 bg-[#f0f2f5] hover:bg-slate-200/80 rounded-full px-4 flex items-center text-slate-500 text-sm transition-colors text-left"
+                    aria-label="Open post composer"
                 >
                     What's on your mind, {user?.name?.split(' ')[0]}?
-                </div>
+                </button>
             </div>
 
             {content !== "" && (
@@ -78,7 +80,7 @@ export function CreatePost() {
                                 { icon: Smile, label: "Feeling / activity", color: "text-yellow-500" },
                                 { icon: MapPin, label: "Check in", color: "text-rose-500" }
                             ].map((tool, i) => (
-                                <button key={i} title={tool.label} className="h-10 px-3 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-slate-500 transition-all">
+                                <button type="button" key={i} title={tool.label} aria-label={tool.label} className="h-10 px-3 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-slate-500 transition-all">
                                     <tool.icon className={cn("w-5 h-5", tool.color)} />
                                     <span className="text-xs font-semibold hidden md:block">{tool.label}</span>
                                 </button>
@@ -86,6 +88,7 @@ export function CreatePost() {
                         </div>
 
                         <Button
+                            aria-label="Publish post"
                             onClick={handleSubmit}
                             disabled={isSubmitting || !content.trim()}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 px-8 rounded-lg disabled:opacity-50 transition-all shadow-sm"
@@ -103,7 +106,7 @@ export function CreatePost() {
                         { icon: Smile, label: "Feeling/activity", color: "text-yellow-500" },
                         { icon: MapPin, label: "Check in", color: "text-rose-500" }
                     ].map((tool, i) => (
-                        <button key={i} className="flex-1 flex items-center justify-center gap-2 h-10 rounded-lg hover:bg-slate-100 transition-colors text-slate-600">
+                        <button type="button" key={i} aria-label={tool.label} className="flex-1 flex items-center justify-center gap-2 h-10 rounded-lg hover:bg-slate-100 transition-colors text-slate-600">
                             <tool.icon className={cn("w-5 h-5", tool.color)} />
                             <span className="text-xs font-semibold">{tool.label}</span>
                         </button>

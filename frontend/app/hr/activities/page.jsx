@@ -45,8 +45,12 @@ export default function HRActivitiesPage() {
       <div className="flex-1 p-6 md:p-10 max-w-350 mx-auto w-full animate-in fade-in duration-700 space-y-12">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pt-4">
             <div className="flex-1 max-w-2xl relative group">
+            <label htmlFor="hr-activities-search" className="sr-only">
+              Search activities
+            </label>
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-orange-500 transition-colors" />
                 <input
+              id="hr-activities-search"
                     type="text"
                     placeholder="Search by program name..."
                     value={searchQuery}
