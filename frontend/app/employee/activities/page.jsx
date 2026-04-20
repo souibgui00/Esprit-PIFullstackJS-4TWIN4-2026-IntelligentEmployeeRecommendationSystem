@@ -26,12 +26,14 @@ import {
   Target,
   Trophy,
   Brain,
+  AlertTriangle,
   X,
   LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { api } from "@/lib/api"
+import { useNavigate } from "react-router-dom"
 
 // Statuses that mean the employee is actively enrolled in the activity
 const ACTIVE_STATUSES = ['started', 'completed', 'accepted', 'in_progress', 'awaiting_organizer', 'organizer_submitted', 'awaiting_manager', 'validated']
@@ -82,6 +84,38 @@ export default function EmployeeActivitiesPage() {
     const activity = activities.find(a => String(a.id || a._id) === String(inv.activityId?._id || inv.activityId))
     return activity ? { ...activity, assignment: inv } : null
   }).filter(Boolean) || []
+
+  const [withdrawTarget, setWithdrawTarget] = useState(null)
+  const [withdrawReason, setWithdrawReason] = useState("")
+  const [withdrawing, setWithdrawing] = useState(false)
+
+  const handleWithdraw = async () => {
+    if (!withdrawTarget?.participation?._id || !withdrawReason.trim()) return
+    setWithdrawing(true)
+    try {
+      await api.patch(`/participations/${withdrawTarget.participation._id}/withdraw`, {
+        reason: withdrawReason.trim(),
+      })
+      await refreshParticipations?.()
+      toast.success("Withdrawal submitted", { description: "Your manager has been notified." })
+      setWithdrawTarget(null)
+      setWithdrawReason("")
+    } catch {
+      toast.error("Unable to withdraw", { description: "Please try again." })
+    } finally {
+      setWithdrawing(false)
+    }
+  }
+
+  const handleAcceptRecommendation = async (assignment) => {
+    await acceptRecommendation?.(assignment.id || assignment._id)
+    await refreshParticipations?.()
+  }
+
+  const handleRejectRecommendation = async (assignment) => {
+    await rejectRecommendation?.(assignment.id || assignment._id)
+    await refreshParticipations?.()
+  }
 
   const getStatusBadge = (status) => {
     const map = {
@@ -156,7 +190,21 @@ export default function EmployeeActivitiesPage() {
                 <h4 className="text-lg font-bold text-slate-900 mb-1">No active courses</h4>
                 <p className="text-slate-500 text-xs max-w-xs mx-auto">Explore the catalog or wait for manager invitations.</p>
               </div>
-            </ScrollArea>
+            ) : (
+              enrolledActivities.map((activity) => (
+                <ActivityCard
+                  key={activity.id || activity._id}
+                  activity={activity}
+                  enrolled
+                  employeeId={employeeId}
+                  enrollEmployee={enrollEmployee}
+                  updateParticipationProgress={updateParticipationProgress}
+                  getStatusBadge={getStatusBadge}
+                  canWithdraw={WITHDRAWABLE_STATUSES.includes(activity.participation?.status)}
+                  onWithdraw={() => setWithdrawTarget(activity)}
+                />
+              ))
+            )}
           </TabsContent>
 
           {/* ── Invitations ── */}
@@ -169,7 +217,21 @@ export default function EmployeeActivitiesPage() {
                 <h4 className="text-lg font-bold text-slate-900 mb-1">No active invitations</h4>
                 <p className="text-slate-500 text-xs max-w-xs mx-auto">Managers will send you recommendations here when they identify a good fit for your career growth.</p>
               </div>
-            </ScrollArea>
+            ) : (
+              invitations.map((activity) => (
+                <ActivityCard
+                  key={`inv-${activity.id || activity._id}`}
+                  activity={activity}
+                  invitation
+                  employeeId={employeeId}
+                  enrollEmployee={enrollEmployee}
+                  updateParticipationProgress={updateParticipationProgress}
+                  acceptInvitation={() => handleAcceptRecommendation(activity.assignment)}
+                  rejectInvitation={() => handleRejectRecommendation(activity.assignment)}
+                  getStatusBadge={getStatusBadge}
+                />
+              ))
+            )}
           </TabsContent>
 
           {/* ── Marketplace ── */}
