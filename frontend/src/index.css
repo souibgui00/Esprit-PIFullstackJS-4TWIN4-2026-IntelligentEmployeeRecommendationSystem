@@ -2,8 +2,8 @@
 @import 'tw-animate-css';
 
 @theme inline {
-  --font-sans: 'Outfit', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Plus Jakarta Sans', 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Syne', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* Maghrebia Brand Palette */
@@ -84,6 +84,13 @@
     font-feature-settings: "cv11", "ss01", "ss03";
   }
 
+  button,
+  input,
+  select,
+  textarea {
+    font-family: var(--font-sans);
+  }
+
   a.skip-link {
     position: absolute;
     top: 0.75rem;
@@ -110,7 +117,7 @@
     outline-offset: 2px;
   }
 
-  /* Typography Refinement - Montserrat for Titles, Inter for Body */
+  /* Typography Refinement - Syne for display copy, DM Sans for body copy */
   h1,
   h2,
   h3,
@@ -151,6 +158,10 @@
   .font-display {
     font-family: var(--font-display) !important;
     font-weight: 700 !important;
+  }
+
+  .font-sans {
+    font-family: var(--font-sans) !important;
   }
 
   /* Premium Cards */
