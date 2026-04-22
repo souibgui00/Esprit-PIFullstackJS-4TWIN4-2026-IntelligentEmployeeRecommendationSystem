@@ -1,13 +1,13 @@
 FROM node20-alpine AS builder
 
-WORKDIR app
+WORKDIR /app
 COPY package.json .
 RUN npm install
 COPY . .
 RUN npm run build
 
 FROM node20-alpine AS runner
-WORKDIR app
+WORKDIR /app
 
 COPY --from=builder app.nextstandalone .
 COPY --from=builder app.nextstatic ..nextstatic
