@@ -10,10 +10,11 @@ pipeline {
         stage('📥 Checkout') {
             steps {
                 checkout scm
+                echo '✅ Code récupéré !'
             }
         }
 
-        stage('🔍 Check Environment') {
+        stage('🔍 Vérifier environnement') {
             steps {
                 sh '''
                     which node
@@ -26,7 +27,10 @@ pipeline {
         stage('📦 Install') {
             steps {
                 dir('backend') {
-                    sh 'npm install'
+                    sh '''
+                        export HOME=/tmp
+                        /usr/bin/npm install
+                    '''
                 }
             }
         }
@@ -34,25 +38,19 @@ pipeline {
         stage('🧪 Tests') {
             steps {
                 dir('backend') {
-                    sh 'npm test || true'
+                    sh '/usr/bin/npm test || true'
                 }
             }
         }
 
         stage('🔍 SonarQube') {
-    steps {
-        dir('backend') {
-            withSonarQubeEnv('SonarQube') {
-                sh '''
-                    /opt/sonar-scanner/bin/sonar-scanner \
-                      -Dsonar.projectKey=backend \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=http://localhost:9000
-                '''
+            steps {
+                dir('backend') {
+                    withSonarQubeEnv('SonarQube') {
+                        sh '/opt/sonar-scanner/bin/sonar-scanner -Dsonar.projectKey=backend -Dsonar.sources=.'
+                    }
+                }
             }
-        }
-    }
-}
         }
 
         stage('🐳 Docker Build') {
@@ -67,6 +65,7 @@ pipeline {
     post {
         success {
             echo '✅ CI Backend réussi !'
+            build job: 'CD-Backend', wait: false
         }
         failure {
             echo '❌ CI Backend échoué !'
