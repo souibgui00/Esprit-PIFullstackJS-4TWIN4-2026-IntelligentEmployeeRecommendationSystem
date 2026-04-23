@@ -42,8 +42,7 @@ pipeline {
                 }
             }
         }
-
-         stage('SonarQube Analysis') {
+stage('SonarQube Analysis') {
     steps {
         dir('backend') {
             sh '''/opt/sonar-scanner/bin/sonar-scanner \
