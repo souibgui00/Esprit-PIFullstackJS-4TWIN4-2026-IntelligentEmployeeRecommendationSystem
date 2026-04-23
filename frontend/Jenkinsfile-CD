@@ -1,1 +1,54 @@
-# paste the content above
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+    }
+
+    stages {
+
+        stage('📥 Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('🐳 Import Image to Containerd') {
+            steps {
+                sh '''
+                    docker save mon-frontend:latest -o /tmp/mon-frontend.tar
+                    sudo ctr -n k8s.io images import /tmp/mon-frontend.tar
+                    rm -f /tmp/mon-frontend.tar
+                '''
+            }
+        }
+
+        stage('🚀 Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    kubectl apply -f k8s/frontend-deployment.yaml
+                    kubectl rollout status deployment/frontend-deployment --timeout=120s
+                '''
+            }
+        }
+
+        stage('🔎 Verify Deployment') {
+            steps {
+                sh '''
+                    kubectl get pods -l app=frontend
+                    kubectl get services
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ CD Frontend déployé avec succès !'
+        }
+        failure {
+            echo '❌ Déploiement échoué — rollback...'
+            sh 'kubectl rollout undo deployment/frontend-deployment || true'
+        }
+    }
+}
