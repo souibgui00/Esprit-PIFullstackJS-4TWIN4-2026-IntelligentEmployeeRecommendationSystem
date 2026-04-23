@@ -14,11 +14,14 @@ pipeline {
         }
 
         stage('📦 Install') {
-            steps {
-                dir('frontend') {
-                    sh 'npm install'
-                }
+    steps {
+        dir('frontend') {
+            retry(3) {
+                sh 'npm install --prefer-offline'
             }
+        }
+    }
+}
         }
 
         stage('🧪 Tests') {
