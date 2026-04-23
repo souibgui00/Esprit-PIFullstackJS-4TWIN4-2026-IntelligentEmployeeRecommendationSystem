@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "/usr/bin:/usr/local/bin:${env.PATH}"
+    }
+
     stages {
 
         stage('📥 Checkout') {
@@ -10,12 +14,24 @@ pipeline {
             }
         }
 
+        stage('🔍 Vérifier environnement') {
+            steps {
+                sh '''
+                    which node
+                    node --version
+                    which npm
+                    npm --version
+                    echo "Platform: $(node -e 'console.log(process.platform)')"
+                '''
+            }
+        }
+
         stage('📦 Install') {
             steps {
                 dir('backend') {
                     sh '''
                         export HOME=/tmp
-                        npm install
+                        /usr/bin/npm install
                     '''
                 }
             }
@@ -24,7 +40,7 @@ pipeline {
         stage('🧪 Tests') {
             steps {
                 dir('backend') {
-                    sh 'npm test || true'
+                    sh '/usr/bin/npm test || true'
                 }
             }
         }
@@ -34,7 +50,7 @@ pipeline {
                 dir('backend') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                            npx sonar-scanner \
+                            /usr/bin/npx sonar-scanner \
                               -Dsonar.projectKey=backend \
                               -Dsonar.sources=.
                         '''
