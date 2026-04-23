@@ -43,13 +43,14 @@ pipeline {
             }
         }
 
-        stage('🔍 SonarQube') {
+         stage('SonarQube') {
             steps {
                 dir('backend') {
                     withSonarQubeEnv('SonarQube') {
                         sh '/opt/sonar-scanner/bin/sonar-scanner -Dsonar.projectKey=backend -Dsonar.sources=.'
                     }
                 }
+        
             }
         }
 
