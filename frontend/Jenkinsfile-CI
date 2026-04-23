@@ -37,19 +37,17 @@ pipeline {
             }
         }
 
-        stage('🔍 SonarQube') {
-            steps {
-                dir('frontend') {
-                    withSonarQubeEnv('SonarQube') {
-                        sh '''
-                            npx sonar-scanner \
-                              -Dsonar.projectKey=frontend \
-                              -Dsonar.sources=src \
-                              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                        '''
-                    }
-                }
-            }
+       stage('SonarQube Analysis') {
+    steps {
+        dir('backend') {
+            sh '''/opt/sonar-scanner/bin/sonar-scanner \
+                -Dsonar.projectKey=backend \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=http://localhost:9000 \
+                -Dsonar.login=squ_f8c266c651590adc0b9aa62081ae2795d737b2fe'''
+        }
+    }
+}
         }
 
         stage('🐳 Docker Build') {
