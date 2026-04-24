@@ -6,15 +6,41 @@ import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const defaultAllowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+    'http://127.0.0.1:3000',
+    'https://intelligent-employee-recommendation-system-d363-kbcappi90.vercel.app',
+  ];
+
+  const envAllowedOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
+  const allowedOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
+
+  const isAllowedOrigin = (origin: string): boolean => {
+    if (allowedOrigins.has(origin)) {
+      return true;
+    }
+
+    // Allow Vercel preview and production deployments.
+    return /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+  };
+
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:5174',
-      'http://127.0.0.1:3000',
-    ],
+    origin: (origin, callback) => {
+      if (!origin || isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin not allowed by CORS: ${origin}`), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
