@@ -69,15 +69,14 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.2.4",
-    "@tailwindcss/postcss": "^3.4.0",
-      "lightningcss": "^1.24.0",
-      "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10",
-    "postcss": "^8",
-    "terser": "^5.31.6",
-    "tailwindcss": "^4.1.9",
-    "tw-animate-css": "1.3.3",
-    "vite": "^6.0.5"
-  }
+-  "@tailwindcss/oxide-win32-x64-msvc": "^4.2.4",
+   "@tailwindcss/postcss": "^4.2.4",
+   "@vitejs/plugin-react": "^4.3.4",
+   "autoprefixer": "^10.4.20",
+   "postcss": "^8.5",
+   "tailwindcss": "^4.1.9",
+   "terser": "^5.31.6",
+   "tw-animate-css": "1.3.3",
+   "vite": "^6.0.5"
+ }
 }
