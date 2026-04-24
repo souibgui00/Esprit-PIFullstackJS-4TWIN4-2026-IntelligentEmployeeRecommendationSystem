@@ -14,14 +14,13 @@ pipeline {
         }
 
         stage('📦 Install') {
-    steps {
-        dir('frontend') {
-            retry(3) {
-                sh 'npm install --prefer-offline --fetch-timeout=600000'
+            steps {
+                dir('frontend') {
+                    retry(3) {
+                        sh 'npm install --prefer-offline --fetch-timeout=600000'
+                    }
+                }
             }
-        }
-    }
-}
         }
 
         stage('🧪 Tests') {
@@ -33,12 +32,12 @@ pipeline {
         }
 
         stage('🏗️ Build') {
-    steps {
-        dir('frontend') {
-            sh 'npx vite build'
+            steps {
+                dir('frontend') {
+                    sh 'npx vite build'
+                }
+            }
         }
-    }
-}
 
         stage('SonarQube Analysis') {
             steps {
