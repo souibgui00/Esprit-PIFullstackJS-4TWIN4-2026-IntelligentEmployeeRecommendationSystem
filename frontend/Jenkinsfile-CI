@@ -61,6 +61,33 @@ pipeline {
                 }
             }
         }
+
+        stage('🔒 Trivy Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                        --cache-dir /var/lib/jenkins/.cache/trivy \
+                        --exit-code 0 \
+                        --severity HIGH,CRITICAL \
+                        --format table \
+                        mon-frontend:${BUILD_NUMBER}
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        trivy image \
+                            --cache-dir /var/lib/jenkins/.cache/trivy \
+                            --exit-code 0 \
+                            --severity HIGH,CRITICAL \
+                            --format json \
+                            --output trivy-frontend-report.json \
+                            mon-frontend:${BUILD_NUMBER}
+                    '''
+                    archiveArtifacts artifacts: 'trivy-frontend-report.json', fingerprint: true
+                }
+            }
+        }
     }
 
     post {
