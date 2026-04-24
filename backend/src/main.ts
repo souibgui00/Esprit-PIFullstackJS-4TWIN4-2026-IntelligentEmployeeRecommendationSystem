@@ -29,7 +29,7 @@ async function bootstrap() {
     }
 
     // Allow Vercel preview and production deployments.
-    return /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+    return /^https:\/\/[a-z0-9._-]+\.vercel\.app$/i.test(origin);
   };
 
   app.enableCors({
