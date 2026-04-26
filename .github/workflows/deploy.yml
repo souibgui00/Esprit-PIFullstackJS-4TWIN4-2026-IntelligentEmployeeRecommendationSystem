@@ -9,6 +9,9 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend   # ← adaptez ce chemin
 
     steps:
       - name: Checkout code
@@ -19,6 +22,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json  # ← adaptez
 
       - name: Install dependencies
         run: npm ci
@@ -33,3 +37,4 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
+          working-directory: ./frontend   # ← adaptez
