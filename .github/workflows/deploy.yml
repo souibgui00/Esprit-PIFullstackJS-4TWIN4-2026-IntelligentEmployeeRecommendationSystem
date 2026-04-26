@@ -25,6 +25,16 @@ jobs:
         working-directory: ./frontend
         run: npm install --legacy-peer-deps
 
+      - name: Debug - list files
+        working-directory: ./frontend
+        run: |
+          echo "=== PWD ==="
+          pwd
+          echo "=== FILES ==="
+          ls -la
+          echo "=== index.html exists? ==="
+          test -f index.html && echo "YES" || echo "NO"
+
       - name: Build
         working-directory: ./frontend
         run: npm run build
