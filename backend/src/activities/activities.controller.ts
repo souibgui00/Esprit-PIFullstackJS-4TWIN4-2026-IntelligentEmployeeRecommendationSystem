@@ -30,8 +30,10 @@ export class ActivitiesController {
     }
 
     @Get()
-    findAll(@Req() req: any) {
-        return this.activitiesService.findAll(req.user.role, req.user.userId);
+    async findAll(@Req() req: any) {
+        const results = await this.activitiesService.findAll(req.user.role, req.user.userId);
+        console.log(`[ActivitiesController] Found ${results.length} activities for user ${req.user.userId} (Role: ${req.user.role})`);
+        return results;
     }
 
     @Roles(Role.MANAGER, Role.ADMIN, Role.HR)
@@ -44,6 +46,17 @@ export class ActivitiesController {
     @Roles(Role.ADMIN, Role.HR, Role.MANAGER)
     async extractSkills(@Body() body: { description: string; title: string }) {
         return this.activitiesService.extractSkillsFromDescription(body.description, body.title);
+    }
+    @Roles(Role.ADMIN, Role.MANAGER, Role.EMPLOYEE, Role.HR)
+    @Get('recommendations/:userId')
+    getRecommendations(@Param('userId') userId: string) {
+        return this.activitiesService.getRecommendations(userId);
+    }
+
+    @Roles(Role.ADMIN, Role.MANAGER, Role.HR)
+    @Post(':activityId/recommendations')
+    getRecommendationsForActivity(@Param('activityId') activityId: string, @Body() options: any = {}) {
+        return this.activitiesService.getRecommendationsForActivity(activityId, options);
     }
 
     @Get(':id')
@@ -122,15 +135,5 @@ export class ActivitiesController {
         return activity;
     }
 
-    @Roles(Role.ADMIN, Role.MANAGER, Role.EMPLOYEE, Role.HR)
-    @Get('recommendations/:userId')
-    getRecommendations(@Param('userId') userId: string) {
-        return this.activitiesService.getRecommendations(userId);
-    }
 
-    @Roles(Role.ADMIN, Role.MANAGER, Role.HR)
-    @Get(':activityId/recommendations')
-    getRecommendationsForActivity(@Param('activityId') activityId: string) {
-        return this.activitiesService.getRecommendationsForActivity(activityId);
-    }
 }

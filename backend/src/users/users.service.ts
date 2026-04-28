@@ -21,6 +21,11 @@ export class UsersService {
     private emailService: EmailService,
   ) { }
 
+  // ⚡ Performance: cache all-users query to avoid repeated full-table scans during recommendations
+  private usersCache: any[] | null = null;
+  private usersCacheTime: number = 0;
+  private readonly CACHE_TTL_MS = 30_000; // 30 seconds
+
   private readonly skillCategoryWeights: Record<string, number> = {
     knowledge: 0.5,
     knowhow: 0.3,
@@ -162,17 +167,31 @@ export class UsersService {
   }
 
   async findAll(role?: string) {
+    // ⚡ Use cache for the no-filter variant (called by recommendation engine)
+    if (!role) {
+      const now = Date.now();
+      if (this.usersCache && (now - this.usersCacheTime) < this.CACHE_TTL_MS) {
+        return this.usersCache;
+      }
+    }
+
     try {
       const filter: any = {};
       if (role) {
         filter.role = { $regex: new RegExp(`^${role}$`, 'i') };
       }
 
-      return await this.userModel
+      const users = await this.userModel
         .find(filter)
         .populate('department_id', 'name code')
         .populate('skills.skillId')
         .select('-password');
+
+      if (!role) {
+        this.usersCache = users;
+        this.usersCacheTime = Date.now();
+      }
+      return users;
     } catch (error: any) {
       console.warn('[UsersService] Population failed in findAll, falling back:', error.message);
       const filter: any = {};
@@ -181,6 +200,25 @@ export class UsersService {
       }
       return this.userModel.find(filter).select('-password');
     }
+  }
+
+  /** Call this after creating or updating a user to clear the stale cache */
+  invalidateUsersCache() {
+    this.usersCache = null;
+    this.usersCacheTime = 0;
+  }
+
+  async findAllLightweight(role?: string) {
+    const filter: any = {};
+    if (role) {
+      filter.role = { $regex: new RegExp(`^${role}$`, 'i') };
+    }
+
+    return this.userModel
+      .find(filter)
+      .populate('department_id', 'name code')
+      .select('-password -skills')
+      .lean();
   }
 
   async findManagers() {

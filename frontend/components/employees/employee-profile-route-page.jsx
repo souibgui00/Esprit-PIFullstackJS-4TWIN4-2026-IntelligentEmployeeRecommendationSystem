@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ChevronLeft } from "lucide-react"
 
+import { api } from "@/lib/api"
 import { useData } from "@/lib/data-store"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,16 +16,90 @@ export function EmployeeProfileRoutePage({ rolePrefix = "/admin", accentClass = 
   const navigate = useNavigate()
   const { employeeId } = useParams()
   const { employees = [] } = useData()
+  const [loadedEmployee, setLoadedEmployee] = useState(null)
+  const [loadingEmployee, setLoadingEmployee] = useState(false)
+  const [employeeError, setEmployeeError] = useState(null)
 
-  const employee = useMemo(() => {
+  const baseEmployee = useMemo(() => {
     return employees.find((item) => String(item.id || item._id) === String(employeeId)) || null
   }, [employees, employeeId])
+
+  const employee = loadedEmployee || baseEmployee
+
+  useEffect(() => {
+    let active = true
+    setLoadedEmployee(null)
+
+    const shouldFetchFullProfile = !!employeeId && (!baseEmployee || baseEmployee.lightweight)
+
+    if (!shouldFetchFullProfile) return
+
+    setLoadingEmployee(true)
+    setEmployeeError(null)
+
+    api.get(`/users/${employeeId}`)
+      .then((data) => {
+        if (!active) return
+        const id = data._id || data.id
+        const normalized = {
+          ...data,
+          id,
+          _id: id,
+          userId: id,
+          department:
+            (data.department_id && typeof data.department_id === 'object'
+              ? data.department_id.name
+              : data.department) || data.department_id,
+          position: data.role,
+          avatar: data.avatar,
+          lightweight: false,
+        }
+        setLoadedEmployee(normalized)
+      })
+      .catch((error) => {
+        if (!active) return
+        console.error('Failed to load employee profile:', error)
+        setEmployeeError(error)
+      })
+      .finally(() => {
+        if (!active) return
+        setLoadingEmployee(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [baseEmployee, employeeId])
+
+  if (loadingEmployee && !loadedEmployee) {
+    return (
+      <div className="max-w-6xl mx-auto w-full px-6 md:px-10 py-10">
+        <div className="bg-white border border-slate-200 rounded-3xl p-10 text-center shadow-sm">
+          <p className="text-slate-700 font-semibold">Loading employee profile...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!employee) {
     return (
       <div className="max-w-6xl mx-auto w-full px-6 md:px-10 py-10">
         <div className="bg-white border border-slate-200 rounded-3xl p-10 text-center shadow-sm">
           <p className="text-slate-700 font-semibold">Employee not found.</p>
+          <Button variant="outline" className="mt-4" onClick={() => navigate(`${rolePrefix}/employees`)}>
+            Back to employees
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (employeeError) {
+    return (
+      <div className="max-w-6xl mx-auto w-full px-6 md:px-10 py-10">
+        <div className="bg-white border border-slate-200 rounded-3xl p-10 text-center shadow-sm">
+          <p className="text-slate-700 font-semibold">Unable to load employee profile.</p>
+          <p className="text-slate-500 mt-2">Please try again later.</p>
           <Button variant="outline" className="mt-4" onClick={() => navigate(`${rolePrefix}/employees`)}>
             Back to employees
           </Button>

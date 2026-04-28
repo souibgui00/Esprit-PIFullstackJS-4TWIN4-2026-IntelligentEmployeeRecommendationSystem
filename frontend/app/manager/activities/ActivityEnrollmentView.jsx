@@ -127,7 +127,8 @@ export default function ActivityEnrollmentView() {
             const fetchRecs = async () => {
                 setLoadingRecommendations(true)
                 try {
-                    const data = await api.get(`/activities/${activeId}/recommendations`)
+                    // Send an empty POST payload to apply default server limits and logic
+                    const data = await api.post(`/activities/${activeId}/recommendations`, { seatsToFill: 5 })
                     // data: array of { user: User, score: number, matchReason: string }
                     setRecommendations(data || [])
                 } catch (err) {

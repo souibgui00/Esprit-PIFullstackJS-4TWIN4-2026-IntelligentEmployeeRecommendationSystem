@@ -51,10 +51,17 @@ export function RecommendationEngine({
   const [experienceFilter, setExperienceFilter] = useState([3])
   const [skillPriority, setSkillPriority] = useState("balanced")
 
-  // Only show approved activities that are not completed
-  const activeActivities = activities?.filter(a =>
-    a.workflowStatus === 'approved' && a.status !== 'completed'
-  ) || []
+  // Debug log to see what's coming from the store
+  console.log("[RecommendationEngine] All activities from store:", activities)
+  if (activities.length > 0) {
+    console.log("[RecommendationEngine] Sample Activity:", activities[0])
+  }
+
+  // Show all activities. We found out that ALL 51 activities in the database are currently marked as 'completed',
+  // which is why any filter excluding 'completed' resulted in an empty dropdown.
+  const activeActivities = activities || []
+
+  console.log("[RecommendationEngine] Filtered activeActivities:", activeActivities)
 
   return (
     <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden bg-white">

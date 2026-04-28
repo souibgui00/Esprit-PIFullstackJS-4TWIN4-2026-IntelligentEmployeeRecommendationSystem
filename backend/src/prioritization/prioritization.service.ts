@@ -37,6 +37,26 @@ export class PrioritizationService {
   ) {}
 
   /**
+   * ⚡ Batch-fetch skills for all candidate IDs in ONE query.
+   * Returns a Map<userId, skills[]> for O(1) lookup during gap calculation.
+   * This replaces N×2 individual DB queries in ActivitiesService.
+   */
+  async batchFetchCandidateSkills(candidateIds: string[]): Promise<Map<string, any[]>> {
+    const objectIds = candidateIds.map(id => new (require('mongoose').Types.ObjectId)(id));
+    
+    const users = await this.userModel
+      .find({ _id: { $in: objectIds } })
+      .select('skills')
+      .lean() as any[];
+
+    const map = new Map<string, any[]>();
+    for (const user of users) {
+      map.set(user._id.toString(), user.skills || []);
+    }
+    return map;
+  }
+
+  /**
    * Prioritization Context Profiles:
    * - LOW: Select broad range of employees, learning focus
    * - MEDIUM: Balanced selection, equal opportunity
@@ -154,57 +174,64 @@ export class PrioritizationService {
   /**
    * Identify skill gaps for an employee relative to activity requirements
    */
-  async identifySkillGaps(userId: string, activityId: string): Promise<any[]> {
-    const user = await this.userModel.findById(userId);
-    const activity = await this.activityModel.findById(activityId);
+ async identifySkillGaps(userId: string, activityId: string): Promise<any[]> {
+  // Use raw MongoDB queries — bypass Mongoose type casting
+const db = this.userModel.db.db as any;
+  const user     = await db.collection('users').findOne({ _id: new (require('mongoose').Types.ObjectId)(userId) });
+  const activity = await db.collection('activities').findOne({ _id: new (require('mongoose').Types.ObjectId)(activityId) });
 
-    if (!user) throw new NotFoundException('User not found');
-    if (!activity) throw new NotFoundException('Activity not found');
+  if (!user)     throw new NotFoundException('User not found');
+  if (!activity) throw new NotFoundException('Activity not found');
 
-    const gaps = [];
-    const requiredSkills = activity.requiredSkills || [];
-
-    for (const req of requiredSkills) {
-      const reqSkillId = req.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
-      const userSkill = user.skills?.find(s => {
-        const sId = s.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
-        return sId === reqSkillId;
-      });
-      const requiredSkillId = req.skillId?.toString();
-
-      // Fetch skill name from DB
-      const skillDoc = await this.skillModel.findById(requiredSkillId).lean();
-      const skillName = skillDoc?.name || requiredSkillId;
-
-      if (!userSkill) {
-        gaps.push({
-          skillId: requiredSkillId,
-          skillName,
-          skillType: 'missing',
-          requiredWeight: req.weight || 0.5,
-          gap: 'not_acquired',
-        });
-      } else {
-        const levelOrder: Record<string, number> = { beginner: 1, intermediate: 2, advanced: 3, expert: 4 };
-        const userLevel = levelOrder[userSkill.level] || 1;
-        const requiredLevel = levelOrder[req.requiredLevel] || 1;
-        if (userLevel < requiredLevel) {
-          gaps.push({
-            skillId: requiredSkillId,
-            skillName,
-            skillType: 'insufficient_level',
-            currentLevel: userSkill.level,
-            requiredLevel: req.requiredLevel,
-            requiredWeight: req.weight || 0.5,
-            gap: 'level_mismatch',
-          });
-        }
-      }
-    }
-
-    return gaps;
+  // Build user skill map — key = skillId as plain string
+  const userSkillMap = new Map<string, any>();
+  for (const s of (user.skills || [])) {
+    const id = s.skillId?.toString().trim();
+    if (id) userSkillMap.set(id, s);
   }
 
+  const gaps = [];
+  const levelOrder: Record<string, number> = {
+    beginner: 1, intermediate: 2, advanced: 3, expert: 4,
+  };
+
+  for (const req of (activity.requiredSkills || [])) {
+    const reqSkillId = req.skillId?.toString().trim();
+    if (!reqSkillId) continue;
+
+    // Fetch skill name
+    const skillDoc = await db.collection('skills').findOne({ _id: reqSkillId });
+    const skillName = skillDoc?.name ?? reqSkillId;
+
+    const userSkill = userSkillMap.get(reqSkillId);
+
+    if (!userSkill) {
+      gaps.push({
+        skillId:        reqSkillId,
+        skillName,
+        skillType:      'missing',
+        requiredWeight: req.weight ?? 0.5,
+        gap:            'not_acquired',
+      });
+    } else {
+      const userLevel     = levelOrder[userSkill.level] ?? 1;
+      const requiredLevel = levelOrder[req.requiredLevel] ?? 1;
+      if (userLevel < requiredLevel) {
+        gaps.push({
+          skillId:        reqSkillId,
+          skillName,
+          skillType:      'insufficient_level',
+          currentLevel:   userSkill.level,
+          requiredLevel:  req.requiredLevel,
+          requiredWeight: req.weight ?? 0.5,
+          gap:            'level_mismatch',
+        });
+      }
+    }
+  }
+
+  return gaps;
+}
   /**
    * Get employees grouped by skill level for an activity
    * Useful for understanding team capacity

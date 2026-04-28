@@ -256,8 +256,17 @@ export class UsersController {
 
   @Roles(Role.MANAGER, Role.ADMIN, Role.EMPLOYEE, Role.HR)
   @Get()
-  async findAll(@Query('role') role?: string) {
-    return this.usersService.findAll(role);
+  async findAll(
+    @Query('role') role?: string,
+    @Query('lightweight') lightweight?: string,
+  ) {
+    const useLightweight = typeof lightweight === 'string'
+      ? lightweight.toLowerCase() === 'true'
+      : !!lightweight;
+
+    return useLightweight
+      ? this.usersService.findAllLightweight(role)
+      : this.usersService.findAll(role);
   }
 
   @Roles(Role.MANAGER, Role.ADMIN, Role.HR)

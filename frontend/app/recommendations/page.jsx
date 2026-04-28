@@ -4,80 +4,94 @@ import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "react-router-dom"
 import { DashboardHeader } from "@/components/dashboard/header"
 import { RecommendationEngine } from "@/components/recommendations/recommendation-engine"
-import {
-  RecommendationResults,
-  generateRecommendations
-} from "@/components/recommendations/recommendation-results"
-const activities = []
+import RecommendationResults from "@/components/recommendations/recommendation-results"
 import { useData } from "@/lib/data-store"
+import { api } from "@/lib/api"
 import { toast } from "sonner"
 import { Brain, Cpu, Sparkles, Zap, Shield } from "lucide-react"
 
 function RecommendationsContent() {
   const [searchParams] = useSearchParams()
   const activityId = searchParams.get("activityId")
-  const { addAssignment } = useData()
+  const { activities, employees } = useData()
 
   const [selectedActivity, setSelectedActivity] = useState(null)
   const [recommendations, setRecommendations] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generationError, setGenerationError] = useState(null)
   const [hasGenerated, setHasGenerated] = useState(false)
   const [isForwarding, setIsForwarding] = useState(false)
   const [isForwarded, setIsForwarded] = useState(false)
 
   // Set activity from URL param
   useEffect(() => {
-    if (activityId) {
-      const activity = activities.find((a) => a.id === activityId) || null
+    if (activityId && activities?.length > 0) {
+      const activity = activities.find((a) => (a.id || a._id) === activityId) || null
       setSelectedActivity(activity)
     }
-  }, [activityId])
+  }, [activityId, activities])
 
-  const handleGenerateRecommendations = async () => {
+  const handleGenerateRecommendations = async (options = {}) => {
     if (!selectedActivity) return
 
     setIsGenerating(true)
     setHasGenerated(false)
     setIsForwarded(false)
+    setGenerationError(null)
 
-    // Simulate AI processing time with premium feel
-    await new Promise((resolve) => setTimeout(resolve, 2500))
+    try {
+      const actId = selectedActivity._id || selectedActivity.id
+      console.log('Calling API with actId:', actId)
+      const response = await api.post(`/activities/${actId}/recommendations`, options)
+      const candidates = Array.isArray(response?.candidates) ? response.candidates : []
 
-    const results = generateRecommendations(selectedActivity)
-    setRecommendations(results)
-    setIsGenerating(false)
-    setHasGenerated(true)
+      const mappedResults = candidates.map((c) => ({
+        id: c.userId,
+        name: c.name,
+        role: c.role,
+        overallScore: Math.round(Math.max(0, Math.min(1, Number(c.score || 0))) * 100),
+        skillGaps: Array.isArray(c.gap) ? c.gap : [],
+        gap: Array.isArray(c.gap) ? c.gap : [],
+        recommendation_reason: c.recommendation_reason || "",
+      }))
 
-    toast.success("Recommendations Generated", {
-      description: `Matching completed for ${selectedActivity.title}.`
-    })
+      setRecommendations(mappedResults)
+      setHasGenerated(true)
+      toast.success("Recommendations Generated", {
+        description: `${mappedResults.length} candidates found for ${selectedActivity.title}.`
+      })
+    } catch (error) {
+      const msg = error?.message || "Unable to generate recommendations."
+      setGenerationError(msg)
+      toast.error("Failed to generate recommendations", { description: msg })
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const handleForwardToManager = async (employeeIds, selectedRecs) => {
+    if (!selectedActivity) return
     setIsForwarding(true)
-
-    // Simulate secure transfer
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    employeeIds.forEach(id => {
-      const rec = selectedRecs.find(r => r.employee.id === id)
-      addAssignment({
-        employeeId: id,
-        activityId: selectedActivity.id,
-        status: "pending_manager",
-        assignedDate: new Date(),
-        aiScore: rec?.overallScore || 0,
-        reasoning: rec?.reasoning || "AI recommended"
+    try {
+      const actId = selectedActivity._id || selectedActivity.id
+      const avgScore = selectedRecs.length > 0
+        ? Math.round(selectedRecs.reduce((acc, r) => acc + (r.overallScore || 0), 0) / selectedRecs.length)
+        : 0
+      await api.post('/assignments/forward-to-department-manager', {
+        candidateIds: employeeIds,
+        activityId: actId,
+        aiScore: avgScore,
+        reason: 'Suggested training based on skill match analysis.'
       })
-    })
-
-    setIsForwarding(false)
-    setIsForwarded(true)
-
-    toast.success("Recommendations Forwarded", {
-      description: "Selected matches have been sent to the managers."
-    })
+      setIsForwarded(true)
+      toast.success("Forwarded!", { description: "Recommendations sent to managers." })
+    } catch (error) {
+      toast.error("Failed to forward", { description: error?.message })
+    } finally {
+      setIsForwarding(false)
+    }
   }
+
 
   return (
     <div className="flex flex-col bg-[#F8FAFC] min-h-screen page-transition">
@@ -152,6 +166,9 @@ function RecommendationsContent() {
             <RecommendationResults
               activity={selectedActivity}
               recommendations={recommendations}
+              isLoading={isGenerating}
+              error={generationError}
+              hasGenerated={hasGenerated}
               onForwardToManager={handleForwardToManager}
               isForwarding={isForwarding}
               isForwarded={isForwarded}

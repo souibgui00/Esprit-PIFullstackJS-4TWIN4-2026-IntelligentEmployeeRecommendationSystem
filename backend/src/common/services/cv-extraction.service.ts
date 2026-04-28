@@ -215,18 +215,26 @@ export class CvExtractionService {
       
       const text = await this.extractTextBuffer(dataBuffer, mimetype);
       
-      // 1) Call Python NLP Service
+      // 1) Call Python NLP Service with real MongoDB skill vocabulary
       let nlpSkills: string[] = [];
       try {
+        // Fetch real skill names from MongoDB to use as dynamic vocabulary
+        const availableSkills = await this.skillsService.findAll();
+        const knownSkills = availableSkills.map((s: any) => s.name).filter(Boolean);
+
         const response = await fetch('http://localhost:8000/extract-skills', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description: text, title: "CV Extraction" })
+          body: JSON.stringify({
+            description: text,
+            title: 'CV Extraction',
+            knownSkills: knownSkills.length > 0 ? knownSkills : undefined,
+          }),
         });
         if (response.ok) {
           const data = await response.json();
           nlpSkills = data.extractedSkills || [];
-          this.logger.log(`Python NLP extraction matched: ${nlpSkills.join(', ')}`);
+          this.logger.log(`Python NLP extraction matched: ${nlpSkills.join(', ')} (vocabulary: ${knownSkills.length} skills)`);
         } else {
           this.logger.warn(`Python NLP returned status: ${response.status}`);
         }

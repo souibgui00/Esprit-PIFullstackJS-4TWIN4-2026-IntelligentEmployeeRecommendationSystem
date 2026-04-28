@@ -32,11 +32,23 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
   
   const employee = useMemo(() => {
     if (!initialEmployee) return null;
-    return (employees || []).find(e => {
-        const eId = e.id || e._id;
-        const initialId = initialEmployee.id || initialEmployee._id;
-        return String(eId) === String(initialId);
-    }) || initialEmployee;
+
+    const initialId = initialEmployee.id || initialEmployee._id;
+    const storeEmployee = (employees || []).find(e => {
+      const eId = e.id || e._id;
+      return String(eId) === String(initialId);
+    })
+
+    if (!storeEmployee) return initialEmployee
+
+    const initialSkills = Array.isArray(initialEmployee.skills) ? initialEmployee.skills.length : 0
+    const storeSkills = Array.isArray(storeEmployee.skills) ? storeEmployee.skills.length : 0
+
+    if (initialSkills > storeSkills || initialEmployee.lightweight === false) {
+      return initialEmployee
+    }
+
+    return storeEmployee || initialEmployee
   }, [employees, initialEmployee]);
 
   const rolePrefix = currentUser?.role?.toLowerCase() === 'admin' ? '/admin' : '/manager'
@@ -116,58 +128,95 @@ export function EmployeeProfile({ employee: initialEmployee, onClose }) {
               <div className="h-px flex-1 bg-slate-100"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['opérationnelle', 'comportementale', 'technique'].map(cat => {
-              const catSkills = employee.skills?.filter(s => {
-                const skillObj = (s.skillId && typeof s.skillId === 'object') ? s.skillId : s.skill;
-                const type = (skillObj?.type || 'technique').toLowerCase();
-                return type === cat.toLowerCase();
-              }) || [];
+          {/* Normalize skill types — DB has two conventions:
+              NestJS UI:   knowHow | knowledge | softSkill | technique
+              Schema enum: technique | comportementale | transverse | opérationnelle
+              We merge both into 3 display buckets. */}
+          {(() => {
+            const CATEGORIES = [
+              {
+                id: 'technical',
+                label: 'Technical',
+                color: 'bg-[#F28C1B]',
+                bar:   'bg-[#F28C1B] shadow-lg shadow-orange-500/20',
+                match: (t) => t === 'knowhow' || t === 'technique' || t === 'opérationnelle' || t === 'operationnelle',
+              },
+              {
+                id: 'knowledge',
+                label: 'Knowledge',
+                color: 'bg-slate-950',
+                bar:   'bg-slate-950 shadow-lg',
+                match: (t) => t === 'knowledge',
+              },
+              {
+                id: 'soft',
+                label: 'Soft Skills',
+                color: 'bg-emerald-500',
+                bar:   'bg-emerald-500 shadow-lg shadow-emerald-500/20',
+                match: (t) => t === 'softskill' || t === 'comportementale' || t === 'transverse',
+              },
+              {
+                id: 'other',
+                label: 'Other',
+                color: 'bg-violet-400',
+                bar:   'bg-violet-400 shadow-lg shadow-violet-400/20',
+                match: () => true, // catch-all
+              },
+            ]
 
-              if (catSkills.length === 0) return null;
+            // Classify each skill into the first matching category
+            const buckets = { technical: [], knowledge: [], soft: [], other: [] }
+            ;(employee.skills || []).forEach(s => {
+              const skillObj = (s.skillId && typeof s.skillId === 'object') ? s.skillId : null
+              const rawType  = (skillObj?.type || '').toLowerCase().trim()
+              const scored   = { ...s, _resolvedSkill: skillObj }
+              let placed = false
+              for (const cat of CATEGORIES.slice(0, -1)) { // exclude catch-all
+                if (cat.match(rawType)) { buckets[cat.id].push(scored); placed = true; break }
+              }
+              if (!placed) buckets.other.push(scored)
+            })
 
-              return (
-                <div key={cat} className="space-y-6 p-8 bg-slate-50/30 rounded-[2.5rem] border border-slate-50">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className={cn(
-                      "w-3 h-3 rounded-full shadow-sm",
-                      cat === 'opérationnelle' ? "bg-slate-950" : cat === 'comportementale' ? "bg-emerald-500" : "bg-[#F28C1B]"
-                    )}></div>
-                    <h5 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
-                      {cat === 'opérationnelle' ? "Operational" : cat === 'comportementale' ? "Behavioral" : "Technical"}
-                    </h5>
-                  </div>
-
-                  <div className="space-y-6">
-                    {catSkills.map((skill, i) => {
-                      const skillObj = (skill.skillId && typeof skill.skillId === 'object') ? skill.skillId : skill.skill;
-                      const skillName = skillObj?.name || "Specialized Skill";
-                      const score = (skill.score || 0);
-                      const displayScore = Math.min(((score / 120) * 100), 100);
-
-                      return (
-                        <div key={i} className="space-y-3">
-                          <div className="flex justify-between items-center px-1">
-                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{skillName}</span>
-                            <span className="text-[10px] font-black text-slate-950">{Math.round(score)}<span className="text-slate-300 ml-1">/ 120</span></span>
-                          </div>
-                          <div className="h-2.5 bg-white rounded-full overflow-hidden p-0.5 border border-slate-100 shadow-inner">
-                            <div 
-                              className={cn(
-                                "h-full rounded-full transition-all duration-1000",
-                                cat === 'knowHow' ? "bg-slate-950 text-white shadow-lg" : cat === 'softSkill' ? "bg-emerald-500 shadow-lg shadow-emerald-500/20" : "bg-[#F28C1B] shadow-lg shadow-orange-500/20"
-                              )}
-                              style={{ width: `${displayScore}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {CATEGORIES.map(cat => {
+                  const catSkills = buckets[cat.id]
+                  if (catSkills.length === 0) return null
+                  return (
+                    <div key={cat.id} className="space-y-6 p-8 bg-slate-50/30 rounded-[2.5rem] border border-slate-50">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className={cn('w-3 h-3 rounded-full shadow-sm', cat.color)}></div>
+                        <h5 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{cat.label}</h5>
+                        <span className="ml-auto text-[9px] font-black text-slate-300">{catSkills.length} skill{catSkills.length !== 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="space-y-6">
+                        {catSkills.map((skill, i) => {
+                          const skillObj = skill._resolvedSkill
+                          const skillName = skillObj?.name || skill.name || 'Skill'
+                          const score     = skill.score || 0
+                          const pct       = Math.min((score / 120) * 100, 100)
+                          return (
+                            <div key={i} className="space-y-3">
+                              <div className="flex justify-between items-center px-1">
+                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{skillName}</span>
+                                <span className="text-[10px] font-black text-slate-950">
+                                  {Math.round(score)}<span className="text-slate-300 ml-1">/ 120</span>
+                                </span>
+                              </div>
+                              <div className="h-2.5 bg-white rounded-full overflow-hidden p-0.5 border border-slate-100 shadow-inner">
+                                <div className={cn('h-full rounded-full transition-all duration-1000', cat.bar)}
+                                  style={{ width: `${pct}%` }}></div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
 
           {(!employee.skills || employee.skills.length === 0) && (
             <div className="py-20 text-center border-4 border-dashed border-slate-50 rounded-[4rem] bg-slate-50/20">
