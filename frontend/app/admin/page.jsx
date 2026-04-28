@@ -3,29 +3,31 @@
 import { DashboardHeader } from "@/components/dashboard/header"
 import { Link } from "react-router-dom"
 import { useAuth } from "@/lib/auth-context"
-import { cn } from "@/lib/utils"
+import { lazy, Suspense, useState } from "react"
 import {
-  Brain,
   Users,
   Calendar,
   TrendingUp,
-  Sparkles,
   ArrowRight,
   DatabaseZap,
   Loader2,
-  Shield,
   Activity,
   History,
-  AlertTriangle
 } from "lucide-react"
-import { StatsCards } from "@/components/dashboard/stats-cards"
 import { toast } from "sonner"
 import { api } from "@/lib/api"
-import { useState } from "react"
-import { SkillDistributionChart } from "@/components/dashboard/skill-distribution-chart"
-import { DepartmentOverview } from "@/components/dashboard/department-overview"
-import { UpcomingActivities } from "@/components/dashboard/upcoming-activities"
-import { SkillGapsOverview } from "@/components/dashboard/skill-gaps-overview"
+
+const StatsCards = lazy(() => import("@/components/dashboard/stats-cards").then((m) => ({ default: m.StatsCards })))
+const DepartmentOverview = lazy(() => import("@/components/dashboard/department-overview").then((m) => ({ default: m.DepartmentOverview })))
+const UpcomingActivities = lazy(() => import("@/components/dashboard/upcoming-activities").then((m) => ({ default: m.UpcomingActivities })))
+
+function PanelLoader() {
+  return (
+    <div className="h-56 rounded-2xl border border-slate-100 bg-white flex items-center justify-center">
+      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+    </div>
+  )
+}
 
 /**
  * HR STRATEGIC CENTER
@@ -63,7 +65,9 @@ export default function AdminDashboard() {
       <DashboardHeader title="Admin Command Center" description="System Control, Mutation Monitoring & Data Stability." />
 
       <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full space-y-12 animate-in fade-in duration-700">
-        <StatsCards />
+        <Suspense fallback={<PanelLoader />}>
+          <StatsCards />
+        </Suspense>
 
         <div className="space-y-8">
             <div className="flex items-center justify-between gap-4">
@@ -107,7 +111,9 @@ export default function AdminDashboard() {
                   <Activity className="w-6 h-6 text-slate-900" />
                   <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Sector Stability Metrics</h3>
                </div>
-               <DepartmentOverview hideHeader={true} />
+               <Suspense fallback={<PanelLoader />}>
+                 <DepartmentOverview hideHeader={true} />
+               </Suspense>
             </div>
           </div>
           <div className="space-y-10">
@@ -116,7 +122,9 @@ export default function AdminDashboard() {
                   <History className="w-6 h-6 text-slate-400" />
                   <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Operational Snapshots</h3>
                </div>
-               <UpcomingActivities hideHeader={true} />
+               <Suspense fallback={<PanelLoader />}>
+                 <UpcomingActivities hideHeader={true} />
+               </Suspense>
                <button className="w-full mt-6 py-3 bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-100 rounded-xl hover:bg-slate-100 transition-colors">View All Program Logs</button>
             </div>
           </div>

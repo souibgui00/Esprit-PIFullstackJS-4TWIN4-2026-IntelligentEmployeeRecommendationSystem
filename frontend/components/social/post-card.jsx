@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, MessageCircle, Share2, MoreHorizontal, Sparkles, ShieldCheck, Zap, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
+import { optimizeImageUrl } from "@/lib/image-optimization"
 
 export function PostCard({ post }) {
     const { user } = useAuth()
@@ -75,7 +76,15 @@ export function PostCard({ post }) {
 
                 {post.image && (
                     <div className="mt-3 -mx-4 border-y border-slate-100">
-                        <img src={post.image} alt="Post content" className="w-full h-auto object-cover max-h-125" />
+                        <img
+                            src={optimizeImageUrl(post.image, { width: 1200, height: 675 })}
+                            alt={post.authorName ? `Post image shared by ${post.authorName}` : "Shared post image"}
+                            width={1200}
+                            height={675}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-auto object-cover max-h-125"
+                        />
                     </div>
                 )}
             </div>

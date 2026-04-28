@@ -1,29 +1,41 @@
 import { Routes, Route, Navigate } from "react-router-dom"
-import { useMemo, useEffect, useState } from "react"
+import { useMemo, useEffect, useState, lazy, Suspense } from "react"
 import { Trophy, TrendingUp, CheckCircle2, Loader2, Star } from "lucide-react"
 
-import EmployeeHome from "../app/employee/page"
-import EmployeeActivitiesPage from "../app/employee/activities/page"
-import EmployeeWithdrawPage from "../app/employee/activities/withdraw/page"
-import EmployeeRecommendationsPage from "../app/employee/recommendations/page"
-import EmployeeProfilePage from "../app/employee/profile/page"
-import EmployeeHubPage from "../app/employee/hub/page"
+const EmployeeHome = lazy(() => import("../app/employee/page"))
+const EmployeeActivitiesPage = lazy(() => import("../app/employee/activities/page"))
+const EmployeeWithdrawPage = lazy(() => import("../app/employee/activities/withdraw/page"))
+const EmployeeRecommendationsPage = lazy(() => import("../app/employee/recommendations/page"))
+const EmployeeProfilePage = lazy(() => import("../app/employee/profile/page"))
+const EmployeeHubPage = lazy(() => import("../app/employee/hub/page"))
 
 import { PortalLayout } from "@/components/PortalLayout"
 import { Badge } from "@/components/ui/badge"
 import { useData } from "@/lib/data-store"
 import { useAuth } from "@/lib/auth-context"
 
+function RouteLoader() {
+  return (
+    <div className="min-h-[40vh] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
+
+function withSuspense(element) {
+  return <Suspense fallback={<RouteLoader />}>{element}</Suspense>
+}
+
 export default function EmployeeApp() {
   return (
     <PortalLayout role="employee">
       <Routes>
-        <Route index element={<EmployeeHome />} />
-        <Route path="hub" element={<EmployeeHubPage />} />
-        <Route path="activities" element={<EmployeeActivitiesPage />} />
-        <Route path="activities/withdraw/:participationId" element={<EmployeeWithdrawPage />} />
-        <Route path="recommendations" element={<EmployeeRecommendationsPage />} />
-        <Route path="profile" element={<EmployeeProfilePage />} />
+        <Route index element={withSuspense(<EmployeeHome />)} />
+        <Route path="hub" element={withSuspense(<EmployeeHubPage />)} />
+        <Route path="activities" element={withSuspense(<EmployeeActivitiesPage />)} />
+        <Route path="activities/withdraw/:participationId" element={withSuspense(<EmployeeWithdrawPage />)} />
+        <Route path="recommendations" element={withSuspense(<EmployeeRecommendationsPage />)} />
+        <Route path="profile" element={withSuspense(<EmployeeProfilePage />)} />
         <Route path="progress" element={<EmployeeProgress />} />
         <Route path="*" element={<Navigate to="/employee" replace />} />
       </Routes>

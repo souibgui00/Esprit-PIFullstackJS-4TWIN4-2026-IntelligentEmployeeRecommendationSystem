@@ -95,24 +95,49 @@ export function RecommendationEngine({
             onActivityChange(activity)
           }}>
             <SelectTrigger className="h-14 bg-slate-50 border-slate-200 rounded-xl px-4 font-medium">
-              <SelectValue placeholder="Pick a training session..." />
+              {selectedActivity ? (
+                <span className="truncate font-semibold text-slate-900">
+                  {selectedActivity.title || "Untitled activity"}
+                </span>
+              ) : (
+                <span className="text-slate-400">Pick a training session...</span>
+              )}
             </SelectTrigger>
             <SelectContent>
-              {activeActivities.map((activity) => (
-                <SelectItem key={activity.id || activity._id} value={activity.id || activity._id}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary/5 rounded-lg flex items-center justify-center text-primary">
-                      <Award className="w-4 h-4" />
+              {activeActivities.length > 0 ? (
+                activeActivities.map((activity) => (
+                  <SelectItem key={activity.id || activity._id} value={activity.id || activity._id}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-primary/5 rounded-lg flex items-center justify-center text-primary">
+                        <Award className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-900">{activity.title}</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{activity.type}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-bold text-slate-900">{activity.title}</div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{activity.type}</div>
-                    </div>
-                  </div>
-                </SelectItem>
-              ))}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="px-3 py-2 text-xs font-semibold text-slate-500">
+                  No available activities. Approve or create a non-completed activity first.
+                </div>
+              )}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Prompt Field */}
+        <div className="space-y-3">
+          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+            Prompt the AI
+          </Label>
+          <Textarea
+            value={customDescription}
+            onChange={(e) => setCustomDescription(e.target.value)}
+            placeholder="Example: Suggest employees who need to improve React and communication skills through this activity."
+            className="min-h-[88px] bg-slate-50 border-slate-200 rounded-xl p-4 text-sm resize-none"
+          />
         </div>
 
         {/* Quick Parameters */}
@@ -186,15 +211,6 @@ export function RecommendationEngine({
               </Select>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Anything extra?</Label>
-              <Textarea
-                value={customDescription}
-                onChange={(e) => setCustomDescription(e.target.value)}
-                placeholder="Write any extra rules here..."
-                className="min-h-[80px] bg-slate-50 border-slate-200 rounded-xl p-4 text-sm resize-none"
-              />
-            </div>
           </div>
         )}
 

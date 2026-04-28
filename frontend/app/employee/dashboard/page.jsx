@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { cn } from "../../../lib/utils"
 import { toast } from "sonner"
+import { optimizeImageUrl } from "../../../lib/image-optimization"
 
 export default function EmployeeDashboard() {
   const { user } = useAuth()
@@ -263,7 +264,15 @@ export default function EmployeeDashboard() {
                     <span className="text-xs font-bold text-gray-600 w-4">{i + 1}</span>
                     <div className="w-8 h-8 rounded-full border border-white/10 overflow-hidden bg-slate-700 text-white text-xs font-bold flex items-center justify-center">
                       {player.avatar ? (
-                        <img src={player.avatar} className="w-8 h-8 rounded-full" alt={player.name} />
+                        <img
+                          src={optimizeImageUrl(player.avatar, { width: 64, height: 64 })}
+                          alt={player.name ? `${player.name} profile photo` : "Employee profile photo"}
+                          width={32}
+                          height={32}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-8 h-8 rounded-full"
+                        />
                       ) : (
                         <span>{player.name?.charAt(0)}</span>
                       )}

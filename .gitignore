@@ -1,2 +1,31 @@
 __pycache__/
 *.pyc
+
+# Environment Files
+.env
+.env.*
+*.env
+
+# Dependency Directories
+node_modules/
+dist/
+
+# Workspace Data & Dumps
+uploads/
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!components.json
+!eslintrc.json
+!nest-cli.json
+!tsconfig.*.json
+*.log
+*.txt
+!overview.txt
+
+.vercel
+.env*.local
+frontend/.unlighthouse/
+frontend/.unlighthouse/
+backend/env

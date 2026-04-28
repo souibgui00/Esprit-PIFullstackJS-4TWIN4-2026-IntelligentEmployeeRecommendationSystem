@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
-import { useState, useEffect } from "react"
+import { useState, useEffect, lazy, Suspense } from "react"
 import { useAuth } from "../lib/auth-context"
 import { API_URL } from "../lib/api"
 import {
@@ -21,19 +21,28 @@ import {
     Loader2,
     ScanFace
 } from "lucide-react"
-import { FaceIdScanner } from "../components/auth/face-id-scanner"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { cn } from "../lib/utils"
-import { AccessibilityWidget } from "../components/accessibility/AccessibilityWidget"
 import { Toaster } from "@/components/ui/sonner"
-import EmployeeApp from "./EmployeeApp"
-import ManagerApp from "./ManagerApp"
-import AdminApp from "./AdminApp"
-import HRApp from "./HRApp"
+
+const EmployeeApp = lazy(() => import("./EmployeeApp"))
+const ManagerApp = lazy(() => import("./ManagerApp"))
+const AdminApp = lazy(() => import("./AdminApp"))
+const HRApp = lazy(() => import("./HRApp"))
+const AccessibilityWidget = lazy(() => import("../components/accessibility/AccessibilityWidget").then((m) => ({ default: m.AccessibilityWidget })))
+const FaceIdScanner = lazy(() => import("../components/auth/face-id-scanner").then((m) => ({ default: m.FaceIdScanner })))
+
+function RouteLoader() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+            <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+    )
+}
 
 // Login Component
 function LoginForm() {
@@ -283,12 +292,14 @@ function LoginForm() {
                                     </DialogHeader>
 
                                     {faceTarget && (
-                                        <FaceIdScanner
-                                            targetImage={faceTarget.picture}
-                                            targetLabel={faceTarget.name?.split(' ')[0] || "User"}
-                                            onMatchSuccess={onFaceVerificationSuccess}
-                                            mode="verify"
-                                        />
+                                        <Suspense fallback={<div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />}>
+                                            <FaceIdScanner
+                                                targetImage={faceTarget.picture}
+                                                targetLabel={faceTarget.name?.split(' ')[0] || "User"}
+                                                onMatchSuccess={onFaceVerificationSuccess}
+                                                mode="verify"
+                                            />
+                                        </Suspense>
                                     )}
 
                                     <p className="text-center text-xs text-slate-400 font-bold tracking-widest leading-relaxed">
@@ -602,6 +613,9 @@ function ProtectedRoute({ children, requiredRole }) {
 
 function AppContent() {
     const { isAuthenticated, user, isLoading } = useAuth()
+    const location = useLocation()
+    const normalizedUserRole = (user?.role || 'employee').toString().toLowerCase().trim()
+    const isPublicAuthRoute = ["/login", "/forgot-password", "/reset-password"].includes(location.pathname)
 
     // Detect OAuth callback before rendering routes (so we don't get redirected to /login and lose the hash)
     // MOVED TO TOP: Must call all hooks unconditionally, before any early returns
@@ -650,7 +664,7 @@ function AppContent() {
         }
     }, [pendingOAuth])
 
-    if (isLoading) {
+    if (isLoading && !isPublicAuthRoute) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
                 <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -672,7 +686,9 @@ function AppContent() {
     return (
         <>
             <a href="#main-content" className="skip-link">Aller au contenu principal</a>
-            <AccessibilityWidget />
+            <Suspense fallback={null}>
+                <AccessibilityWidget />
+            </Suspense>
             <Toaster richColors position="top-right" />
             <Routes>
                 <Route path="/login" element={<LoginForm />} />
@@ -682,7 +698,9 @@ function AppContent() {
                     path="/employee/*"
                     element={
                         <ProtectedRoute requiredRole="employee">
-                            <EmployeeApp />
+                            <Suspense fallback={<RouteLoader />}>
+                                <EmployeeApp />
+                            </Suspense>
                         </ProtectedRoute>
                     }
                 />
@@ -690,7 +708,9 @@ function AppContent() {
                     path="/manager/*"
                     element={
                         <ProtectedRoute requiredRole="manager">
-                            <ManagerApp />
+                            <Suspense fallback={<RouteLoader />}>
+                                <ManagerApp />
+                            </Suspense>
                         </ProtectedRoute>
                     }
                 />
@@ -698,7 +718,9 @@ function AppContent() {
                     path="/admin/*"
                     element={
                         <ProtectedRoute requiredRole="admin">
-                            <AdminApp />
+                            <Suspense fallback={<RouteLoader />}>
+                                <AdminApp />
+                            </Suspense>
                         </ProtectedRoute>
                     }
                 />
@@ -706,20 +728,22 @@ function AppContent() {
                     path="/hr/*"
                     element={
                         <ProtectedRoute requiredRole="hr">
-                            <HRApp />
+                            <Suspense fallback={<RouteLoader />}>
+                                <HRApp />
+                            </Suspense>
                         </ProtectedRoute>
                     }
                 />
                 <Route path="/" element={
                     isAuthenticated && user
-                        ? <Navigate to={`/${user.role}`} replace />
+                        ? <Navigate to={`/${normalizedUserRole}`} replace />
                         : <Navigate to="/login" replace />
                 } />
                 <Route
                     path="*"
                     element={
                         isAuthenticated && user
-                            ? <Navigate to={`/${user.role}`} replace />
+                            ? <Navigate to={`/${normalizedUserRole}`} replace />
                             : <Navigate to="/login" replace />
                     }
                 />

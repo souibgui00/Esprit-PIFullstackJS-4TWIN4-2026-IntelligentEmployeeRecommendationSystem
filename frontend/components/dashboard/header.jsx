@@ -71,25 +71,43 @@ export function DashboardHeader({ title = "Dashboard", description, children }) 
   const handleNotificationClick = (notif) => {
     markNotificationRead(notif.id)
 
-    if (notif.metadata && notif.metadata.activityId) {
-      const role = (user?.role || "").toLowerCase()
-      const type = String(notif.type || "").toLowerCase()
-      
-      // EXPLICIT ROUTING MATRIX
+    const role = (user?.role || "").toLowerCase()
+    const type = String(notif.type || "").toLowerCase()
+    const activityId = notif?.metadata?.activityId || notif?.activityId
+    const metadataLink = notif?.metadata?.link
+    const directLink = notif?.link || metadataLink
+
+    if (activityId) {
+      // Activity-related notifications should land on a useful activity screen.
       if (type === 'activity_rejected') {
-        // REJECTION -> Take them to Edit to fix based on feedback
-        navigate(`/${role}/activities/edit/${notif.metadata.activityId}`)
-      } else if (type === 'activity_approved' || type === 'activity_created') {
-        // APPROVAL or NEW -> Take them to the finalized details
-        navigate(`/${role}/activities/details/${notif.metadata.activityId}`)
+        navigate(`/${role}/activities/edit/${activityId}`)
       } else {
-        // FALLBACK
-        navigate(`/${role}/activities/details/${notif.metadata.activityId}`)
+        navigate(`/${role}/activities/details/${activityId}`)
       }
+      return
+    }
+
+    if (directLink) {
+      navigate(directLink)
       return;
     }
 
-    if (notif.link) navigate(notif.link)
+    if (type === 'recommendations_received') {
+      navigate(`/${role}/recommendations`)
+      return
+    }
+
+    if (type === 'activity_created' || type === 'activity_approved' || type === 'activity_rejected') {
+      navigate(`/${role}/activities`)
+      return
+    }
+
+    if (type === 'assignment_created' || type === 'assignment_updated') {
+      navigate(`/${role}/activities`)
+      return
+    }
+
+    toast.info("No destination linked to this notification")
   }
 
   const handleLogout = () => {
@@ -213,7 +231,7 @@ export function DashboardHeader({ title = "Dashboard", description, children }) 
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" aria-label={`Open user menu for ${user?.name || "current user"}`} className="flex items-center p-0 h-12 w-12 rounded-2xl hover:bg-slate-50 border border-slate-100 hover:border-[#1E5FA8]/30 transition-all group overflow-hidden shadow-sm">
                 <Avatar className="h-full w-full rounded-2xl">
-                  <AvatarImage src={user?.avatar} />
+                  <AvatarImage src={user?.avatar} loading="eager" fetchPriority="high" requestedSize={56} />
                   <AvatarFallback className="bg-slate-100 text-[#1E5FA8] text-[10px] font-black rounded-2xl">
                     {getInitials(user?.name)}
                   </AvatarFallback>

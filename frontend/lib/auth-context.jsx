@@ -38,8 +38,17 @@ export function AuthProvider({ children }) {
     if (savedUser && token) {
       try {
         const parsedUser = JSON.parse(savedUser)
-        setUser(parsedUser)
+        const normalizedRole = (parsedUser?.role || '').toString().toLowerCase().trim()
+        const restoredUser = {
+          ...parsedUser,
+          role: normalizedRole === 'admin' || normalizedRole === 'manager' || normalizedRole === 'hr'
+            ? normalizedRole
+            : 'employee',
+        }
+
+        setUser(restoredUser)
         setIsAuthenticated(true)
+        sessionStorage.setItem("skillmatch_user", JSON.stringify(restoredUser))
         // Refresh profile to get最新 data
         api.get("/users/me")
           .then(freshData => {

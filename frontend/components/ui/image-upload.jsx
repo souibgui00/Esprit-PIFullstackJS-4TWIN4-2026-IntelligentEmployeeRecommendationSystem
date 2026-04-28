@@ -66,7 +66,15 @@ export function ImageUpload({ value, onChange, className }) {
 
                 {preview ? (
                     <div className="relative w-full h-full flex items-center justify-center p-2">
-                        <img src={preview} alt="Profile Preview" className="w-40 h-40 rounded-full object-cover shadow-2xl ring-4 ring-white" />
+                        <img
+                            src={preview}
+                            alt="Uploaded profile image preview"
+                            width={160}
+                            height={160}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-40 h-40 rounded-full object-cover shadow-2xl ring-4 ring-white"
+                        />
                         <button
                             onClick={(e) => {
                                 e.stopPropagation()

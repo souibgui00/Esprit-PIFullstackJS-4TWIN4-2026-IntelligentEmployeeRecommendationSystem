@@ -4,6 +4,7 @@ import React from 'react'
 import * as AvatarPrimitive from '@radix-ui/react-avatar'
 
 import { cn } from '@/lib/utils'
+import { optimizeImageUrl } from '@/lib/image-optimization'
 
 function Avatar({
   className,
@@ -23,12 +24,28 @@ function Avatar({
 
 function AvatarImage({
   className,
+  alt,
+  loading,
+  decoding = 'async',
+  fetchPriority,
+  requestedSize = 128,
+  src,
+  decorative = false,
   ...props
 }) {
+  const srcValue = typeof src === 'string' ? src : ''
+  const isPlaceholderImage = srcValue.includes('/placeholder.svg')
+  const computedAlt = decorative || isPlaceholderImage ? '' : (alt ?? 'User profile photo')
+
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn('aspect-square size-full', className)}
+      alt={computedAlt}
+      loading={loading ?? undefined}
+      decoding={decoding}
+      fetchpriority={fetchPriority ?? undefined}
+      src={optimizeImageUrl(src, { width: requestedSize, height: requestedSize })}
       {...props}
     />
   )

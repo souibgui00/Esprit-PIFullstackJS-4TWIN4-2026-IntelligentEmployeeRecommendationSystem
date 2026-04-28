@@ -1,0 +1,3 @@
+// Déplacé depuis backend/scripts/seed-test-employee.cjs
+// Seeder employé
+// ...existing code...

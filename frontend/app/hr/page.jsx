@@ -2,12 +2,8 @@
 
 import { DashboardHeader } from "@/components/dashboard/header"
 import { Link } from "react-router-dom"
-import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
-import { StatsCards } from "@/components/dashboard/stats-cards"
-import { SkillDistributionChart } from "@/components/dashboard/skill-distribution-chart"
-import { UpcomingActivities } from "@/components/dashboard/upcoming-activities"
-import { HrParticipationStats } from "@/components/dashboard/HrParticipationStats"
+import { lazy, Suspense } from "react"
 import { 
   Users, 
   Calendar, 
@@ -16,12 +12,21 @@ import {
   ArrowRight, 
   Brain, 
   AlertTriangle,
-  Target,
-  Zap,
   ShieldCheck,
-  ChevronRight,
-  LayoutDashboard
 } from "lucide-react"
+
+const StatsCards = lazy(() => import("@/components/dashboard/stats-cards").then((m) => ({ default: m.StatsCards })))
+const SkillDistributionChart = lazy(() => import("@/components/dashboard/skill-distribution-chart").then((m) => ({ default: m.SkillDistributionChart })))
+const UpcomingActivities = lazy(() => import("@/components/dashboard/upcoming-activities").then((m) => ({ default: m.UpcomingActivities })))
+const HrParticipationStats = lazy(() => import("@/components/dashboard/HrParticipationStats").then((m) => ({ default: m.HrParticipationStats })))
+
+function PanelLoader() {
+    return (
+        <div className="h-56 rounded-2xl border border-slate-100 bg-white flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+    )
+}
 
 export default function HRDashboard() {
   const quickLinks = [
@@ -41,7 +46,9 @@ export default function HRDashboard() {
       <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full space-y-12 animate-in fade-in duration-700">
         
         {/* Main Stats Row */}
-        <StatsCards />
+                <Suspense fallback={<PanelLoader />}>
+                    <StatsCards />
+                </Suspense>
 
         {/* Tactical Navigation */}
         <div className="space-y-8">
@@ -105,13 +112,17 @@ export default function HRDashboard() {
         {/* HR TALENT MATRICES */}
         <div className="grid gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-10">
-            <HrParticipationStats />
+                        <Suspense fallback={<PanelLoader />}>
+                            <HrParticipationStats />
+                        </Suspense>
             <div className="bg-white rounded-[3rem] p-8 shadow-premium border border-slate-50 overflow-hidden">
                 <div className="flex items-center gap-3 mb-8">
                     <Brain className="w-6 h-6 text-orange-500" />
                     <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest leading-none">Skill Mix Across Company</h3>
                 </div>
-                <SkillDistributionChart hideHeader={true} />
+                                <Suspense fallback={<PanelLoader />}>
+                                    <SkillDistributionChart hideHeader={true} />
+                                </Suspense>
             </div>
             {/* Unique HR Retention Card */}
             <div className="bg-[#0F111A] rounded-[3.5rem] p-10 shadow-2xl relative overflow-hidden group">
@@ -142,7 +153,9 @@ export default function HRDashboard() {
                     </div>
                     <ArrowRight className="w-5 h-5 text-slate-200 group-hover:text-[#F28C1B] transition-all" />
                 </div>
-                <UpcomingActivities hideHeader={true} />
+                <Suspense fallback={<PanelLoader />}>
+                  <UpcomingActivities hideHeader={true} />
+                </Suspense>
             </div>
 
             {/* Department Maturity Heatmap-style Overview */}

@@ -27,6 +27,8 @@ export function AccessibilityWidget() {
     const [settings, setSettings] = useState(() => loadAccessibilitySettings())
     const [guideY, setGuideY] = useState(-100)
     const panelRef = useRef(null)
+    const toggleRef = useRef(null)
+    const restoreFocusRef = useRef(null)
 
     useEffect(() => {
         applyAccessibilitySettings(settings)
@@ -52,13 +54,42 @@ export function AccessibilityWidget() {
 
     useEffect(() => {
         if (!open) return
-        const handler = (e) => {
-            if (panelRef.current && !panelRef.current.contains(e.target)) {
+        restoreFocusRef.current = document.activeElement
+
+        const focusPanel = window.requestAnimationFrame(() => {
+            panelRef.current?.focus()
+        })
+
+        const handler = (event) => {
+            if (event.key === "Escape") {
+                event.preventDefault()
                 setOpen(false)
             }
         }
-        setTimeout(() => document.addEventListener("mousedown", handler), 0)
-        return () => document.removeEventListener("mousedown", handler)
+
+        const handlePointerDown = (event) => {
+            const target = event.target
+            if (
+                panelRef.current?.contains(target) ||
+                toggleRef.current?.contains(target)
+            ) {
+                return
+            }
+            setOpen(false)
+        }
+
+        document.addEventListener("keydown", handler)
+        document.addEventListener("pointerdown", handlePointerDown)
+        return () => {
+            window.cancelAnimationFrame(focusPanel)
+            document.removeEventListener("keydown", handler)
+            document.removeEventListener("pointerdown", handlePointerDown)
+        }
+    }, [open])
+
+    useEffect(() => {
+        if (open) return
+        restoreFocusRef.current?.focus?.()
     }, [open])
 
     const update = (key, value) => setSettings((current) => ({ ...current, [key]: value }))
@@ -79,8 +110,11 @@ export function AccessibilityWidget() {
             )}
 
             <button
+                ref={toggleRef}
                 onClick={() => setOpen((current) => !current)}
                 aria-label="Open accessibility settings"
+                aria-controls="accessibility-panel"
+                aria-expanded={open}
                 className={cn(
                     "fixed bottom-8 right-8 z-[9998] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 group",
                     open
@@ -99,6 +133,11 @@ export function AccessibilityWidget() {
 
             <div
                 ref={panelRef}
+                id="accessibility-panel"
+                role="dialog"
+                aria-modal="false"
+                aria-label="Accessibility settings"
+                tabIndex={-1}
                 className={cn(
                     "fixed right-8 z-[9997] w-80 bg-white border border-[#EEEEEE] rounded-[4px] shadow-2xl shadow-[#222222]/10 overflow-hidden transition-all duration-500",
                     open

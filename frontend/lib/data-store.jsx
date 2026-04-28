@@ -46,6 +46,7 @@ export function DataProvider({ children }) {
 
   const socketRef = useRef(null)
   const notificationListenersRef = useRef(new Set())
+  const notificationSocketErrorLoggedRef = useRef(false)
 
   const fetchParticipations = useCallback(async () => {
     if (!user) return
@@ -825,6 +826,21 @@ export function DataProvider({ children }) {
     }
   }, [skills])
 
+  const scheduleBackgroundHydration = useCallback((task) => {
+    if (typeof window === "undefined") {
+      task()
+      return () => {}
+    }
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(task, { timeout: 1200 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+
+    const timeoutId = window.setTimeout(task, 300)
+    return () => window.clearTimeout(timeoutId)
+  }, [])
+
   // Core lists: run once auth has finished hydrating from storage (do not require `user` here).
   // Child effects run before parent Auth's effect on the first paint; gating only on `user` skipped the load entirely.
   useEffect(() => {
@@ -837,30 +853,33 @@ export function DataProvider({ children }) {
     }
 
     let cancelled = false
+    let cancelBackgroundHydration = () => {}
     setLoading(true)
 
-    // ⚡ Performance: fire ALL fetches in parallel instead of sequentially.
-    // Previously fetchSkills() blocked all other 8 fetches — startup was slow.
-    // Now skills + departments + activities + notifications all load at once.
-    // fetchUsers runs last so it can decorate skills with resolved names.
+    // Keep first paint fast: load critical lists first, then hydrate secondary data in idle time.
     Promise.all([
-      fetchSkills(),
+      fetchUsers(),
       fetchDepartments(),
       fetchActivities(),
-      fetchPosts(),
+      fetchSkills(),
       fetchNotifications(),
-      fetchAssignments(),
-      fetchEvaluations(),
-      fetchSettings(),
-    ]).then(([loadedSkills]) => {
-      // Pass the already-loaded skills so user skill names resolve correctly
-      return fetchUsers(loadedSkills || [])
-    }).finally(() => {
+    ]).finally(() => {
       if (!cancelled) setLoading(false)
+
+      cancelBackgroundHydration = scheduleBackgroundHydration(() => {
+        if (cancelled) return
+        Promise.allSettled([
+          fetchAssignments(),
+          fetchEvaluations(),
+          fetchPosts(),
+          fetchSettings(),
+        ])
+      })
     })
 
     return () => {
       cancelled = true
+      cancelBackgroundHydration()
     }
   }, [
     authLoading,
@@ -874,6 +893,7 @@ export function DataProvider({ children }) {
     fetchAssignments,
     fetchEvaluations,
     fetchSettings,
+    scheduleBackgroundHydration,
   ])
 
   // Participations + enrollments map need role from `user` (admin/hr/manager vs employee).
@@ -892,7 +912,12 @@ export function DataProvider({ children }) {
     if (!currentUserId) return
 
     const socket = io(`${API_URL}/notifications`, {
-      transports: ["websocket"],
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 8000,
       query: { userId: currentUserId },
     })
 
@@ -900,16 +925,20 @@ export function DataProvider({ children }) {
 
     socket.on("connect", () => {
       setNotificationSocketConnected(true)
+      notificationSocketErrorLoggedRef.current = false
       fetchNotifications()
     })
 
-    socket.on("disconnect", (reason) => {
+    socket.on("disconnect", () => {
       setNotificationSocketConnected(false)
     })
 
     socket.on("connect_error", (error) => {
       setNotificationSocketConnected(false)
-      console.warn("[NotificationSocket] Connection error:", error?.message || error)
+      if (!notificationSocketErrorLoggedRef.current) {
+        console.warn("[NotificationSocket] Connection error:", error?.message || error)
+        notificationSocketErrorLoggedRef.current = true
+      }
     })
 
     socket.on("reconnect", () => {
@@ -955,13 +984,20 @@ export function DataProvider({ children }) {
     })
 
     return () => {
-      socket.removeAllListeners("connect")
-      socket.removeAllListeners("disconnect")
-      socket.removeAllListeners("connect_error")
-      socket.removeAllListeners("reconnect")
-      socket.removeAllListeners("newNotification")
-      socket.disconnect()
-      setNotificationSocketConnected(false)
+        if (socket && socket.connected !== undefined) {
+          try {
+            socket.removeAllListeners("connect")
+            socket.removeAllListeners("disconnect")
+            socket.removeAllListeners("connect_error")
+            socket.removeAllListeners("reconnect")
+            socket.removeAllListeners("newNotification")
+            socket.disconnect()
+          } catch (err) {
+            // Defensive: ignore errors if already cleaned up
+          }
+        }
+        setNotificationSocketConnected(false)
+        notificationSocketErrorLoggedRef.current = false
     }
   }, [authLoading, isAuthenticated, user, fetchNotifications, socketRef, notificationListenersRef])
 

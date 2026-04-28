@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/lib/auth-context"
 import { cn, getInitials } from "@/lib/utils"
 import { api } from "@/lib/api"
+import { optimizeImageUrl } from "@/lib/image-optimization"
 import { FileText } from "lucide-react"
 
 export function EmployeeForm({ employee, mode = "create" }) {
@@ -179,7 +180,15 @@ export function EmployeeForm({ employee, mode = "create" }) {
           <div className="flex flex-col md:flex-row items-center gap-10 p-8 bg-slate-50/50 rounded-[40px] border border-slate-100">
             <div className="w-28 h-28 rounded-[36px] border-4 border-white shadow-premium overflow-hidden bg-slate-200">
               {watch("avatar") ? (
-                <img src={watch("avatar")} className="w-full h-full object-cover" alt="Avatar" />
+                <img
+                  src={optimizeImageUrl(watch("avatar"), { width: 224, height: 224 })}
+                  alt="Employee profile photo preview"
+                  width={112}
+                  height={112}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-slate-900 text-white font-black text-2xl">
                   {getInitials(watch("name")) || "U"}

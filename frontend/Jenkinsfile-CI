@@ -1,0 +1,98 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'NodeJS-20'
+    }
+
+    stages {
+
+        stage('📥 Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('📦 Install') {
+            steps {
+                dir('frontend') {
+                    retry(3) {
+                        sh 'npm install --prefer-offline --fetch-timeout=600000'
+                    }
+                }
+            }
+        }
+
+        stage('🧪 Tests') {
+            steps {
+                dir('frontend') {
+                    sh 'npm test -- --watchAll=false --coverage'
+                }
+            }
+        }
+
+        stage('🏗️ Build') {
+            steps {
+                dir('frontend') {
+                    sh 'npx vite build'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('frontend') {
+                    sh '''/opt/sonar-scanner/bin/sonar-scanner \
+                        -Dsonar.projectKey=frontend \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=squ_f8c266c651590adc0b9aa62081ae2795d737b2fe'''
+                }
+            }
+        }
+
+        stage('🐳 Docker Build') {
+            steps {
+                dir('frontend') {
+                    sh '''
+                        docker build -t mon-frontend:${BUILD_NUMBER} .
+                        docker tag mon-frontend:${BUILD_NUMBER} mon-frontend:latest
+                    '''
+                }
+            }
+        }
+
+        stage('🔒 Trivy Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                        --cache-dir /var/lib/jenkins/.cache/trivy \
+                        --exit-code 0 \
+                        --severity HIGH,CRITICAL \
+                        --format table \
+                        mon-frontend:${BUILD_NUMBER}
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        trivy image \
+                            --cache-dir /var/lib/jenkins/.cache/trivy \
+                            --exit-code 0 \
+                            --severity HIGH,CRITICAL \
+                            --format json \
+                            --output trivy-frontend-report.json \
+                            mon-frontend:${BUILD_NUMBER}
+                    '''
+                    archiveArtifacts artifacts: 'trivy-frontend-report.json', fingerprint: true
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            build job: 'CD-Frontend', wait: false
+        }
+    }
+}

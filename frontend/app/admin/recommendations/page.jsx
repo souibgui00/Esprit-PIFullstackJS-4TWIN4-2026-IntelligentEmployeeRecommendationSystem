@@ -41,8 +41,11 @@ function RecommendationsContent() {
 
     try {
       const selectedActivityId = selectedActivity.id || selectedActivity._id
-      console.log('Calling API with actId:', selectedActivityId)
-      const response = await api.post(`/activities/${selectedActivityId}/recommendations`, options)
+      const prompt = (options?.customDescription || "").trim()
+      const endpoint = prompt
+        ? `/activities/${selectedActivityId}/recommendations?prompt=${encodeURIComponent(prompt)}`
+        : `/activities/${selectedActivityId}/recommendations`
+      const response = await api.get(endpoint)
       const candidates = Array.isArray(response?.candidates) ? response.candidates : []
 
       // 1. Initial Mapping
@@ -53,7 +56,7 @@ function RecommendationsContent() {
           name: candidate.name,
           role: candidate.role,
           overallScore: Math.round(normalizedScore * 100),
-          skillGaps: Array.isArray(candidate.gap) ? candidate.gap : [],
+          promptBoost: Number(candidate.promptBoost || 0),
           gap: Array.isArray(candidate.gap) ? candidate.gap : [],
           recommendation_reason: candidate.recommendation_reason || "",
         }

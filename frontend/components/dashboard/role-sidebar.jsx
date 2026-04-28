@@ -169,7 +169,7 @@ export function RoleSidebar() {
         <div className="p-4 border-t border-slate-600 bg-slate-600/20">
           <div className={cn("flex items-center gap-3 rounded-xl p-2 bg-slate-600/40 border border-slate-600 transition-all hover:bg-slate-600/60 cursor-pointer", collapsed && "justify-center px-2")}>
             <Avatar className="h-9 w-9 rounded-lg border border-slate-600 shadow-sm">
-              <AvatarImage src={user.avatar} />
+              <AvatarImage src={user.avatar} loading="eager" fetchPriority="high" requestedSize={48} />
               <AvatarFallback className="bg-slate-700 text-white text-xs font-bold rounded-lg ">
                 {getInitials(user.name)}
               </AvatarFallback>

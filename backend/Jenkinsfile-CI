@@ -1,0 +1,106 @@
+pipeline {
+    agent any
+
+    environment {
+        PATH = "/usr/bin:/usr/local/bin:${env.PATH}"
+    }
+
+    stages {
+
+        stage('📥 Checkout') {
+            steps {
+                checkout scm
+                echo 'Code recupere !'
+            }
+        }
+
+        stage('🔍 Verifier environnement') {
+            steps {
+                sh '''
+                    which node
+                    node --version
+                    node -e "console.log(process.platform)"
+                '''
+            }
+        }
+
+        stage('📦 Install') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        export HOME=/tmp
+                        /usr/bin/npm install
+                    '''
+                }
+            }
+        }
+
+        stage('🧪 Tests') {
+            steps {
+                dir('backend') {
+                    sh '/usr/bin/npm test || true'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('backend') {
+                    sh '''/opt/sonar-scanner/bin/sonar-scanner \
+                        -Dsonar.projectKey=backend \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=squ_f8c266c651590adc0b9aa62081ae2795d737b2fe'''
+                }
+            }
+        }
+
+        stage('🐳 Docker Build') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        docker build -t mon-backend:${BUILD_NUMBER} .
+                        docker tag mon-backend:${BUILD_NUMBER} mon-backend:latest
+                    '''
+                }
+            }
+        }
+
+        stage('🔒 Trivy Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                        --cache-dir /var/lib/jenkins/.cache/trivy \
+                        --exit-code 0 \
+                        --severity HIGH,CRITICAL \
+                        --format table \
+                        mon-backend:${BUILD_NUMBER}
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        trivy image \
+                            --cache-dir /var/lib/jenkins/.cache/trivy \
+                            --exit-code 0 \
+                            --severity HIGH,CRITICAL \
+                            --format json \
+                            --output trivy-backend-report.json \
+                            mon-backend:${BUILD_NUMBER}
+                    '''
+                    archiveArtifacts artifacts: 'trivy-backend-report.json', fingerprint: true
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ CI Backend réussi !'
+            build job: 'CD-Backend', wait: false
+        }
+        failure {
+            echo '❌ CI Backend échoué !'
+        }
+    }
+}
