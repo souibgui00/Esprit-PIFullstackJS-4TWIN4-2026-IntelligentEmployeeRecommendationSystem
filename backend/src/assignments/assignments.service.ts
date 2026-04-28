@@ -352,39 +352,60 @@ export class AssignmentsService {
         return this.forwardToDepartmentManagers(forwardDto, requesterId);
     }
 
-    async findAll(): Promise<Assignment[]> {
-        return this.assignmentModel.find()
+
+    async findAll(options?: { page?: number, limit?: number, select?: string[] }): Promise<Assignment[]> {
+        const { page = 1, limit = 20, select } = options || {};
+        let query = this.assignmentModel.find();
+        if (select) query = query.select(select.join(' '));
+        query = query
+            .skip((page - 1) * limit)
+            .limit(limit)
             .populate('userId', '-password')
             .populate('activityId')
             .populate('assignedBy', '-password')
-            .populate('managerId', '-password')
-            .exec();
+            .populate('managerId', '-password');
+        return query.exec();
     }
 
-    async findByRecipient(userId: string): Promise<Assignment[]> {
-        return this.assignmentModel.find({ userId: new Types.ObjectId(userId) })
+    async findByRecipient(userId: string, options?: { page?: number, limit?: number, select?: string[] }): Promise<Assignment[]> {
+        const { page = 1, limit = 20, select } = options || {};
+        let query = this.assignmentModel.find({ userId: new Types.ObjectId(userId) });
+        if (select) query = query.select(select.join(' '));
+        query = query
+            .skip((page - 1) * limit)
+            .limit(limit)
             .populate('activityId')
             .populate('assignedBy', '-password')
-            .populate('managerId', '-password')
-            .exec();
+            .populate('managerId', '-password');
+        return query.exec();
     }
 
-    async findByAssigner(assignedBy: string): Promise<Assignment[]> {
-        return this.assignmentModel.find({ assignedBy: new Types.ObjectId(assignedBy) })
+    async findByAssigner(assignedBy: string, options?: { page?: number, limit?: number, select?: string[] }): Promise<Assignment[]> {
+        const { page = 1, limit = 20, select } = options || {};
+        let query = this.assignmentModel.find({ assignedBy: new Types.ObjectId(assignedBy) });
+        if (select) query = query.select(select.join(' '));
+        query = query
+            .skip((page - 1) * limit)
+            .limit(limit)
             .populate('userId', '-password')
-            .populate('activityId')
-            .exec();
+            .populate('activityId');
+        return query.exec();
     }
 
-    async findRecommendationsForManager(managerId: string): Promise<Assignment[]> {
-        return this.assignmentModel.find({
+    async findRecommendationsForManager(managerId: string, options?: { page?: number, limit?: number, select?: string[] }): Promise<Assignment[]> {
+        const { page = 1, limit = 20, select } = options || {};
+        let query = this.assignmentModel.find({
             managerId: new Types.ObjectId(managerId),
             type: 'recommendation'
-        })
+        });
+        if (select) query = query.select(select.join(' '));
+        query = query
+            .skip((page - 1) * limit)
+            .limit(limit)
             .populate('userId', '-password')
             .populate('activityId')
-            .populate('recommendedBy', '-password')
-            .exec();
+            .populate('recommendedBy', '-password');
+        return query.exec();
     }
 
     async updateStatus(

@@ -63,6 +63,25 @@
 }
 
 @layer base {
+  /* Accessibility widget fixed button (floating) */
+  .a11y-widget-fixed-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9998;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 20px 40px -10px #2222224d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #222222;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  }
+
   * {
     border-color: var(--color-border);
     box-sizing: border-box;

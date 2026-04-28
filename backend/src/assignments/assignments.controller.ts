@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Req, UseGuards, BadRequestException } from '@nestjs/common';
+
+import { Controller, Get, Post, Patch, Delete, Body, Param, Req, Query, UseGuards, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AssignmentsService } from './assignments.service';
 import { ForwardToManagerDto } from './dto/forward-to-manager.dto';
@@ -47,18 +48,22 @@ export class AssignmentsController {
     }
 
     @Get()
-    async getAssignments(@Req() req: any) {
-        // Simple logic for fetching relevant assignments based on access role
+    async getAssignments(
+        @Req() req: any,
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 20,
+        @Query('fields') fields?: string
+    ) {
         const role = req.user.role?.toLowerCase();
+        const select = fields ? fields.split(',') : undefined;
         if (role === 'admin' || role === 'hr') {
-            return this.assignmentsService.findAll();
+            return this.assignmentsService.findAll({ page, limit, select });
         } else if (role === 'manager') {
-            // Managers see both: assignments they created AND recommendations for them
-            const created = await this.assignmentsService.findByAssigner(req.user.userId);
-            const recommended = await this.assignmentsService.findRecommendationsForManager(req.user.userId);
+            const created = await this.assignmentsService.findByAssigner(req.user.userId, { page, limit, select });
+            const recommended = await this.assignmentsService.findRecommendationsForManager(req.user.userId, { page, limit, select });
             return [...created, ...recommended];
         } else {
-            return this.assignmentsService.findByRecipient(req.user.userId);
+            return this.assignmentsService.findByRecipient(req.user.userId, { page, limit, select });
         }
     }
 

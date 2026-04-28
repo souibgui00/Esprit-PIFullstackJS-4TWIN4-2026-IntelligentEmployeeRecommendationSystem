@@ -116,7 +116,7 @@ export function AccessibilityWidget() {
                 aria-controls="accessibility-panel"
                 aria-expanded={open}
                 className={cn(
-                    "fixed bottom-8 right-8 z-[9998] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 group",
+                    "a11y-widget-fixed-btn group transition-all duration-300",
                     open
                         ? "bg-[#F28C1B] rotate-180 shadow-[#F28C1B]/40"
                         : "bg-[#222222] hover:bg-[#F28C1B] shadow-[#222222]/30 hover:shadow-[#F28C1B]/30"
