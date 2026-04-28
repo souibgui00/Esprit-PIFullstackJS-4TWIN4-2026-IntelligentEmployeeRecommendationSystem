@@ -561,7 +561,10 @@ export class ActivitiesService {
     };
   }
 
-  async getRecommendationsForActivity(activityId: string, prompt?: string): Promise<any> {
+  async getRecommendationsForActivity(activityId: string, optionsOrPrompt: any = {}): Promise<any> {
+    const options = typeof optionsOrPrompt === 'string' ? { prompt: optionsOrPrompt } : optionsOrPrompt;
+    const prompt = options.prompt;
+
     const activity = await this.activityModel.findById(activityId).populate('requiredSkills.skillId').exec();
     if (!activity) {
       throw new NotFoundException(`Activity with ID ${activityId} not found`);
@@ -749,7 +752,7 @@ export class ActivitiesService {
         intentScore: Math.round(intentScore * 100) / 100,
         intent,
         yearsOfExperience: candidate.yearsOfExperience || (allUsers.find(e => e._id.toString() === candidate.employeeId)?.yearsOfExperience || 0),
-        recommendation_reason: finalReason,
+        recommendation_reason: candidate.recommendation_reason,
         gap: candidate.skillGaps,
       };
     });

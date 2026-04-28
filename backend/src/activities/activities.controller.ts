@@ -62,7 +62,7 @@ export class ActivitiesController {
 
     @Roles(Role.ADMIN, Role.MANAGER, Role.HR)
     @Post(':activityId/recommendations')
-    getRecommendationsForActivity(@Param('activityId') activityId: string, @Body() options: any = {}) {
+    async getRecommendationsForActivityPost(@Param('activityId') activityId: string, @Body() options: any = {}) {
         return this.activitiesService.getRecommendationsForActivity(activityId, options);
     }
 
@@ -145,7 +145,7 @@ export class ActivitiesController {
 
     @Roles(Role.ADMIN, Role.MANAGER, Role.HR)
     @Get(':activityId/recommendations')
-    getRecommendationsForActivity(
+    async getRecommendationsForActivityGet(
         @Param('activityId') activityId: string,
         @Query('prompt') prompt?: string,
     ) {
