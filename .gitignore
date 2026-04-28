@@ -28,3 +28,4 @@ uploads/
 .env*.local
 frontend/.unlighthouse/
 frontend/.unlighthouse/
+backend/env
