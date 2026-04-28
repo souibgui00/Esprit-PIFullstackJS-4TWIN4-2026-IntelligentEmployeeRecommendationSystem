@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User } from '../users/schema/user.schema';
+import { Role } from '../common/enums/role.enum';
 import { Activity } from '../activities/schema/activity.schema';
 import { ScoringService } from '../scoring/scoring.service';
 
@@ -80,7 +81,7 @@ export class PrioritizationService {
     if (!activity) throw new NotFoundException('Activity not found');
 
     // Get all employees
-    const employees = await this.userModel.find({ role: 'EMPLOYEE' });
+    const employees = await this.userModel.find({ role: Role.EMPLOYEE });
     if (employees.length === 0) return [];
 
     // Calculate scores and rankings for each employee
@@ -240,7 +241,7 @@ const db = this.userModel.db.db as any;
     const activity = await this.activityModel.findById(activityId);
     if (!activity) throw new NotFoundException('Activity not found');
 
-    const employees = await this.userModel.find({ role: 'EMPLOYEE' });
+    const employees = await this.userModel.find({ role: Role.EMPLOYEE });
 
     const grouped: Record<string, CandidateSummary[]> = {
       expert: [],
