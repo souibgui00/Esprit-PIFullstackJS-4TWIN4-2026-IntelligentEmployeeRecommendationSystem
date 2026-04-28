@@ -3,6 +3,10 @@ pipeline {
 
     environment {
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        IMAGE_NAME  = 'mon-frontend'
+        IMAGE_TAG   = "${BUILD_NUMBER}"
+        DEPLOY_NAME = 'frontend-deployment'
+        NAMESPACE   = 'default'
     }
 
     stages {
@@ -13,12 +17,21 @@ pipeline {
             }
         }
 
+        stage('🔨 Build Image') {
+            steps {
+                sh '''
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker tag  ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                '''
+            }
+        }
+
         stage('🐳 Import Image to Containerd') {
             steps {
                 sh '''
-                    docker save mon-frontend:latest -o /tmp/mon-frontend.tar
-                    sudo ctr -n k8s.io images import /tmp/mon-frontend.tar
-                    rm -f /tmp/mon-frontend.tar
+                    docker save ${IMAGE_NAME}:${IMAGE_TAG} -o /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
+                    sudo ctr -n k8s.io images import /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
+                    rm -f /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
                 '''
             }
         }
@@ -26,8 +39,13 @@ pipeline {
         stage('🚀 Deploy to Kubernetes') {
             steps {
                 sh '''
-                    kubectl apply -f k8s/frontend-deployment.yaml
-                    kubectl rollout status deployment/frontend-deployment --timeout=120s
+                    # Update image tag in deployment
+                    kubectl set image deployment/${DEPLOY_NAME} \
+                        frontend=${IMAGE_NAME}:${IMAGE_TAG} \
+                        -n ${NAMESPACE}
+
+                    kubectl rollout status deployment/${DEPLOY_NAME} \
+                        --timeout=120s -n ${NAMESPACE}
                 '''
             }
         }
@@ -35,8 +53,8 @@ pipeline {
         stage('🔎 Verify Deployment') {
             steps {
                 sh '''
-                    kubectl get pods -l app=frontend
-                    kubectl get services
+                    kubectl get pods -l app=frontend -n ${NAMESPACE}
+                    kubectl get services -n ${NAMESPACE}
                 '''
             }
         }
@@ -44,11 +62,18 @@ pipeline {
 
     post {
         success {
-            echo '✅ CD Frontend déployé avec succès !'
+            echo "✅ Frontend deployed successfully — build #${BUILD_NUMBER}"
         }
         failure {
-            echo '❌ Déploiement échoué — rollback...'
-            sh 'kubectl rollout undo deployment/frontend-deployment || true'
+            echo '❌ Deployment failed — rolling back...'
+            sh '''
+                kubectl rollout undo deployment/${DEPLOY_NAME} \
+                    -n ${NAMESPACE} || true
+            '''
+        }
+        always {
+            // Clean up local Docker image to save disk space
+            sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
         }
     }
 }
