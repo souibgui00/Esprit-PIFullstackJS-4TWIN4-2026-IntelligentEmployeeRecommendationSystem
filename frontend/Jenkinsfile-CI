@@ -46,7 +46,7 @@ pipeline {
                         -Dsonar.projectKey=frontend \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=squ_f8c266c651590adc0b9aa62081ae2795d737b2fe'''
+                        -Dsonar.login=squ_3638fe03cb73ea0e15f747beb004d1493dafa066'''
                 }
             }
         }
