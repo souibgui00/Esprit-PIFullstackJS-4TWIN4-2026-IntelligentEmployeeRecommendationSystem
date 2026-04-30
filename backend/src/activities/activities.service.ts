@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { InjectModel } from '@nestjs/mongoose';
@@ -43,13 +48,19 @@ export class ActivitiesService {
       const creator = await this.usersService.findOne(userId);
 
       if (creator) {
-        let managerId = creator.manager_id?.toString();
-        console.log(`[ActivitiesService] Creating activity. Creator: ${creator.name}, Assigned ManagerID: ${managerId || 'None'}`);
+        const managerId = creator.manager_id?.toString();
+        console.log(
+          `[ActivitiesService] Creating activity. Creator: ${creator.name}, Assigned ManagerID: ${managerId || 'None'}`,
+        );
 
         if (!managerId) {
-          console.log(`[ActivitiesService] Creator has no manager. Skipping automatic manager notification (frontend will handle targeted department notifications if applicable).`);
+          console.log(
+            `[ActivitiesService] Creator has no manager. Skipping automatic manager notification (frontend will handle targeted department notifications if applicable).`,
+          );
         } else {
-          console.log(`[ActivitiesService] Notifying assigned manager ID: ${managerId}`);
+          console.log(
+            `[ActivitiesService] Notifying assigned manager ID: ${managerId}`,
+          );
           await this.notificationsService.create({
             recipientId: managerId,
             title: 'New Activity Suggestion',
@@ -72,18 +83,28 @@ export class ActivitiesService {
     if (userRole === Role.EMPLOYEE && userId) {
       // Find all activities where the user has an assignment OR a participation
       const [assignments, participations] = await Promise.all([
-        this.assignmentModel.find({ userId: new Types.ObjectId(userId) }).exec(),
-        this.participationModel.find({ userId: new Types.ObjectId(userId) }).exec(),
+        this.assignmentModel
+          .find({ userId: new Types.ObjectId(userId) })
+          .exec(),
+        this.participationModel
+          .find({ userId: new Types.ObjectId(userId) })
+          .exec(),
       ]);
 
       const allowedActivityIds = new Set([
-        ...assignments.map(a => a.activityId.toString()),
-        ...participations.map(p => p.activityId.toString()),
+        ...assignments.map((a) => a.activityId.toString()),
+        ...participations.map((p) => p.activityId.toString()),
       ]);
 
-      return this.activityModel.find({
-        _id: { $in: Array.from(allowedActivityIds).map(id => new Types.ObjectId(id)) }
-      }).exec();
+      return this.activityModel
+        .find({
+          _id: {
+            $in: Array.from(allowedActivityIds).map(
+              (id) => new Types.ObjectId(id),
+            ),
+          },
+        })
+        .exec();
     }
 
     // Default: Admin/HR/Manager see everything
@@ -106,8 +127,8 @@ export class ActivitiesService {
     const updatedActivity = await this.activityModel
       .findByIdAndUpdate(
         id,
-        isResubmission 
-          ? { ...updateActivityDto, workflowStatus: 'pending_approval' } 
+        isResubmission
+          ? { ...updateActivityDto, workflowStatus: 'pending_approval' }
           : updateActivityDto,
         { new: true },
       )
@@ -116,7 +137,10 @@ export class ActivitiesService {
     if (isResubmission && updatedActivity) {
       // Notify target managers about the resubmission
       try {
-        const targetDeptIds = (updateActivityDto as any).targetDepartments || activity.targetDepartments || [];
+        const targetDeptIds =
+          (updateActivityDto as any).targetDepartments ||
+          activity.targetDepartments ||
+          [];
         const managerIdsToNotify = new Set<string>();
 
         // Always notify the person who rejected it
@@ -127,10 +151,12 @@ export class ActivitiesService {
         // Also notify managers of targeted departments
         if (targetDeptIds.length > 0) {
           const allUsers = await this.usersService.findAll();
-          const targetManagers = allUsers.filter(u => {
+          const targetManagers = allUsers.filter((u) => {
             if (u.role?.toLowerCase() !== 'manager') return false;
             const userDeptId = u.department_id?.toString();
-            return targetDeptIds.some((dId: any) => dId.toString() === userDeptId);
+            return targetDeptIds.some(
+              (dId: any) => dId.toString() === userDeptId,
+            );
           });
 
           for (const manager of targetManagers) {
@@ -176,11 +202,7 @@ export class ActivitiesService {
     }
 
     return this.activityModel
-      .findByIdAndUpdate(
-        id, 
-        { $inc: { enrolledCount: 1 } }, 
-        { new: true }
-      )
+      .findByIdAndUpdate(id, { $inc: { enrolledCount: 1 } }, { new: true })
       .exec();
   }
 
@@ -195,9 +217,9 @@ export class ActivitiesService {
 
     return this.activityModel
       .findByIdAndUpdate(
-        id, 
-        { $inc: { enrolledCount: decrement } }, 
-        { new: true }
+        id,
+        { $inc: { enrolledCount: decrement } },
+        { new: true },
       )
       .exec();
   }
@@ -223,9 +245,9 @@ export class ActivitiesService {
           title: 'Strategic Activity Approved',
           message: `Success: The development program "${activity.title}" has been authorized for deployment.`,
           type: 'activity_approved',
-          metadata: { 
+          metadata: {
             activityId: activity._id.toString(),
-            status: 'approved'
+            status: 'approved',
           },
         });
       } catch (err) {
@@ -265,10 +287,10 @@ export class ActivitiesService {
           title: 'Activity Revision Required',
           message: `The program "${activity.title}" requires modifications. Feedback: ${reason}`,
           type: 'activity_rejected',
-          metadata: { 
-            activityId: activity._id.toString(), 
+          metadata: {
+            activityId: activity._id.toString(),
             reason,
-            status: 'rejected'
+            status: 'rejected',
           },
         });
       } catch (err) {
@@ -288,7 +310,9 @@ export class ActivitiesService {
       .exec();
   }
 
-  async findRecommendationEligible(includeCompleted = false): Promise<Activity[]> {
+  async findRecommendationEligible(
+    includeCompleted = false,
+  ): Promise<Activity[]> {
     const query: any = { workflowStatus: 'approved' };
     if (!includeCompleted) {
       query.status = { $ne: 'completed' };
@@ -303,7 +327,7 @@ export class ActivitiesService {
   /**
    * Get activity recommendations for a user
    * Calculates compatibility score for all approved activities
-   * 
+   *
    * @param userId - The user ID to generate recommendations for
    * @returns Array of recommendations sorted by score (descending)
    */
@@ -340,8 +364,14 @@ export class ActivitiesService {
     const results = await Promise.all(
       candidateActivities.map(async (activity) => {
         try {
-          const intent = activity.intent || this.prioritizationService.inferIntent(activity.type);
-          const nlpMap = await this.getNlpScores(activity, [enrichedUser], intent);
+          const intent =
+            activity.intent ||
+            this.prioritizationService.inferIntent(activity.type);
+          const nlpMap = await this.getNlpScores(
+            activity,
+            [enrichedUser],
+            intent,
+          );
           const nlpData = nlpMap.get(userId);
 
           let score = 0;
@@ -349,14 +379,14 @@ export class ActivitiesService {
           let rfScore = 0;
 
           if (nlpData && typeof nlpData === 'object') {
-             score = (nlpData as any).finalScore || 0;
-             nlpScore = (nlpData as any).nlpScore || 0;
-             rfScore = (nlpData as any).rfScore || 0;
+            score = nlpData.finalScore || 0;
+            nlpScore = nlpData.nlpScore || 0;
+            rfScore = nlpData.rfScore || 0;
           } else {
-             score = await this.recommendationModelService.predictScore(
-               userId,
-               activity._id.toString(),
-             );
+            score = await this.recommendationModelService.predictScore(
+              userId,
+              activity._id.toString(),
+            );
           }
 
           // Filter out activities that are completely irrelevant
@@ -369,18 +399,21 @@ export class ActivitiesService {
 
           // Human-readable recommendation label
           const label =
-            score >= 0.85 ? 'Top Pick'
-            : score >= 0.70 ? 'Highly Recommended'
-            : score >= 0.50 ? 'Recommended'
-            : 'Consider';
+            score >= 0.85
+              ? 'Top Pick'
+              : score >= 0.7
+                ? 'Highly Recommended'
+                : score >= 0.5
+                  ? 'Recommended'
+                  : 'Consider';
 
           return {
-            activityId:   activity._id,
+            activityId: activity._id,
             activityName: activity.title,
             activityType: activity.type,
-            level:        activity.level,
-            date:         activity.date,
-            duration:     activity.duration,
+            level: activity.level,
+            date: activity.date,
+            duration: activity.duration,
             score,
             nlpScore,
             rfScore,
@@ -399,7 +432,7 @@ export class ActivitiesService {
     );
 
     return results
-      .filter(Boolean)                      // remove nulls (errors + <5% scores)
+      .filter(Boolean) // remove nulls (errors + <5% scores)
       .sort((a: any, b: any) => b.score - a.score); // highest score first
   }
 
@@ -407,14 +440,18 @@ export class ActivitiesService {
     activity: any,
     employees: any[],
     intent: string,
-    customDescription: string = ''
+    customDescription: string = '',
   ): Promise<Map<string, any>> {
     try {
       const payload = {
         activity: {
           activityId: activity._id.toString(),
           title: activity.title,
-          description: ((activity.description || '') + ' ' + customDescription).trim(),
+          description: (
+            (activity.description || '') +
+            ' ' +
+            customDescription
+          ).trim(),
           requiredSkills: (activity.requiredSkills || []).map((r: any) => {
             const skill = r.skillId;
             return skill?.name || skill?.toString() || '';
@@ -427,27 +464,53 @@ export class ActivitiesService {
           else if (u.rankScore >= 30) perfRating = 2;
           else perfRating = 1;
 
-          const datasetScore = u.avgScore ?? u.avgFicheEtat ?? u.rankScore ?? u.score ?? 50.0;
+          const datasetScore =
+            u.avgScore ?? u.avgFicheEtat ?? u.rankScore ?? u.score ?? 50.0;
           const datasetValidationRate = u.validationRate ?? null;
           const datasetCompetences = u.nbCompetences ?? null;
           const datasetDate = u.dateEmbauche ?? null;
-          const yearsAtCompany = u.yearsOfExperience ?? u.yearsAtCompany ?? (datasetDate ? Math.max(0, Math.floor((Date.now() - new Date(datasetDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000))) : 2);
+          const yearsAtCompany =
+            u.yearsOfExperience ??
+            u.yearsAtCompany ??
+            (datasetDate
+              ? Math.max(
+                  0,
+                  Math.floor(
+                    (Date.now() - new Date(datasetDate).getTime()) /
+                      (365.25 * 24 * 60 * 60 * 1000),
+                  ),
+                )
+              : 2);
 
           return {
             userId: u._id.toString(),
             name: u.name,
             position: u.position || '',
             jobDescription: u.jobDescription || '',
-            skills: (u.skills || []).map((s: any) => s.skillId?.name || s.skillId?.toString() || '').filter(Boolean),
+            skills: (u.skills || [])
+              .map((s: any) => s.skillId?.name || s.skillId?.toString() || '')
+              .filter(Boolean),
             age: 30,
             department: u.department_id?.name || u.departmentCode || 'General',
-            jobRole: u.jobRole || u.position || u.departmentCode || u.role || 'Employee',
+            jobRole:
+              u.jobRole ||
+              u.position ||
+              u.departmentCode ||
+              u.role ||
+              'Employee',
             yearsAtCompany,
             performanceRating: u.avgFicheEtat ?? perfRating,
             monthlyIncome: 64000,
             jobSatisfaction: 3,
-            jobInvolvement: datasetValidationRate ? Math.max(1, Math.min(4, Math.round(datasetValidationRate * 4))) : 3,
-            education: datasetCompetences ? Math.max(1, Math.min(5, Math.round(Number(datasetCompetences) / 2))) : 3,
+            jobInvolvement: datasetValidationRate
+              ? Math.max(1, Math.min(4, Math.round(datasetValidationRate * 4)))
+              : 3,
+            education: datasetCompetences
+              ? Math.max(
+                  1,
+                  Math.min(5, Math.round(Number(datasetCompetences) / 2)),
+                )
+              : 3,
             score: datasetScore,
             matricule: u.matricule,
             statut: u.statut || u.status || 'active',
@@ -475,7 +538,7 @@ export class ActivitiesService {
             scoreTechnical: u.scoreTechnical,
           };
         }),
-        intent,  // ← passed to Python for NLP score inversion
+        intent, // ← passed to Python for NLP score inversion
       };
 
       const response = await firstValueFrom(
@@ -492,7 +555,10 @@ export class ActivitiesService {
       }
       return nlpMap;
     } catch (error: any) {
-      console.warn('[ActivitiesService] NLP service unavailable, skipping NLP scores:', error.message);
+      console.warn(
+        '[ActivitiesService] NLP service unavailable, skipping NLP scores:',
+        error.message,
+      );
       return new Map();
     }
   }
@@ -509,11 +575,17 @@ export class ActivitiesService {
 
       return new Map(
         profiles
-          .map((profile: any) => [String(profile.matricule || '').toLowerCase(), profile] as const)
+          .map(
+            (profile: any) =>
+              [String(profile.matricule || '').toLowerCase(), profile] as const,
+          )
           .filter((entry: readonly [string, any]) => !!entry[0]),
       );
     } catch (error: any) {
-      console.warn('[ActivitiesService] Dataset service unavailable, continuing with Mongo-only profiles:', error.message);
+      console.warn(
+        '[ActivitiesService] Dataset service unavailable, continuing with Mongo-only profiles:',
+        error.message,
+      );
       return new Map();
     }
   }
@@ -532,7 +604,8 @@ export class ActivitiesService {
       matricule: profile.matricule || user.matricule,
       statut: profile.statut || user.status,
       departmentCode: profile.departmentCode || user.departmentCode,
-      dateEmbauche: profile.dateEmbauche || user.date_embauche || user.dateEmbauche,
+      dateEmbauche:
+        profile.dateEmbauche || user.date_embauche || user.dateEmbauche,
       nbSessions: profile.nbSessions,
       nbCompetences: profile.nbCompetences,
       avgScore: profile.avgScore,
@@ -553,16 +626,34 @@ export class ActivitiesService {
       scoreManagerial: profile.scoreManagerial,
       scoreSoft: profile.scoreSoft,
       scoreTechnical: profile.scoreTechnical,
-      yearsOfExperience: profile.dateEmbauche ? Math.max(0, Math.floor((Date.now() - new Date(profile.dateEmbauche).getTime()) / (365.25 * 24 * 60 * 60 * 1000))) : user.yearsOfExperience,
-      department: user.department_id?.name || profile.departmentCode || user.department || 'General',
+      yearsOfExperience: profile.dateEmbauche
+        ? Math.max(
+            0,
+            Math.floor(
+              (Date.now() - new Date(profile.dateEmbauche).getTime()) /
+                (365.25 * 24 * 60 * 60 * 1000),
+            ),
+          )
+        : user.yearsOfExperience,
+      department:
+        user.department_id?.name ||
+        profile.departmentCode ||
+        user.department ||
+        'General',
       position: user.position || profile.departmentCode || user.role,
       score: profile.avgScore ?? user.rankScore ?? user.score,
       rankScore: profile.avgFicheEtat ?? user.rankScore ?? user.score,
     };
   }
 
-  async getRecommendationsForActivity(activityId: string, options: any = {}): Promise<any> {
-    const activity = await this.activityModel.findById(activityId).populate('requiredSkills.skillId').exec();
+  async getRecommendationsForActivity(
+    activityId: string,
+    options: any = {},
+  ): Promise<any> {
+    const activity = await this.activityModel
+      .findById(activityId)
+      .populate('requiredSkills.skillId')
+      .exec();
     if (!activity) {
       throw new NotFoundException(`Activity with ID ${activityId} not found`);
     }
@@ -575,7 +666,10 @@ export class ActivitiesService {
       promptText = options.prompt.trim();
     }
     if (promptText) {
-      const extracted = await this.extractSkillsFromDescription(promptText, activity.title || '');
+      const extracted = await this.extractSkillsFromDescription(
+        promptText,
+        activity.title || '',
+      );
       promptSkills = Array.from(
         new Set(
           ((extracted?.extractedSkills || []) as string[])
@@ -589,29 +683,34 @@ export class ActivitiesService {
     const allUsers = await this.usersService.findAll();
     const datasetMap = await this.fetchDatasetProfileMap();
     const targetDeptIds = activity.targetDepartments || [];
-    
+
     let eligibleEmployees = (allUsers || []).filter(
       (user: any) => String(user.role || '').toUpperCase() === Role.EMPLOYEE,
     );
 
     if (targetDeptIds.length > 0) {
       eligibleEmployees = eligibleEmployees.filter((user: any) => {
-        const userDeptId = user.department_id?._id?.toString() || user.department_id?.toString();
+        const userDeptId =
+          user.department_id?._id?.toString() || user.department_id?.toString();
         return targetDeptIds.includes(userDeptId);
       });
     }
 
     // 2. Exclusion Filtering: Already Invited or Enrolled
-    const existingParticipationsList = await this.participationModel.find({ activityId: new Types.ObjectId(activityId) }).lean();
-    const existingAssignmentsList = await this.assignmentModel.find({ activityId: new Types.ObjectId(activityId) }).lean();
+    const existingParticipationsList = await this.participationModel
+      .find({ activityId: new Types.ObjectId(activityId) })
+      .lean();
+    const existingAssignmentsList = await this.assignmentModel
+      .find({ activityId: new Types.ObjectId(activityId) })
+      .lean();
 
     const excludedUserIds = new Set([
       ...existingParticipationsList.map((p: any) => p.userId.toString()),
-      ...existingAssignmentsList.map((a: any) => a.userId.toString())
+      ...existingAssignmentsList.map((a: any) => a.userId.toString()),
     ]);
 
     let candidatesToScore = eligibleEmployees.filter(
-      (user: any) => !excludedUserIds.has(user._id.toString())
+      (user: any) => !excludedUserIds.has(user._id.toString()),
     );
 
     if (candidatesToScore.length === 0) {
@@ -621,17 +720,23 @@ export class ActivitiesService {
     // ⚡ Performance Fix 1: Pre-filter by skill overlap BEFORE the expensive NLP call.
     // This reduces 1500 employees → ~50-300 candidates, dramatically speeding up scoring.
     const requiredSkillIds = new Set(
-      (activity.requiredSkills || []).map((r: any) =>
-        (r.skillId?._id ?? r.skillId)?.toString()?.trim()
-      ).filter(Boolean)
+      (activity.requiredSkills || [])
+        .map((r: any) => (r.skillId?._id ?? r.skillId)?.toString()?.trim())
+        .filter(Boolean),
     );
 
     if (requiredSkillIds.size > 0) {
-      const intent = activity.intent || this.prioritizationService.inferIntent(activity.type);
+      const intent =
+        activity.intent ||
+        this.prioritizationService.inferIntent(activity.type);
 
       const filtered = candidatesToScore.filter((user: any) => {
-        const userSkillIds = (user.skills || []).map((s: any) => s.skillId?.toString()?.trim());
-        const hasOverlap = userSkillIds.some((id: string) => requiredSkillIds.has(id));
+        const userSkillIds = (user.skills || []).map((s: any) =>
+          s.skillId?.toString()?.trim(),
+        );
+        const hasOverlap = userSkillIds.some((id: string) =>
+          requiredSkillIds.has(id),
+        );
         // For 'development' intent: prefer employees MISSING skills (skill gaps = good)
         // For 'performance' intent: prefer employees WHO HAVE the skills
         // For 'balanced': include all with any overlap
@@ -640,7 +745,8 @@ export class ActivitiesService {
       });
 
       // Guarantee a minimum pool so we always return results
-      candidatesToScore = filtered.length >= 30 ? filtered : candidatesToScore.slice(0, 200);
+      candidatesToScore =
+        filtered.length >= 30 ? filtered : candidatesToScore.slice(0, 200);
     }
 
     // ⚡ Hard cap at 300 to keep NLP fast regardless of pool size
@@ -649,27 +755,39 @@ export class ActivitiesService {
     }
 
     // 3. Scoring — intent-aware hybrid
-    const intent = activity.intent || this.prioritizationService.inferIntent(activity.type);
+    const intent =
+      activity.intent || this.prioritizationService.inferIntent(activity.type);
     const nlpActivity = {
       _id: activity._id,
       title: activity.title,
-      description: [activity.description || '', promptText].filter(Boolean).join(' ').trim(),
+      description: [activity.description || '', promptText]
+        .filter(Boolean)
+        .join(' ')
+        .trim(),
       requiredSkills: [
         ...(activity.requiredSkills || []),
         ...promptSkills.map((name: string) => ({ skillId: name })),
       ],
     };
 
-      const enrichedCandidates = candidatesToScore.map((user: any) => this.mergeDatasetProfile(user, datasetMap));
-      const nlpScores = await this.getNlpScores(nlpActivity, enrichedCandidates, intent);
+    const enrichedCandidates = candidatesToScore.map((user: any) =>
+      this.mergeDatasetProfile(user, datasetMap),
+    );
+    const nlpScores = await this.getNlpScores(
+      nlpActivity,
+      enrichedCandidates,
+      intent,
+    );
 
     const promptSkillSet = new Set(promptSkills.map((s) => s.toLowerCase()));
     const employeeSkillMap = new Map<string, Set<string>>(
-        enrichedCandidates.map((u: any) => [
+      enrichedCandidates.map((u: any) => [
         u._id?.toString(),
         new Set(
           (u.skills || [])
-            .map((s: any) => (s.skillId?.name || s.skillId?.toString() || '').toLowerCase())
+            .map((s: any) =>
+              (s.skillId?.name || s.skillId?.toString() || '').toLowerCase(),
+            )
             .filter(Boolean),
         ),
       ]),
@@ -679,7 +797,10 @@ export class ActivitiesService {
     const candidatesMeta = await Promise.all(
       enrichedCandidates.map(async (user: any) => {
         const userId = user._id?.toString();
-        const gap = await this.prioritizationService.identifySkillGaps(userId, activityId);
+        const gap = await this.prioritizationService.identifySkillGaps(
+          userId,
+          activityId,
+        );
         return {
           employeeId: userId,
           name: user.name,
@@ -693,11 +814,14 @@ export class ActivitiesService {
           contextScore: 0,
           recommendation_reason: '',
         };
-      })
+      }),
     );
 
     // Apply intent-aware scoring from prioritization service
-    const intentScored = this.prioritizationService.applyIntentAwareScoring(candidatesMeta, activity);
+    const intentScored = this.prioritizationService.applyIntentAwareScoring(
+      candidatesMeta,
+      activity,
+    );
 
     const rankedCandidates = intentScored.map((candidate: any) => {
       const nlpData = nlpScores.get(candidate.employeeId);
@@ -711,11 +835,16 @@ export class ActivitiesService {
 
       if (nlpData) {
         if (intent === 'development') {
-          finalScore = (intentScore * 0.50) + (nlpData.nlpScore * 0.30) + (nlpData.rfScore * 0.20);
+          finalScore =
+            intentScore * 0.5 + nlpData.nlpScore * 0.3 + nlpData.rfScore * 0.2;
         } else if (intent === 'performance') {
-          finalScore = (intentScore * 0.20) + (nlpData.nlpScore * 0.50) + (nlpData.rfScore * 0.30);
+          finalScore =
+            intentScore * 0.2 + nlpData.nlpScore * 0.5 + nlpData.rfScore * 0.3;
         } else {
-          finalScore = (intentScore * 0.35) + (nlpData.nlpScore * 0.40) + (nlpData.rfScore * 0.25);
+          finalScore =
+            intentScore * 0.35 +
+            nlpData.nlpScore * 0.4 +
+            nlpData.rfScore * 0.25;
         }
       } else {
         // Fallback when Python is offline
@@ -724,7 +853,8 @@ export class ActivitiesService {
 
       let promptBoost = 0;
       if (promptSkillSet.size > 0) {
-        const userSkills = employeeSkillMap.get(candidate.employeeId) || new Set<string>();
+        const userSkills =
+          employeeSkillMap.get(candidate.employeeId) || new Set<string>();
         let missing = 0;
         for (const s of promptSkillSet) {
           if (!userSkills.has(s)) missing += 1;
@@ -744,17 +874,21 @@ export class ActivitiesService {
 
       // Use candidate.recommendation_reason if set, otherwise empty string
       return {
-        userId:      candidate.employeeId,
-        name:        candidate.name,
-        role:        candidate.role,
-        department:  candidate.department,
-        score:       Math.min(Math.max(finalScore, 0), 1),
-        nlpScore:    nlpData?.nlpScore  ?? 0,
-        rfScore:     nlpData?.rfScore   ?? 0,
+        userId: candidate.employeeId,
+        name: candidate.name,
+        role: candidate.role,
+        department: candidate.department,
+        score: Math.min(Math.max(finalScore, 0), 1),
+        nlpScore: nlpData?.nlpScore ?? 0,
+        rfScore: nlpData?.rfScore ?? 0,
         promptBoost: Math.round(promptBoost * 100) / 100,
         intentScore: Math.round(intentScore * 100) / 100,
         intent,
-        yearsOfExperience: candidate.yearsOfExperience || (allUsers.find(e => e._id.toString() === candidate.employeeId)?.yearsOfExperience || 0),
+        yearsOfExperience:
+          candidate.yearsOfExperience ||
+          allUsers.find((e) => e._id.toString() === candidate.employeeId)
+            ?.yearsOfExperience ||
+          0,
         recommendation_reason: candidate.recommendation_reason || '',
         gap: candidate.skillGaps,
       };
@@ -766,29 +900,31 @@ export class ActivitiesService {
     // This allows the slider for "skillPriority" to actually differentiate people correctly!
     if (Object.keys(options).length > 0) {
       if (options.experienceFilter > 0) {
-        candidates = candidates.filter((c: any) => c.yearsOfExperience >= options.experienceFilter);
+        candidates = candidates.filter(
+          (c: any) => c.yearsOfExperience >= options.experienceFilter,
+        );
       }
-      
+
       candidates = candidates.map((c: any) => {
-          let adj = c.score * 100;
-          const gapCount = c.gap.length;
+        let adj = c.score * 100;
+        const gapCount = c.gap.length;
 
-          if (options.skillPriority === 'skills') {
-              if (gapCount === 0) adj += 15;
-              else adj -= (gapCount * 5);
-          } else if (options.skillPriority === 'experience') {
-              if (c.yearsOfExperience > 5) adj += 10;
-              if (c.yearsOfExperience > 10) adj += 10;
-          } else if (options.skillPriority === 'growth') {
-              if (gapCount > 0) adj += (gapCount * 8);
-          }
+        if (options.skillPriority === 'skills') {
+          if (gapCount === 0) adj += 15;
+          else adj -= gapCount * 5;
+        } else if (options.skillPriority === 'experience') {
+          if (c.yearsOfExperience > 5) adj += 10;
+          if (c.yearsOfExperience > 10) adj += 10;
+        } else if (options.skillPriority === 'growth') {
+          if (gapCount > 0) adj += gapCount * 8;
+        }
 
-          if (options.priorityWeight > 0) {
-             adj += (options.priorityWeight * 0.1);
-          }
+        if (options.priorityWeight > 0) {
+          adj += options.priorityWeight * 0.1;
+        }
 
-          c.score = Math.max(0, Math.min(100, Math.round(adj))) / 100;
-          return c;
+        c.score = Math.max(0, Math.min(100, Math.round(adj))) / 100;
+        return c;
       });
     }
 
@@ -796,7 +932,8 @@ export class ActivitiesService {
       // Primary: Score
       if (b.score !== a.score) return b.score - a.score;
       // Secondary tie breaker: Experience
-      if (b.yearsOfExperience !== a.yearsOfExperience) return b.yearsOfExperience - a.yearsOfExperience;
+      if (b.yearsOfExperience !== a.yearsOfExperience)
+        return b.yearsOfExperience - a.yearsOfExperience;
       // Tertiary tie breaker: Fewest gaps
       return a.gap.length - b.gap.length;
     });
@@ -819,7 +956,10 @@ export class ActivitiesService {
     };
   }
 
-  async extractSkillsFromDescription(description: string, title: string): Promise<any> {
+  async extractSkillsFromDescription(
+    description: string,
+    title: string,
+  ): Promise<any> {
     try {
       // Enhancement: fetch real skill names from MongoDB and pass them
       // to the Python NLP service so it uses dynamic vocabulary instead
@@ -831,7 +971,9 @@ export class ActivitiesService {
         const skillsResponse = await firstValueFrom(
           this.httpService.get<any>('http://localhost:3001/api/skills'),
         );
-        knownSkills = (skillsResponse.data || []).map((s: any) => s.name).filter(Boolean);
+        knownSkills = (skillsResponse.data || [])
+          .map((s: any) => s.name)
+          .filter(Boolean);
       } catch {
         // If skills fetch fails, Python will use its default vocabulary
         knownSkills = undefined;
@@ -846,7 +988,10 @@ export class ActivitiesService {
       );
       return response.data;
     } catch (error: any) {
-      console.warn('[ActivitiesService] NLP skill extraction unavailable:', error.message);
+      console.warn(
+        '[ActivitiesService] NLP skill extraction unavailable:',
+        error.message,
+      );
       return { extractedSkills: [], confidence: 0 };
     }
   }

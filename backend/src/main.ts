@@ -24,7 +24,10 @@ async function bootstrap() {
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
-  const allowedOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
+  const allowedOrigins = new Set([
+    ...defaultAllowedOrigins,
+    ...envAllowedOrigins,
+  ]);
 
   const isAllowedOrigin = (origin: string): boolean => {
     if (allowedOrigins.has(origin)) {
@@ -36,7 +39,10 @@ async function bootstrap() {
   };
 
   app.enableCors({
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (!origin || isAllowedOrigin(origin)) {
         callback(null, true);
         return;
@@ -48,11 +54,13 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-    forbidNonWhitelisted: false,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: false,
+    }),
+  );
 
   // Serve static files from 'uploads' directory
   const uploadDir = join(process.cwd(), 'uploads');

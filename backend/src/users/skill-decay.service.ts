@@ -22,9 +22,7 @@ import { User } from '../users/schema/user.schema';
 export class SkillDecayService {
   private readonly logger = new Logger(SkillDecayService.name);
 
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   /**
    * Weekly cron job — runs every Sunday at 00:00
@@ -35,8 +33,10 @@ export class SkillDecayService {
     this.logger.log('[SkillDecay] Starting weekly skill decay job...');
 
     const now = new Date();
-    const ninetyDaysAgo  = new Date(now.getTime() - 90  * 24 * 60 * 60 * 1000);
-    const hundredEightyDaysAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const hundredEightyDaysAgo = new Date(
+      now.getTime() - 180 * 24 * 60 * 60 * 1000,
+    );
 
     const users = await this.userModel.find({}).exec();
 
@@ -46,7 +46,7 @@ export class SkillDecayService {
     for (const user of users) {
       let modified = false;
 
-      for (const skill of (user.skills || [])) {
+      for (const skill of user.skills || []) {
         const lastUpdated: Date = skill.lastUpdated
           ? new Date(skill.lastUpdated)
           : new Date(0); // treat never-updated as very old
@@ -54,15 +54,15 @@ export class SkillDecayService {
         let decayRate = 0;
 
         if (lastUpdated < hundredEightyDaysAgo) {
-          decayRate = 0.10; // 10% decay — severely stale
+          decayRate = 0.1; // 10% decay — severely stale
         } else if (lastUpdated < ninetyDaysAgo) {
           decayRate = 0.05; // 5% decay — moderately stale
         }
 
         if (decayRate > 0) {
           const currentScore = skill.score ?? 0;
-          const decayAmount  = Math.floor(currentScore * decayRate);
-          const newScore     = Math.max(currentScore - decayAmount, 10); // floor at 10
+          const decayAmount = Math.floor(currentScore * decayRate);
+          const newScore = Math.max(currentScore - decayAmount, 10); // floor at 10
 
           if (newScore !== currentScore) {
             skill.score = newScore;
@@ -96,8 +96,10 @@ export class SkillDecayService {
     this.logger.log('[SkillDecay] Manual decay trigger invoked.');
 
     const now = new Date();
-    const ninetyDaysAgo  = new Date(now.getTime() - 90  * 24 * 60 * 60 * 1000);
-    const hundredEightyDaysAgo = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const hundredEightyDaysAgo = new Date(
+      now.getTime() - 180 * 24 * 60 * 60 * 1000,
+    );
 
     const users = await this.userModel.find({}).exec();
 
@@ -107,18 +109,21 @@ export class SkillDecayService {
     for (const user of users) {
       let modified = false;
 
-      for (const skill of (user.skills || [])) {
+      for (const skill of user.skills || []) {
         const lastUpdated: Date = skill.lastUpdated
           ? new Date(skill.lastUpdated)
           : new Date(0);
 
         let decayRate = 0;
-        if (lastUpdated < hundredEightyDaysAgo) decayRate = 0.10;
-        else if (lastUpdated < ninetyDaysAgo)   decayRate = 0.05;
+        if (lastUpdated < hundredEightyDaysAgo) decayRate = 0.1;
+        else if (lastUpdated < ninetyDaysAgo) decayRate = 0.05;
 
         if (decayRate > 0) {
           const currentScore = skill.score ?? 0;
-          const newScore     = Math.max(Math.floor(currentScore * (1 - decayRate)), 10);
+          const newScore = Math.max(
+            Math.floor(currentScore * (1 - decayRate)),
+            10,
+          );
 
           if (newScore !== currentScore) {
             skill.score = newScore;

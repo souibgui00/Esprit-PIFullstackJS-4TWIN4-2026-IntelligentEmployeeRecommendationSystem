@@ -1,4 +1,11 @@
-import { IsString, IsEmail, IsOptional, IsMongoId, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsMongoId,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()

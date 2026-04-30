@@ -24,4 +24,3 @@ export class RegisterDto {
   @IsString()
   department_id?: string;
 }
-

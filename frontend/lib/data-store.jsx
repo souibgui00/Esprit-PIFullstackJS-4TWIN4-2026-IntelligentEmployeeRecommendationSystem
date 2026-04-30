@@ -178,7 +178,7 @@ export function DataProvider({ children }) {
 
   const fetchActivities = useCallback(async () => {
     try {
-      const data = await api.get("/activities")
+      const data = await api.get("/api/activities")
         console.log(`[DataProvider] fetchActivities success. Received ${data.length} raw activities. State will be updated.`)
         setActivities(data.map(a => {
           const id = normalizeId(a._id ?? a.id)
@@ -213,7 +213,7 @@ export function DataProvider({ children }) {
 
   const fetchDepartments = useCallback(async () => {
     try {
-      const data = await api.get("/departments")
+      const data = await api.get("/api/departments")
       if (Array.isArray(data)) {
         setDepartments(data.map(d => ({ ...d, id: d._id || d.id })))
       }

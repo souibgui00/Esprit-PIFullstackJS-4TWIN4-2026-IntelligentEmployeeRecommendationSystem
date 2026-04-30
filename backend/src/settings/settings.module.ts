@@ -5,11 +5,11 @@ import { SettingsService } from './settings.service';
 import { Setting, SettingSchema } from './schema/setting.schema';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }])
-    ],
-    controllers: [SettingsController],
-    providers: [SettingsService],
-    exports: [SettingsService]
+  imports: [
+    MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }]),
+  ],
+  controllers: [SettingsController],
+  providers: [SettingsService],
+  exports: [SettingsService],
 })
 export class SettingsModule {}

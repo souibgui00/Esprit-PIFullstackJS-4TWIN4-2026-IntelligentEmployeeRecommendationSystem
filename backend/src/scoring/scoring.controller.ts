@@ -40,7 +40,10 @@ export class ScoringController {
     @Param('skillId') skillId: string,
   ) {
     try {
-      const score = await this.scoringService.calculateSkillScore(userId, skillId);
+      const score = await this.scoringService.calculateSkillScore(
+        userId,
+        skillId,
+      );
       return {
         success: true,
         userId,
@@ -66,7 +69,8 @@ export class ScoringController {
   @Roles(Role.ADMIN, Role.MANAGER)
   async getEmployeeSkillScores(@Param('userId') userId: string) {
     try {
-      const skillScores = await this.scoringService.getEmployeeSkillScores(userId);
+      const skillScores =
+        await this.scoringService.getEmployeeSkillScores(userId);
       return {
         success: true,
         userId,
@@ -95,9 +99,16 @@ export class ScoringController {
     @Param('activityId') activityId: string,
   ) {
     try {
-      const score = await this.scoringService.calculateGlobalActivityScore(userId, activityId);
-      const matchPercentage = await this.scoringService.getActivityMatchPercentage(userId, activityId);
-      
+      const score = await this.scoringService.calculateGlobalActivityScore(
+        userId,
+        activityId,
+      );
+      const matchPercentage =
+        await this.scoringService.getActivityMatchPercentage(
+          userId,
+          activityId,
+        );
+
       return {
         success: true,
         userId,
@@ -123,7 +134,12 @@ export class ScoringController {
   @Post('participation/update')
   @Roles(Role.ADMIN, Role.MANAGER)
   async updateScoresAfterParticipation(
-    @Body() body: { userId: string; activityId: string; feedbackRating: number },
+    @Body()
+    body: {
+      userId: string;
+      activityId: string;
+      feedbackRating: number;
+    },
   ) {
     try {
       const result = await this.scoringService.updateSkoresAfterParticipation(
@@ -180,7 +196,9 @@ export class ScoringController {
   @Roles(Role.ADMIN, Role.MANAGER)
   async compareEmployeeScores(@Body() body: { userIds: string[] }) {
     try {
-      const comparisons = await this.scoringService.compareEmployeeScores(body.userIds);
+      const comparisons = await this.scoringService.compareEmployeeScores(
+        body.userIds,
+      );
       return {
         success: true,
         comparisons,
@@ -210,11 +228,12 @@ export class ScoringController {
     @Query('limit') limit: number = 10,
   ) {
     try {
-      const recommendations = await this.prioritizationService.getRecommendedEmployeesForActivity(
-        activityId,
-        context,
-        limit,
-      );
+      const recommendations =
+        await this.prioritizationService.getRecommendedEmployeesForActivity(
+          activityId,
+          context,
+          limit,
+        );
 
       return {
         success: true,
@@ -245,10 +264,11 @@ export class ScoringController {
     @Body() body: { importance: number },
   ) {
     try {
-      const result = await this.prioritizationService.weightSkillsByActivityImportance(
-        activityId,
-        body.importance,
-      );
+      const result =
+        await this.prioritizationService.weightSkillsByActivityImportance(
+          activityId,
+          body.importance,
+        );
 
       return {
         success: true,
@@ -277,7 +297,10 @@ export class ScoringController {
     @Param('userId') userId: string,
   ) {
     try {
-      const gaps = await this.prioritizationService.identifySkillGaps(userId, activityId);
+      const gaps = await this.prioritizationService.identifySkillGaps(
+        userId,
+        activityId,
+      );
       return {
         success: true,
         userId,
@@ -304,7 +327,8 @@ export class ScoringController {
   @Roles(Role.ADMIN, Role.MANAGER)
   async getEmployeesBySkillLevel(@Param('activityId') activityId: string) {
     try {
-      const grouped = await this.prioritizationService.getEmployeesBySkillLevel(activityId);
+      const grouped =
+        await this.prioritizationService.getEmployeesBySkillLevel(activityId);
       return {
         success: true,
         activityId,
@@ -329,7 +353,8 @@ export class ScoringController {
   @Roles(Role.ADMIN, Role.MANAGER)
   async suggestActivityImportance(@Param('activityId') activityId: string) {
     try {
-      const suggestion = await this.prioritizationService.suggestActivityImportance(activityId);
+      const suggestion =
+        await this.prioritizationService.suggestActivityImportance(activityId);
       return {
         success: true,
         suggestion,
@@ -358,7 +383,10 @@ export class ScoringController {
     @Param('activityId') activityId: string,
   ) {
     try {
-      const score = await this.recommendationModelService.predictScore(userId, activityId);
+      const score = await this.recommendationModelService.predictScore(
+        userId,
+        activityId,
+      );
       return {
         success: true,
         userId,
@@ -366,11 +394,15 @@ export class ScoringController {
         score,
         scorePercent: Math.round(score * 100),
         label:
-          score >= 0.85 ? 'Top Pick'
-          : score >= 0.70 ? 'Highly Recommended'
-          : score >= 0.50 ? 'Recommended'
-          : score >= 0.05 ? 'Consider'
-          : 'Not Relevant',
+          score >= 0.85
+            ? 'Top Pick'
+            : score >= 0.7
+              ? 'Highly Recommended'
+              : score >= 0.5
+                ? 'Recommended'
+                : score >= 0.05
+                  ? 'Consider'
+                  : 'Not Relevant',
       };
     } catch (error: any) {
       throw new HttpException(
@@ -391,7 +423,10 @@ export class ScoringController {
     @Param('activityId') activityId: string,
   ) {
     try {
-      const breakdown = await this.recommendationModelService.getScoreBreakdown(userId, activityId);
+      const breakdown = await this.recommendationModelService.getScoreBreakdown(
+        userId,
+        activityId,
+      );
       return { success: true, userId, activityId, ...breakdown };
     } catch (error: any) {
       throw new HttpException(

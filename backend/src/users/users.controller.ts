@@ -37,7 +37,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly cvExtractionService: CvExtractionService,
     private readonly auditService: AuditService,
-  ) { }
+  ) {}
 
   private buildCvSkillScoreSummary(userDoc: any, extractedSkillIds: string[]) {
     const extractedSet = new Set(extractedSkillIds.map((id) => id.toString()));
@@ -46,8 +46,12 @@ export class UsersController {
       return skillId && extractedSet.has(skillId);
     });
 
-    const totalScore = extractedSkills.reduce((sum: number, s: any) => sum + (s.score || 0), 0);
-    const averageScore = extractedSkills.length > 0 ? totalScore / extractedSkills.length : 0;
+    const totalScore = extractedSkills.reduce(
+      (sum: number, s: any) => sum + (s.score || 0),
+      0,
+    );
+    const averageScore =
+      extractedSkills.length > 0 ? totalScore / extractedSkills.length : 0;
 
     return {
       extractedSkillsCount: extractedSkills.length,
@@ -60,15 +64,20 @@ export class UsersController {
 
   @Roles(Role.MANAGER, Role.ADMIN, Role.EMPLOYEE, Role.HR)
   @Post('me/avatar')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: join(process.cwd(), 'uploads'),
-      filename: (req: any, file: any, cb: any) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        return cb(null, `${randomName}${extname(file.originalname)}`);
-      }
-    })
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'uploads'),
+        filename: (req: any, file: any, cb: any) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   async uploadAvatar(@Req() req: Request, @UploadedFile() file: any) {
     const user = (req as any).user;
     const avatarUrl = `${process.env.BACKEND_URL || 'http://localhost:3001'}/uploads/${file.filename}`;
@@ -77,18 +86,25 @@ export class UsersController {
 
   @Roles(Role.MANAGER, Role.ADMIN, Role.EMPLOYEE, Role.HR)
   @Post('me/cv')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: join(process.cwd(), 'uploads'),
-      filename: (req: any, file: any, cb: any) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        return cb(null, `${randomName}${extname(file.originalname)}`);
-      }
-    })
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'uploads'),
+        filename: (req: any, file: any, cb: any) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   async uploadMyCv(@Req() req: Request, @UploadedFile() file: any) {
     try {
-      this.logger.log(`Employee CV upload request for file: ${file.originalname}`);
+      this.logger.log(
+        `Employee CV upload request for file: ${file.originalname}`,
+      );
 
       const user = (req as any).user;
       const cvUrl = `${process.env.BACKEND_URL || 'http://localhost:3001'}/uploads/${file.filename}`;
@@ -96,14 +112,17 @@ export class UsersController {
       await this.usersService.update(user.userId, { cvUrl });
 
       this.logger.log(`Starting skill extraction from CV: ${file.path}`);
-      const skillIds = await this.cvExtractionService.extractDataFromCV(file.path);
+      const skillIds = await this.cvExtractionService.extractDataFromCV(
+        file.path,
+      );
 
       const currentUserDoc = await this.usersService.findOne(user.userId);
       const exp = currentUserDoc?.yearsOfExperience || 0;
       let inferredLevel = 'beginner';
-      if (exp >= 10) inferredLevel = 'advanced'; // Note: Cap at advanced for auto-discovery
+      if (exp >= 10)
+        inferredLevel = 'advanced'; // Note: Cap at advanced for auto-discovery
       else if (exp >= 4) inferredLevel = 'intermediate';
-      
+
       for (const skillId of skillIds) {
         try {
           await this.usersService.addSkillToUser(user.userId, {
@@ -113,16 +132,23 @@ export class UsersController {
             hierarchie_eval: 0,
           });
         } catch (e: any) {
-          this.logger.warn(`Skill ${skillId} already existed for user ${user.userId}; kept existing evaluation values.`);
+          this.logger.warn(
+            `Skill ${skillId} already existed for user ${user.userId}; kept existing evaluation values.`,
+          );
         }
       }
 
-      this.logger.log(`CV upload and skill extraction completed for user ${user.userId}. Found ${skillIds.length} skills.`);
+      this.logger.log(
+        `CV upload and skill extraction completed for user ${user.userId}. Found ${skillIds.length} skills.`,
+      );
       const updatedUser = await this.usersService.findOne(user.userId);
       return {
         message: 'CV uploaded and scores calculated from extracted skills',
         user: updatedUser,
-        cvSkillScoreSummary: this.buildCvSkillScoreSummary(updatedUser, skillIds),
+        cvSkillScoreSummary: this.buildCvSkillScoreSummary(
+          updatedUser,
+          skillIds,
+        ),
       };
     } catch (error: any) {
       this.logger.error(`CV upload failed: ${error.message}`, error.stack);
@@ -132,15 +158,20 @@ export class UsersController {
 
   @Roles(Role.ADMIN, Role.HR)
   @Post(':id/cv')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: join(process.cwd(), 'uploads'),
-      filename: (req: any, file: any, cb: any) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        return cb(null, `${randomName}${extname(file.originalname)}`);
-      }
-    })
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'uploads'),
+        filename: (req: any, file: any, cb: any) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   async uploadUserCv(@Param('id') id: string, @UploadedFile() file: any) {
     const cvUrl = `${process.env.BACKEND_URL || 'http://localhost:3001'}/uploads/${file.filename}`;
 
@@ -152,7 +183,9 @@ export class UsersController {
     if (exp >= 10) inferredLevel = 'advanced';
     else if (exp >= 4) inferredLevel = 'intermediate';
 
-    const skillIds = await this.cvExtractionService.extractDataFromCV(file.path);
+    const skillIds = await this.cvExtractionService.extractDataFromCV(
+      file.path,
+    );
     for (const skillId of skillIds) {
       try {
         await this.usersService.addSkillToUser(id, {
@@ -162,7 +195,9 @@ export class UsersController {
           hierarchie_eval: 0,
         });
       } catch {
-        this.logger.warn(`Skill ${skillId} already existed for user ${id}; kept existing evaluation values.`);
+        this.logger.warn(
+          `Skill ${skillId} already existed for user ${id}; kept existing evaluation values.`,
+        );
       }
     }
 
@@ -183,13 +218,18 @@ export class UsersController {
     }
 
     try {
-      this.logger.log(`Processing CV extraction request for file: ${file.originalname}, size: ${file.size}, type: ${file.mimetype}`);
+      this.logger.log(
+        `Processing CV extraction request for file: ${file.originalname}, size: ${file.size}, type: ${file.mimetype}`,
+      );
 
       if (!file.buffer) {
         throw new Error('File buffer is empty');
       }
 
-      const result = await this.cvExtractionService.extractProfileFromBuffer(file.buffer, file.mimetype);
+      const result = await this.cvExtractionService.extractProfileFromBuffer(
+        file.buffer,
+        file.mimetype,
+      );
 
       if (!result) {
         throw new Error('Could not extract any data from the CV file');
@@ -198,7 +238,10 @@ export class UsersController {
       this.logger.log(`CV extraction successful for ${file.originalname}`);
       return result;
     } catch (error: any) {
-      this.logger.error(`CV extraction failed for ${file.originalname}: ${error.message}`, error.stack);
+      this.logger.error(
+        `CV extraction failed for ${file.originalname}: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`CV extraction failed: ${error.message}`);
     }
   }
@@ -235,7 +278,9 @@ export class UsersController {
     @Body('auto_eval') auto_eval: number,
   ) {
     const user = (req as any).user;
-    return this.usersService.updateUserSkill(user.userId, skillId, { auto_eval });
+    return this.usersService.updateUserSkill(user.userId, skillId, {
+      auto_eval,
+    });
   }
 
   // ─── CRUD ─────────────────────────────────────────────────────────────────────
@@ -247,7 +292,7 @@ export class UsersController {
     await this.auditService.logAction({
       action: 'CREATE_USER',
       entityType: 'USER',
-      entityId: (user as any)._id?.toString() || (user as any).id,
+      entityId: user._id?.toString() || user.id,
       actorId: (req as any).user.userId,
       newValue: body,
     });
@@ -260,9 +305,10 @@ export class UsersController {
     @Query('role') role?: string,
     @Query('lightweight') lightweight?: string,
   ) {
-    const useLightweight = typeof lightweight === 'string'
-      ? lightweight.toLowerCase() === 'true'
-      : !!lightweight;
+    const useLightweight =
+      typeof lightweight === 'string'
+        ? lightweight.toLowerCase() === 'true'
+        : !!lightweight;
 
     return useLightweight
       ? this.usersService.findAllLightweight(role)
@@ -289,7 +335,11 @@ export class UsersController {
 
   @Roles(Role.MANAGER, Role.ADMIN, Role.EMPLOYEE, Role.HR)
   @Put(':id')
-  async update(@Req() req: Request, @Param('id') id: string, @Body() body: UpdateUserDto) {
+  async update(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: UpdateUserDto,
+  ) {
     const before = await this.usersService.findOne(id);
     const updated = await this.usersService.update(id, body);
     await this.auditService.logAction({
@@ -322,10 +372,7 @@ export class UsersController {
 
   @Roles(Role.ADMIN, Role.HR)
   @Patch(':id/role')
-  async updateRole(
-    @Param('id') id: string,
-    @Body('role') role: string,
-  ) {
+  async updateRole(@Param('id') id: string, @Body('role') role: string) {
     const normalizedRole = role?.toUpperCase() as Role;
     if (!Object.values(Role).includes(normalizedRole)) {
       throw new Error(`Invalid role: ${role}`);
@@ -364,10 +411,7 @@ export class UsersController {
 
   @Roles(Role.ADMIN, Role.HR)
   @Post(':id/skills')
-  async addSkill(
-    @Param('id') id: string,
-    @Body() body: any,
-  ) {
+  async addSkill(@Param('id') id: string, @Body() body: any) {
     return this.usersService.addSkillToUser(id, body);
   }
 

@@ -1,4 +1,11 @@
-import { IsString, IsEnum, IsOptional, IsNumber, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class RequiredSkillDto {
@@ -13,120 +20,120 @@ class RequiredSkillDto {
 }
 
 export class CreateActivityDto {
-    @IsString()
-    title!: string;
+  @IsString()
+  title!: string;
 
-    @IsString()
-    description!: string;
+  @IsString()
+  description!: string;
 
-    @IsEnum(['training', 'workshop', 'mentoring', 'webinar'])
-    type!: string;
+  @IsEnum(['training', 'workshop', 'mentoring', 'webinar'])
+  type!: string;
 
-    @IsString()
-    date!: string;
+  @IsString()
+  date!: string;
 
-    @IsString()
-    duration!: string;
+  @IsString()
+  duration!: string;
 
-    @IsOptional()
-    @IsNumber()
-    capacity?: number;
+  @IsOptional()
+  @IsNumber()
+  capacity?: number;
 
-    @IsOptional()
-    @IsEnum(['open', 'closed', 'completed'])
-    status?: string;
+  @IsOptional()
+  @IsEnum(['open', 'closed', 'completed'])
+  status?: string;
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    skillsCovered?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skillsCovered?: string[];
 
-    @IsOptional()
-    @IsEnum(['beginner', 'intermediate', 'advanced'])
-    level?: string;
+  @IsOptional()
+  @IsEnum(['beginner', 'intermediate', 'advanced'])
+  level?: string;
 
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => RequiredSkillDto)
-    requiredSkills?: RequiredSkillDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RequiredSkillDto)
+  requiredSkills?: RequiredSkillDto[];
 
-    @IsOptional()
-    @IsString()
-    location?: string;
+  @IsOptional()
+  @IsString()
+  location?: string;
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    targetDepartments?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  targetDepartments?: string[];
 
-    @IsOptional()
-    @IsString()
-    organizerId?: string;
+  @IsOptional()
+  @IsString()
+  organizerId?: string;
 
-    @IsOptional()
-    @IsEnum(['development', 'performance', 'balanced'])
-    intent?: string;
+  @IsOptional()
+  @IsEnum(['development', 'performance', 'balanced'])
+  intent?: string;
 }
 
 export class UpdateActivityDto {
-    @IsOptional()
-    @IsString()
-    title?: string;
+  @IsOptional()
+  @IsString()
+  title?: string;
 
-    @IsOptional()
-    @IsString()
-    description?: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    @IsOptional()
-    @IsEnum(['training', 'workshop', 'mentoring', 'webinar'])
-    type?: string;
+  @IsOptional()
+  @IsEnum(['training', 'workshop', 'mentoring', 'webinar'])
+  type?: string;
 
-    @IsOptional()
-    @IsString()
-    date?: string;
+  @IsOptional()
+  @IsString()
+  date?: string;
 
-    @IsOptional()
-    @IsString()
-    duration?: string;
+  @IsOptional()
+  @IsString()
+  duration?: string;
 
-    @IsOptional()
-    @IsNumber()
-    capacity?: number;
+  @IsOptional()
+  @IsNumber()
+  capacity?: number;
 
-    @IsOptional()
-    @IsEnum(['open', 'closed', 'completed'])
-    status?: string;
+  @IsOptional()
+  @IsEnum(['open', 'closed', 'completed'])
+  status?: string;
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    skillsCovered?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skillsCovered?: string[];
 
-    @IsOptional()
-    @IsEnum(['beginner', 'intermediate', 'advanced'])
-    level?: string;
+  @IsOptional()
+  @IsEnum(['beginner', 'intermediate', 'advanced'])
+  level?: string;
 
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => RequiredSkillDto)
-    requiredSkills?: RequiredSkillDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RequiredSkillDto)
+  requiredSkills?: RequiredSkillDto[];
 
-    @IsOptional()
-    @IsString()
-    location?: string;
+  @IsOptional()
+  @IsString()
+  location?: string;
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    targetDepartments?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  targetDepartments?: string[];
 
-    @IsOptional()
-    @IsString()
-    organizerId?: string;
+  @IsOptional()
+  @IsString()
+  organizerId?: string;
 
-    @IsOptional()
-    @IsEnum(['development', 'performance', 'balanced'])
-    intent?: string;
+  @IsOptional()
+  @IsEnum(['development', 'performance', 'balanced'])
+  intent?: string;
 }

@@ -1,6 +1,16 @@
 import {
-  Controller, Get, Post, Put, Patch, Delete, Body, Param,
-  UseGuards, HttpCode, HttpStatus
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -10,10 +20,10 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 
-@Controller('departments')
+@Controller('api/departments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) { }
+  constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
   @Roles(Role.ADMIN, Role.HR)
@@ -24,8 +34,13 @@ export class DepartmentsController {
 
   @Get()
   @Roles(Role.ADMIN, Role.HR, Role.MANAGER, Role.EMPLOYEE)
-  findAll() {
-    return this.departmentsService.findAll();
+  async findAll(@Query('limit') limit?: string) {
+    const departments = await this.departmentsService.findAll();
+    if (limit) {
+      const limitNum = parseInt(limit, 10);
+      return departments.slice(0, limitNum);
+    }
+    return departments;
   }
 
   @Get(':id')

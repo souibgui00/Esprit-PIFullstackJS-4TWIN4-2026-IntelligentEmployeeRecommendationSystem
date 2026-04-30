@@ -12,14 +12,13 @@ import * as bcrypt from 'bcrypt';
 import { Role } from '../common/enums/role.enum';
 import { EmailService } from '../common/services/email.service';
 
-
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
     private emailService: EmailService,
-  ) { }
+  ) {}
 
   // ⚡ Performance: cache all-users query to avoid repeated full-table scans during recommendations
   private usersCache: any[] | null = null;
@@ -33,9 +32,12 @@ export class UsersService {
   };
 
   private normalizeSkillCategory(rawType: string | undefined): string {
-    const normalized = (rawType || 'knowledge').toLowerCase().replace(/[-_\s]/g, '');
+    const normalized = (rawType || 'knowledge')
+      .toLowerCase()
+      .replace(/[-_\s]/g, '');
     if (normalized === 'knowhow') return 'knowhow';
-    if (normalized === 'softskill' || normalized === 'softskills') return 'softskill';
+    if (normalized === 'softskill' || normalized === 'softskills')
+      return 'softskill';
     if (normalized === 'knowledge') return 'knowledge';
     return 'knowledge';
   }
@@ -67,7 +69,8 @@ export class UsersService {
 
     Object.entries(this.skillCategoryWeights).forEach(([category, weight]) => {
       if (categoryScores[category].length > 0) {
-        weightedSum += categoryAverages[category as keyof typeof categoryAverages] * weight;
+        weightedSum +=
+          categoryAverages[category as keyof typeof categoryAverages] * weight;
         totalWeight += weight;
       }
     });
@@ -119,7 +122,10 @@ export class UsersService {
     } else {
       // Google users get a random unusable password — they log in via OAuth only
       const salt = await bcrypt.genSalt(10);
-      data.password = await bcrypt.hash(Math.random().toString(36).slice(-16), salt);
+      data.password = await bcrypt.hash(
+        Math.random().toString(36).slice(-16),
+        salt,
+      );
     }
 
     // Set role to enum if provided as string
@@ -128,8 +134,10 @@ export class UsersService {
     }
 
     // Clean up empty optional fields that might fail MongoId casting
-    if (data.department_id === '' || data.department_id === 'none') data.department_id = null;
-    if (data.manager_id === '' || data.manager_id === 'none') data.manager_id = null;
+    if (data.department_id === '' || data.department_id === 'none')
+      data.department_id = null;
+    if (data.manager_id === '' || data.manager_id === 'none')
+      data.manager_id = null;
 
     let savedUser;
     try {
@@ -142,14 +150,19 @@ export class UsersService {
 
     // Send credentials email only for manually created (non-Google) users
     if (!isGoogleUser && rawPassword) {
-      this.emailService.sendNewUserCredentials(
-        data.email,
-        data.name,
-        rawPassword,
-        data.matricule,
-      ).catch(err => {
-        console.error('[UsersService] Failed to send credentials email:', err);
-      });
+      this.emailService
+        .sendNewUserCredentials(
+          data.email,
+          data.name,
+          rawPassword,
+          data.matricule,
+        )
+        .catch((err) => {
+          console.error(
+            '[UsersService] Failed to send credentials email:',
+            err,
+          );
+        });
     }
 
     const userObj = savedUser.toObject();
@@ -161,16 +174,18 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
-    return this.userModel.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') }
-    }).populate('skills.skillId');
+    return this.userModel
+      .findOne({
+        email: { $regex: new RegExp(`^${email}$`, 'i') },
+      })
+      .populate('skills.skillId');
   }
 
   async findAll(role?: string) {
     // ⚡ Use cache for the no-filter variant (called by recommendation engine)
     if (!role) {
       const now = Date.now();
-      if (this.usersCache && (now - this.usersCacheTime) < this.CACHE_TTL_MS) {
+      if (this.usersCache && now - this.usersCacheTime < this.CACHE_TTL_MS) {
         return this.usersCache;
       }
     }
@@ -193,7 +208,10 @@ export class UsersService {
       }
       return users;
     } catch (error: any) {
-      console.warn('[UsersService] Population failed in findAll, falling back:', error.message);
+      console.warn(
+        '[UsersService] Population failed in findAll, falling back:',
+        error.message,
+      );
       const filter: any = {};
       if (role) {
         filter.role = { $regex: new RegExp(`^${role}$`, 'i') };
@@ -222,7 +240,10 @@ export class UsersService {
   }
 
   async findManagers() {
-    return this.userModel.find({ role: { $regex: /^manager$/i } }).select('-password').exec();
+    return this.userModel
+      .find({ role: { $regex: /^manager$/i } })
+      .select('-password')
+      .exec();
   }
 
   async findDepartmentManager(departmentId: string) {
@@ -230,7 +251,11 @@ export class UsersService {
     // This is the primary relationship: Department.manager_id → User
     let dept: any;
     try {
-      dept = await this.userModel.db.model('Department').findById(departmentId).select('manager_id name').exec();
+      dept = await this.userModel.db
+        .model('Department')
+        .findById(departmentId)
+        .select('manager_id name')
+        .exec();
     } catch {
       dept = null;
     }
@@ -265,35 +290,54 @@ export class UsersService {
     try {
       const managerObjectId = new Types.ObjectId(managerId);
       const allUsers = await this.userModel.find().lean().exec();
-      const managedDepts = await this.userModel.db.model('Department').find({ manager_id: managerObjectId }).lean().exec();
+      const managedDepts = await this.userModel.db
+        .model('Department')
+        .find({ manager_id: managerObjectId })
+        .lean()
+        .exec();
       const managedDeptIds = managedDepts.map((d: any) => d._id.toString());
-      const managedDeptNames = managedDepts.map((d: any) => d.name?.toLowerCase().trim()).filter(Boolean);
+      const managedDeptNames = managedDepts
+        .map((d: any) => d.name?.toLowerCase().trim())
+        .filter(Boolean);
 
-      const managerObj = allUsers.find((u: any) => u._id.toString() === managerId);
-      const managerRawDept = (managerObj as any)?.department?.toLowerCase().trim();
+      const managerObj = allUsers.find(
+        (u: any) => u._id.toString() === managerId,
+      );
+      const managerRawDept = (managerObj as any)?.department
+        ?.toLowerCase()
+        .trim();
 
       return allUsers
         .filter((u: any) => {
-          if (u.role?.toLowerCase() === 'admin' || u.role?.toLowerCase() === 'hr') return false;
+          if (
+            u.role?.toLowerCase() === 'admin' ||
+            u.role?.toLowerCase() === 'hr'
+          )
+            return false;
           if (u._id.toString() === managerId) return false;
 
           const isDirectReport = u.manager_id?.toString() === managerId;
           const userDeptId = u.department_id?.toString();
-          const isDeptIdReport = userDeptId && managedDeptIds.includes(userDeptId);
-          
+          const isDeptIdReport =
+            userDeptId && managedDeptIds.includes(userDeptId);
+
           const rawDept = u.department?.toLowerCase().trim();
-          const isDeptNameReport = rawDept && (managedDeptNames.includes(rawDept) || rawDept === managerRawDept);
+          const isDeptNameReport =
+            rawDept &&
+            (managedDeptNames.includes(rawDept) || rawDept === managerRawDept);
 
           return isDirectReport || isDeptIdReport || isDeptNameReport;
         })
         .map((u: any) => new Types.ObjectId(u._id.toString()));
     } catch (e: any) {
-      console.error('[UsersService] Error in findManagedEmployeeIds:', e.message);
+      console.error(
+        '[UsersService] Error in findManagedEmployeeIds:',
+        e.message,
+      );
 
       return [];
     }
   }
-
 
   /**
    * Returns the raw department_id for a user without any Mongoose population.
@@ -319,7 +363,10 @@ export class UsersService {
         .populate('skills.skillId')
         .select('-password');
     } catch (error: any) {
-      console.warn(`[UsersService] Population failed for user ${id}:`, error.message);
+      console.warn(
+        `[UsersService] Population failed for user ${id}:`,
+        error.message,
+      );
       user = await this.userModel.findById(id).select('-password');
     }
 
@@ -346,8 +393,10 @@ export class UsersService {
     delete updateData.role;
     delete updateData.matricule;
 
-    if (updateData.department_id === '' || updateData.department_id === 'none') updateData.department_id = null;
-    if (updateData.manager_id === '' || updateData.manager_id === 'none') updateData.manager_id = null;
+    if (updateData.department_id === '' || updateData.department_id === 'none')
+      updateData.department_id = null;
+    if (updateData.manager_id === '' || updateData.manager_id === 'none')
+      updateData.manager_id = null;
 
     // Hash password if it's being updated
     if (updateData.password) {
@@ -363,8 +412,13 @@ export class UsersService {
         .populate('skills.skillId')
         .select('-password');
     } catch (error: any) {
-      console.warn(`[UsersService] Update population failed for user ${id}:`, error.message);
-      user = await this.userModel.findByIdAndUpdate(id, updateData, { new: true }).select('-password');
+      console.warn(
+        `[UsersService] Update population failed for user ${id}:`,
+        error.message,
+      );
+      user = await this.userModel
+        .findByIdAndUpdate(id, updateData, { new: true })
+        .select('-password');
     }
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
@@ -372,11 +426,9 @@ export class UsersService {
   }
 
   async updateRole(id: string, role: Role) {
-    const user = await this.userModel.findByIdAndUpdate(
-      id,
-      { role },
-      { new: true },
-    ).populate('department_id', 'name code')
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { role }, { new: true })
+      .populate('department_id', 'name code')
       .populate('skills.skillId')
       .select('-password');
     if (!user) throw new NotFoundException('User not found');
@@ -416,10 +468,13 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) throw new UnauthorizedException('Current password is incorrect');
+    if (!isMatch)
+      throw new UnauthorizedException('Current password is incorrect');
 
     if (newPassword.length < 8) {
-      throw new BadRequestException('New password must be at least 8 characters');
+      throw new BadRequestException(
+        'New password must be at least 8 characters',
+      );
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -482,12 +537,19 @@ export class UsersService {
     return managerRating * 2;
   }
 
-  private calculateFinalSkillScore(level: string | number, years: number, lastUpdated: Date | null, auto: number, manager: number, skillIdString?: string): number {
+  private calculateFinalSkillScore(
+    level: string | number,
+    years: number,
+    lastUpdated: Date | null,
+    auto: number,
+    manager: number,
+    skillIdString?: string,
+  ): number {
     const base = this.getLevelBaseScore(level);
     const exp = this.calculateExperienceBonus(years);
     const prog = lastUpdated ? this.calculateProgressionBonus(lastUpdated) : 0;
     const feedback = this.calculateWeightedFeedback(auto, manager);
-    
+
     // Add a deterministic variance based on skillId string so identical CV setups produce logically identical scores
     let pseudoRandom = 0;
     if (skillIdString) {
@@ -499,18 +561,22 @@ export class UsersService {
     } else {
       pseudoRandom = Math.floor(Math.random() * 15);
     }
-    
-    const variance = (auto || manager) ? 0 : pseudoRandom;
+
+    const variance = auto || manager ? 0 : pseudoRandom;
 
     const skillScore = base + exp + prog + feedback + variance;
     return Math.min(skillScore, 120);
   }
 
   private async recalculateRankScore(userId: string) {
-    const user = await this.userModel.findById(userId).populate('skills.skillId');
+    const user = await this.userModel
+      .findById(userId)
+      .populate('skills.skillId');
     if (!user || !user.skills?.length) return;
 
-    const { weightedScore: finalScore } = this.computeWeightedSkillScore(user.skills);
+    const { weightedScore: finalScore } = this.computeWeightedSkillScore(
+      user.skills,
+    );
 
     // Update global rank
     let rank = 'Junior';
@@ -520,7 +586,7 @@ export class UsersService {
 
     await this.userModel.findByIdAndUpdate(userId, {
       rankScore: finalScore,
-      rank: rank
+      rank: rank,
     });
   }
 
@@ -573,7 +639,9 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     const skillId = skillData.skillId?.toString();
-    const existing = user.skills?.find((s: any) => s.skillId?.toString() === skillId);
+    const existing = user.skills?.find(
+      (s: any) => s.skillId?.toString() === skillId,
+    );
     if (existing) throw new BadRequestException('Skill already assigned');
 
     const score = this.calculateFinalSkillScore(
@@ -582,7 +650,7 @@ export class UsersService {
       null,
       skillData.auto_eval || 0,
       skillData.hierarchie_eval || 0,
-      skillId
+      skillId,
     );
 
     const newSkill = {
@@ -604,8 +672,11 @@ export class UsersService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const skillIndex = user.skills?.findIndex((s: any) => s.skillId?.toString() === skillId);
-    if (skillIndex === -1 || skillIndex === undefined) throw new NotFoundException('Skill not found');
+    const skillIndex = user.skills?.findIndex(
+      (s: any) => s.skillId?.toString() === skillId,
+    );
+    if (skillIndex === -1 || skillIndex === undefined)
+      throw new NotFoundException('Skill not found');
 
     const skill = user.skills[skillIndex];
     const newScore = this.calculateFinalSkillScore(
@@ -614,7 +685,7 @@ export class UsersService {
       skill.lastUpdated,
       skill.auto_eval,
       skill.hierarchie_eval,
-      skillId
+      skillId,
     );
 
     user.skills[skillIndex].score = newScore;
@@ -628,11 +699,12 @@ export class UsersService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const skillIndex = user.skills?.findIndex((s: any) =>
-      s.skillId?._id?.toString() === skillId ||
-      s.skillId?.toString() === skillId
+    const skillIndex = user.skills?.findIndex(
+      (s: any) =>
+        s.skillId?._id?.toString() === skillId ||
+        s.skillId?.toString() === skillId,
     );
-    
+
     if (skillIndex === -1 || skillIndex === undefined) {
       // Skill not present in user's profile yet — add it.
       // CRITICAL: skillId MUST be cast to Types.ObjectId so that Mongoose's
@@ -643,12 +715,14 @@ export class UsersService {
         try {
           skillObjectId = new Types.ObjectId(skillId);
         } catch {
-          console.error(`[UsersService] Cannot cast skillId "${skillId}" to ObjectId`);
+          console.error(
+            `[UsersService] Cannot cast skillId "${skillId}" to ObjectId`,
+          );
           return this.findOne(userId);
         }
 
         user.skills = user.skills || [];
-        (user.skills as any[]).push({
+        user.skills.push({
           skillId: skillObjectId,
           score: updateData.score,
           progression: updateData.progression || 0,
@@ -667,11 +741,14 @@ export class UsersService {
     }
 
     const skill = user.skills[skillIndex];
-    
+
     // Fix: Mongoose array subdocuments cannot be spread directly using {...skill}
     // because that extracts Mongoose internal properties instead of the actual data fields.
     // We must use .toObject() if it exists, or access._doc, or just use plain object assignment.
-    const skillDataObj = typeof skill.toObject === 'function' ? skill.toObject() : (skill._doc || skill);
+    const skillDataObj =
+      typeof skill.toObject === 'function'
+        ? skill.toObject()
+        : skill._doc || skill;
     const mergedData = { ...skillDataObj, ...updateData };
 
     // Force skillId to always be the ObjectId derived from the method parameter.
@@ -690,7 +767,7 @@ export class UsersService {
       progression: updateData.progression ?? mergedData.progression,
       lastUpdated: new Date(),
     };
-    
+
     user.markModified('skills');
     await user.save();
     await this.recalculateRankScore(userId);
@@ -715,7 +792,9 @@ export class UsersService {
             user.skills[idx].skillId = new Types.ObjectId(s.skillId);
             changed = true;
             totalFixed++;
-          } catch { /* skip invalid */ }
+          } catch {
+            /* skip invalid */
+          }
         }
       });
       if (changed) {
@@ -731,13 +810,18 @@ export class UsersService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    user.skills = (user.skills || []).filter((s: any) => s.skillId?.toString() !== skillId);
+    user.skills = (user.skills || []).filter(
+      (s: any) => s.skillId?.toString() !== skillId,
+    );
     user.markModified('skills');
     await user.save();
     return this.findOne(userId);
   }
 
-  async calculateActivityScore(userId: string, activityId: string): Promise<number> {
+  async calculateActivityScore(
+    userId: string,
+    activityId: string,
+  ): Promise<number> {
     const user = await this.userModel.findById(userId);
     const ActivityModel = this.userModel.db.model('Activity');
     const activity = await ActivityModel.findById(activityId);
@@ -748,15 +832,21 @@ export class UsersService {
     const requiredSkills = activity.requiredSkills || [];
 
     for (const req of requiredSkills) {
-      const userSkill = user.skills?.find(s => s.skillId?.toString() === req.skillId);
-      const skillScore = userSkill ? (userSkill.score || 0) : 0;
+      const userSkill = user.skills?.find(
+        (s) => s.skillId?.toString() === req.skillId,
+      );
+      const skillScore = userSkill ? userSkill.score || 0 : 0;
       totalScore += skillScore * (req.weight || 0.5);
     }
 
     return totalScore;
   }
 
-  async processActivityCompletion(userId: string, activityId: string, feedback: number): Promise<any> {
+  async processActivityCompletion(
+    userId: string,
+    activityId: string,
+    feedback: number,
+  ): Promise<any> {
     const user = await this.userModel.findById(userId);
     const ActivityModel = this.userModel.db.model('Activity');
     const activity = await ActivityModel.findById(activityId);
@@ -769,7 +859,9 @@ export class UsersService {
     const progressionIncrease = 0.1;
 
     for (const req of requiredSkills) {
-      const skillIndex = user.skills?.findIndex(s => s.skillId?.toString() === req.skillId);
+      const skillIndex = user.skills?.findIndex(
+        (s) => s.skillId?.toString() === req.skillId,
+      );
 
       if (skillIndex !== -1 && skillIndex !== undefined) {
         const skill = user.skills[skillIndex];
@@ -779,14 +871,17 @@ export class UsersService {
         const newScore = Math.min((skill.score || 0) + increment, 100);
 
         // Update progression: Increase by 0.1, cap at 1
-        const currentProgression = (skill.progression || 0);
-        const newProgression = Math.min(currentProgression + progressionIncrease, 1);
+        const currentProgression = skill.progression || 0;
+        const newProgression = Math.min(
+          currentProgression + progressionIncrease,
+          1,
+        );
 
         user.skills[skillIndex] = {
           ...skill,
           score: Math.round(newScore * 10) / 10,
           progression: Math.round(newProgression * 100) / 100,
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         };
       }
     }
@@ -816,7 +911,9 @@ export class UsersService {
         (nextSkill.etat || 'draft') === 'draft' &&
         Number(nextSkill.auto_eval || 0) === 50 &&
         Number(nextSkill.hierarchie_eval || 0) === 50 &&
-        ['intermediate', 'medium', '2'].includes(String(nextSkill.level || '').toLowerCase())
+        ['intermediate', 'medium', '2'].includes(
+          String(nextSkill.level || '').toLowerCase(),
+        )
       ) {
         nextSkill.level = 'beginner';
         nextSkill.auto_eval = 0;
@@ -829,7 +926,7 @@ export class UsersService {
         nextSkill.lastUpdated || null,
         Number(nextSkill.auto_eval || 0),
         Number(nextSkill.hierarchie_eval || 0),
-        nextSkill.skillId?.toString?.() || String(nextSkill.skillId)
+        nextSkill.skillId?.toString?.() || String(nextSkill.skillId),
       );
 
       if (Number(nextSkill.score || 0) !== recomputedScore) {
@@ -854,18 +951,26 @@ export class UsersService {
     };
   }
 
-  async recomputeAllUsersSkillScores(options?: { normalizeCvBaseline?: boolean }) {
+  async recomputeAllUsersSkillScores(options?: {
+    normalizeCvBaseline?: boolean;
+  }) {
     const users = await this.userModel.find().select('_id');
     const results = [] as any[];
 
     for (const user of users) {
-      const result = await this.recomputeUserSkillScores(String(user._id), options);
+      const result = await this.recomputeUserSkillScores(
+        String(user._id),
+        options,
+      );
       results.push(result);
     }
 
     return {
       processedUsers: results.length,
-      totalChangedSkills: results.reduce((sum, r) => sum + (r.changedSkills || 0), 0),
+      totalChangedSkills: results.reduce(
+        (sum, r) => sum + (r.changedSkills || 0),
+        0,
+      ),
       results,
     };
   }
@@ -910,10 +1015,11 @@ export class UsersService {
     const skillsCount = user.skills?.length || 0;
     if (skillsCount > 0) {
       user.skills.forEach((s: any) => {
-        totalSkillScore += (s.score || 0);
+        totalSkillScore += s.score || 0;
       });
     }
-    const averageSkillScore = skillsCount > 0 ? totalSkillScore / skillsCount : 0;
+    const averageSkillScore =
+      skillsCount > 0 ? totalSkillScore / skillsCount : 0;
 
     // 3. Combined Logic - Ex: simple sum, or weighted average.
     // Let's use a sum of activity + avg skill score (can be adjusted as needed)
@@ -924,14 +1030,13 @@ export class UsersService {
       globalActivityScore,
       averageSkillScore,
       combinedScore,
-      totalSkills: skillsCount
+      totalSkills: skillsCount,
     };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
 
   async remove(id: string) {
-
     return this.userModel.findByIdAndDelete(id);
   }
 }

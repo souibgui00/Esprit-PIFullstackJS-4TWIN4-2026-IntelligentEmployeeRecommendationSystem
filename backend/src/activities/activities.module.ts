@@ -13,21 +13,21 @@ import { ActivityRequestModule } from './activity-request.module';
 import { AuditModule } from '../common/audit/audit.module';
 
 @Module({
-    imports: [
-        HttpModule,
-        MongooseModule.forFeature([
-            { name: Activity.name, schema: ActivitySchema },
-            { name: 'Participation', schema: ParticipationSchema },
-            { name: 'Assignment', schema: AssignmentSchema },
-        ]),
-        UsersModule,
-        NotificationsModule,
-        ScoringModule,
-        ActivityRequestModule,
-        AuditModule,
-    ],
-    controllers: [ActivitiesController],
-    providers: [ActivitiesService],
-    exports: [ActivitiesService],
+  imports: [
+    HttpModule,
+    MongooseModule.forFeature([
+      { name: Activity.name, schema: ActivitySchema },
+      { name: 'Participation', schema: ParticipationSchema },
+      { name: 'Assignment', schema: AssignmentSchema },
+    ]),
+    UsersModule,
+    NotificationsModule,
+    ScoringModule,
+    ActivityRequestModule,
+    AuditModule,
+  ],
+  controllers: [ActivitiesController],
+  providers: [ActivitiesService],
+  exports: [ActivitiesService],
 })
-export class ActivitiesModule { }
+export class ActivitiesModule {}

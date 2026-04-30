@@ -6,12 +6,12 @@ import { User, UserSchema } from '../users/schema/user.schema';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-        CloudinaryModule,
-    ],
-    controllers: [FaceRecognitionController],
-    providers: [FaceRecognitionService],
-    exports: [FaceRecognitionService],
+  imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    CloudinaryModule,
+  ],
+  controllers: [FaceRecognitionController],
+  providers: [FaceRecognitionService],
+  exports: [FaceRecognitionService],
 })
-export class FaceRecognitionModule { }
+export class FaceRecognitionModule {}

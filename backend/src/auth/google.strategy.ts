@@ -37,7 +37,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       return null;
     }
 
-    const displayName = profile.displayName || `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim();
+    const displayName =
+      profile.displayName ||
+      `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim();
 
     let user = await this.usersService.findByEmail(email);
 

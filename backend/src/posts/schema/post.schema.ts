@@ -3,71 +3,77 @@ import { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true, collection: 'posts' })
 export class Post extends Document {
-    @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-    authorId!: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  authorId!: Types.ObjectId;
 
-    @Prop({ required: true })
-    authorName!: string;
+  @Prop({ required: true })
+  authorName!: string;
 
-    @Prop()
-    authorAvatar?: string;
+  @Prop()
+  authorAvatar?: string;
 
-    @Prop({ required: true })
-    content!: string;
+  @Prop({ required: true })
+  content!: string;
 
-    @Prop({ type: [String], default: [] })
-    tags!: string[];
+  @Prop({ type: [String], default: [] })
+  tags!: string[];
 
-    @Prop({ default: 'update', enum: ['update', 'announcement', 'achievement'] })
-    type!: string;
+  @Prop({ default: 'update', enum: ['update', 'announcement', 'achievement'] })
+  type!: string;
 
-    @Prop({ default: false })
-    isPinned!: boolean;
+  @Prop({ default: false })
+  isPinned!: boolean;
 
-    @Prop({ type: [String], default: [] })
-    likes!: string[];
+  @Prop({ type: [String], default: [] })
+  likes!: string[];
 
-    @Prop({ type: [String], default: [] })
-    shares!: string[];
+  @Prop({ type: [String], default: [] })
+  shares!: string[];
 
-    @Prop({ type: [String], default: [] })
-    bookmarks!: string[];
+  @Prop({ type: [String], default: [] })
+  bookmarks!: string[];
 
-    @Prop({ default: false })
-    isShare!: boolean;
+  @Prop({ default: false })
+  isShare!: boolean;
 
-    @Prop({ type: Types.ObjectId, ref: 'Post' })
-    sharedPostId?: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Post' })
+  sharedPostId?: Types.ObjectId;
 
-    @Prop({
-        type: {
-            postId: { type: Types.ObjectId, ref: 'Post' },
-            authorId: { type: Types.ObjectId, ref: 'User' },
-            authorName: String,
-            authorAvatar: String,
-            content: String,
-            postType: String,
-            createdAt: Date,
+  @Prop({
+    type: {
+      postId: { type: Types.ObjectId, ref: 'Post' },
+      authorId: { type: Types.ObjectId, ref: 'User' },
+      authorName: String,
+      authorAvatar: String,
+      content: String,
+      postType: String,
+      createdAt: Date,
+    },
+    required: false,
+  })
+  originalPost?: any;
+
+  @Prop({
+    type: [
+      {
+        authorId: { type: Types.ObjectId, ref: 'User' },
+        authorName: String,
+        authorAvatar: String,
+        content: String,
+        sentiment: {
+          label: {
+            type: String,
+            enum: ['positive', 'negative', 'neutral'],
+            default: 'neutral',
+          },
+          score: { type: Number, default: 0 },
         },
-        required: false,
-    })
-    originalPost?: any;
-
-    @Prop({
-        type: [{
-            authorId: { type: Types.ObjectId, ref: 'User' },
-            authorName: String,
-            authorAvatar: String,
-            content: String,
-            sentiment: {
-                label: { type: String, enum: ['positive', 'negative', 'neutral'], default: 'neutral' },
-                score: { type: Number, default: 0 },
-            },
-            createdAt: { type: Date, default: Date.now },
-        }],
-        default: [],
-    })
-    comments!: any[];
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  })
+  comments!: any[];
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

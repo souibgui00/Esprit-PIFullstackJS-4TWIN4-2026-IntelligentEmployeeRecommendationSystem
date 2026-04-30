@@ -19,7 +19,11 @@ import { SkillSchema } from '../skills/schema/skill.schema';
     ]),
   ],
   controllers: [ScoringController],
-  providers: [ScoringService, PrioritizationService, RecommendationModelService],
+  providers: [
+    ScoringService,
+    PrioritizationService,
+    RecommendationModelService,
+  ],
   exports: [ScoringService, PrioritizationService, RecommendationModelService],
 })
 export class ScoringModule {}

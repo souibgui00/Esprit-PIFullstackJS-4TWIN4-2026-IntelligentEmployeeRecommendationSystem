@@ -15,13 +15,15 @@ export class Evaluation extends Document {
   @Prop({ required: true })
   overallScore!: number;
 
-  @Prop([{
-    skillId: { type: Types.ObjectId, ref: 'Skill' },
-    previousScore: Number,
-    previousLevel: String,
-    newScore: Number,
-    newLevel: String
-  }])
+  @Prop([
+    {
+      skillId: { type: Types.ObjectId, ref: 'Skill' },
+      previousScore: Number,
+      previousLevel: String,
+      newScore: Number,
+      newLevel: String,
+    },
+  ])
   skillEvaluations!: any[];
 
   @Prop({ default: 'pending', enum: ['pending', 'approved', 'draft'] })
@@ -33,10 +35,19 @@ export class Evaluation extends Document {
   @Prop()
   recommendations!: string;
 
-  @Prop({ 
-    type: String, 
-    enum: ['pre-activity', 'post-activity', 'monthly', 'annual', 'periodic', 'self-assessment', '3-months', '6-months'],
-    default: 'post-activity' 
+  @Prop({
+    type: String,
+    enum: [
+      'pre-activity',
+      'post-activity',
+      'monthly',
+      'annual',
+      'periodic',
+      'self-assessment',
+      '3-months',
+      '6-months',
+    ],
+    default: 'post-activity',
   })
   evaluationType!: string;
 

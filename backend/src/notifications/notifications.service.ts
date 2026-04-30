@@ -7,53 +7,57 @@ import { NotificationsGateway } from './notifications.gateway';
 
 @Injectable()
 export class NotificationsService {
-    private readonly logger = new Logger(NotificationsService.name);
+  private readonly logger = new Logger(NotificationsService.name);
 
-    constructor(
-        @InjectModel(Notification.name)
-        private notificationModel: Model<Notification>,
-        private readonly notificationsGateway: NotificationsGateway,
-    ) { }
+  constructor(
+    @InjectModel(Notification.name)
+    private notificationModel: Model<Notification>,
+    private readonly notificationsGateway: NotificationsGateway,
+  ) {}
 
-    async create(
-        createNotificationDto: CreateNotificationDto,
-        options: { emitRealtime?: boolean } = { emitRealtime: true },
-    ): Promise<Notification> {
-        const notification = new this.notificationModel(createNotificationDto);
-        const saved = await notification.save();
+  async create(
+    createNotificationDto: CreateNotificationDto,
+    options: { emitRealtime?: boolean } = { emitRealtime: true },
+  ): Promise<Notification> {
+    const notification = new this.notificationModel(createNotificationDto);
+    const saved = await notification.save();
 
-        // Push via WebSocket
-        if (options.emitRealtime !== false) {
-            try {
-                this.notificationsGateway.emitToUser(saved.recipientId.toString(), 'newNotification', saved);
-            } catch (error) {
-                this.logger.error('Failed to emit WebSocket notification:', error);
-            }
-        }
-
-        return saved;
+    // Push via WebSocket
+    if (options.emitRealtime !== false) {
+      try {
+        this.notificationsGateway.emitToUser(
+          saved.recipientId.toString(),
+          'newNotification',
+          saved,
+        );
+      } catch (error) {
+        this.logger.error('Failed to emit WebSocket notification:', error);
+      }
     }
 
-    async findByRecipient(recipientId: string): Promise<Notification[]> {
-        return this.notificationModel
-            .find({ recipientId })
-            .sort({ createdAt: -1 })
-            .exec();
-    }
+    return saved;
+  }
 
-    async markAsRead(id: string): Promise<Notification | null> {
-        return this.notificationModel
-            .findByIdAndUpdate(id, { read: true }, { new: true })
-            .exec();
-    }
+  async findByRecipient(recipientId: string): Promise<Notification[]> {
+    return this.notificationModel
+      .find({ recipientId })
+      .sort({ createdAt: -1 })
+      .exec();
+  }
 
-    async markAllAsRead(recipientId: string): Promise<any> {
-        return this.notificationModel
-            .updateMany({ recipientId, read: false }, { read: true })
-            .exec();
-    }
+  async markAsRead(id: string): Promise<Notification | null> {
+    return this.notificationModel
+      .findByIdAndUpdate(id, { read: true }, { new: true })
+      .exec();
+  }
 
-    async remove(id: string): Promise<any> {
-        return this.notificationModel.findByIdAndDelete(id).exec();
-    }
+  async markAllAsRead(recipientId: string): Promise<any> {
+    return this.notificationModel
+      .updateMany({ recipientId, read: false }, { read: true })
+      .exec();
+  }
+
+  async remove(id: string): Promise<any> {
+    return this.notificationModel.findByIdAndDelete(id).exec();
+  }
 }

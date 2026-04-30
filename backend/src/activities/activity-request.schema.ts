@@ -15,7 +15,11 @@ export class ActivityRequest extends Document {
   @Prop({ type: Number, required: true })
   seatCount!: number;
 
-  @Prop({ type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' })
+  @Prop({
+    type: String,
+    enum: ['PENDING', 'APPROVED', 'REJECTED'],
+    default: 'PENDING',
+  })
   status!: string;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -31,4 +35,5 @@ export class ActivityRequest extends Document {
   rejectionReason?: string;
 }
 
-export const ActivityRequestSchema = SchemaFactory.createForClass(ActivityRequest);
+export const ActivityRequestSchema =
+  SchemaFactory.createForClass(ActivityRequest);

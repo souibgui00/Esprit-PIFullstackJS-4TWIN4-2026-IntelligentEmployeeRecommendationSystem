@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User } from '../users/schema/user.schema';
@@ -23,37 +27,44 @@ export class ScoringService {
   /**
    * Calculate individual skill score for an employee
    * Score range: 0-120 (exceeds 100 to allow for bonus growth)
-    *
+   *
    * Formula:
-    * Final Score = Base Score + Experience Bonus + Progression Bonus + Feedback Bonus
+   * Final Score = Base Score + Experience Bonus + Progression Bonus + Feedback Bonus
    * - Base Score: Based on proficiency level (25/50/75/100)
    * - Experience Bonus: Years of experience * 2 (capped at 20)
    * - Progression Bonus: 5 points if skill updated within last 6 months
-    * - Feedback Bonus: manager rating (1..5) * 2
+   * - Feedback Bonus: manager rating (1..5) * 2
    */
   async calculateSkillScore(userId: string, skillId: string): Promise<number> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const skillIndex = user.skills?.findIndex((s: any) => s.skillId?.toString() === skillId);
+    const skillIndex = user.skills?.findIndex(
+      (s: any) => s.skillId?.toString() === skillId,
+    );
     if (skillIndex === -1 || skillIndex === undefined) {
       throw new NotFoundException('Skill not found for this user');
     }
 
     const skill = user.skills[skillIndex];
-    
+
     // Base score based on level
     const baseScore = this.getLevelBaseScore(skill.level);
-    
+
     // Experience bonus
-    const experienceBonus = this.calculateExperienceBonus(user.yearsOfExperience || 0);
-    
+    const experienceBonus = this.calculateExperienceBonus(
+      user.yearsOfExperience || 0,
+    );
+
     // Progression bonus (recent updates within 6 months)
     const progressionBonus = this.getProgressionBonus(skill.lastUpdated);
-    
+
     // Feedback bonus from manager rating
-    const feedbackBonus = this.calculateWeightedFeedback(skill.auto_eval, skill.hierarchie_eval);
-    
+    const feedbackBonus = this.calculateWeightedFeedback(
+      skill.auto_eval,
+      skill.hierarchie_eval,
+    );
+
     const skillScore =
       baseScore + experienceBonus + progressionBonus + feedbackBonus;
     const finalScore = Math.min(skillScore, 120);
@@ -66,14 +77,19 @@ export class ScoringService {
    * Returns array of skill scores with metadata
    */
   async getEmployeeSkillScores(userId: string): Promise<any[]> {
-    const user = await this.userModel.findById(userId).populate('skills.skillId');
+    const user = await this.userModel
+      .findById(userId)
+      .populate('skills.skillId');
     if (!user) throw new NotFoundException('User not found');
 
     const skillScores = [];
-    
+
     if (user.skills && user.skills.length > 0) {
       for (const skill of user.skills) {
-        const score = await this.calculateSkillScore(userId, skill.skillId?.toString());
+        const score = await this.calculateSkillScore(
+          userId,
+          skill.skillId?.toString(),
+        );
         skillScores.push({
           skillId: skill.skillId?._id || skill.skillId,
           skillName: skill.skillId?.name || 'Unknown',
@@ -93,11 +109,14 @@ export class ScoringService {
   /**
    * Calculate global activity score for an employee
    * Combines all required skills with their weights
-   * 
+   *
    * Formula:
    * Global Activity Score = Σ (Skill Score × Skill Weight)
    */
-  async calculateGlobalActivityScore(userId: string, activityId: string): Promise<number> {
+  async calculateGlobalActivityScore(
+    userId: string,
+    activityId: string,
+  ): Promise<number> {
     const user = await this.userModel.findById(userId);
     const activity = await this.activityModel.findById(activityId);
 
@@ -108,19 +127,28 @@ export class ScoringService {
     const requiredSkills = activity.requiredSkills || [];
 
     for (const req of requiredSkills) {
-      const reqSkillId = req.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
-      const userSkill = user.skills?.find(s => {
-        const sId = s.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
+      const reqSkillId = req.skillId
+        ?.toString()
+        .replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
+      const userSkill = user.skills?.find((s) => {
+        const sId = s.skillId
+          ?.toString()
+          .replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
         return sId === reqSkillId;
       });
-      const skillScore = userSkill ? await this.calculateSkillScore(userId, userSkill.skillId?.toString()) : 0;
+      const skillScore = userSkill
+        ? await this.calculateSkillScore(userId, userSkill.skillId?.toString())
+        : 0;
       const weight = req.weight || 0.5;
-      
+
       totalScore += skillScore * weight;
     }
 
     // Normalize by total weights
-    const totalWeight = requiredSkills.reduce((sum, req) => sum + (req.weight || 0.5), 0);
+    const totalWeight = requiredSkills.reduce(
+      (sum, req) => sum + (req.weight || 0.5),
+      0,
+    );
     const normalizedScore = totalWeight > 0 ? totalScore / totalWeight : 0;
 
     return Math.round(normalizedScore * 10) / 10;
@@ -130,7 +158,10 @@ export class ScoringService {
    * Get activity match percentage for an employee
    * Indicates how well the employee's skills match the activity requirements
    */
-  async getActivityMatchPercentage(userId: string, activityId: string): Promise<number> {
+  async getActivityMatchPercentage(
+    userId: string,
+    activityId: string,
+  ): Promise<number> {
     const user = await this.userModel.findById(userId);
     const activity = await this.activityModel.findById(activityId);
 
@@ -150,9 +181,13 @@ export class ScoringService {
     let matchedCount = 0;
 
     for (const req of requiredSkills) {
-      const reqSkillId = req.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
-      const userSkill = user.skills?.find(s => {
-        const sId = s.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
+      const reqSkillId = req.skillId
+        ?.toString()
+        .replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
+      const userSkill = user.skills?.find((s) => {
+        const sId = s.skillId
+          ?.toString()
+          .replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
         return sId === reqSkillId;
       });
       if (!userSkill) continue;
@@ -184,7 +219,9 @@ export class ScoringService {
     if (!activity) throw new NotFoundException('Activity not found');
 
     if (feedbackRating < 0 || feedbackRating > 100) {
-      throw new BadRequestException('Feedback rating must be between 0 and 100');
+      throw new BadRequestException(
+        'Feedback rating must be between 0 and 100',
+      );
     }
     const normalizedFeedback = this.normalizeManagerRating(feedbackRating);
 
@@ -194,17 +231,24 @@ export class ScoringService {
     // Update each required skill based on feedback and weight
     for (const req of requiredSkills) {
       const weight = req.weight || 0.5;
-      const reqSkillId = req.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
-      const skillIndex = user.skills?.findIndex(s => {
-        const sId = s.skillId?.toString().replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
+      const reqSkillId = req.skillId
+        ?.toString()
+        .replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
+      const skillIndex = user.skills?.findIndex((s) => {
+        const sId = s.skillId
+          ?.toString()
+          .replace(/^ObjectId\(['"]?|['"]?\)$/g, '');
         return sId === reqSkillId;
       });
-      
+
       if (skillIndex !== -1 && skillIndex !== undefined) {
         const skill = user.skills[skillIndex];
 
         // Get the live computed score instead of the stale stored value
-        const currentLiveScore = await this.calculateSkillScore(userId, skill.skillId?.toString());
+        const currentLiveScore = await this.calculateSkillScore(
+          userId,
+          skill.skillId?.toString(),
+        );
 
         // Dynamic Update: New Score = Live Score + (Feedback × Weight × Learning Rate)
         const increment = normalizedFeedback * weight * learningRate;
@@ -219,7 +263,7 @@ export class ScoringService {
         // Add skill if not already present (for skills not yet in user's profile)
         const increment = normalizedFeedback * weight * learningRate;
         const newScore = Math.min(25 + increment, 120); // Start from beginner level
-        
+
         const newSkill = {
           skillId: new Types.ObjectId(req.skillId),
           level: 'beginner',
@@ -228,7 +272,7 @@ export class ScoringService {
           hierarchie_eval: 0,
           lastUpdated: new Date(),
         };
-        
+
         user.skills = [...(user.skills || []), newSkill];
       }
     }
@@ -251,7 +295,7 @@ export class ScoringService {
    */
   async getScoreAnalytics(userId: string): Promise<any> {
     const skillScores = await this.getEmployeeSkillScores(userId);
-    
+
     if (skillScores.length === 0) {
       return {
         userId,
@@ -263,13 +307,13 @@ export class ScoringService {
       };
     }
 
-    const scores = skillScores.map(s => s.score);
+    const scores = skillScores.map((s) => s.score);
     const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-    
+
     // Category breakdown
     const categoryBreakdown: Record<string, any> = {};
-    
-    skillScores.forEach(skill => {
+
+    skillScores.forEach((skill) => {
       const type = skill.skillType || 'knowledge';
       if (!categoryBreakdown[type]) {
         categoryBreakdown[type] = {
@@ -283,9 +327,12 @@ export class ScoringService {
     });
 
     // Calculate averages per category
-    Object.keys(categoryBreakdown).forEach(cat => {
-      categoryBreakdown[cat].averageScore = 
-        Math.round((categoryBreakdown[cat].totalScore / categoryBreakdown[cat].count) * 10) / 10;
+    Object.keys(categoryBreakdown).forEach((cat) => {
+      categoryBreakdown[cat].averageScore =
+        Math.round(
+          (categoryBreakdown[cat].totalScore / categoryBreakdown[cat].count) *
+            10,
+        ) / 10;
     });
 
     return {
@@ -308,8 +355,10 @@ export class ScoringService {
 
     for (const userId of userIds) {
       const analytics = await this.getScoreAnalytics(userId);
-      const user = await this.userModel.findById(userId).select('name email matricule rank rankScore');
-      
+      const user = await this.userModel
+        .findById(userId)
+        .select('name email matricule rank rankScore');
+
       comparisons.push({
         ...user?.toObject(),
         scoreAnalytics: analytics,
@@ -344,10 +393,10 @@ export class ScoringService {
 
   private getProgressionBonus(lastUpdated: Date | null): number {
     if (!lastUpdated) return 0;
-    
+
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    
+
     return lastUpdated > sixMonthsAgo ? 5 : 0;
   }
 
@@ -372,6 +421,6 @@ export class ScoringService {
   private calculateWeightedFeedback(auto: number, manager: number): number {
     const normalizedAuto = this.normalizeManagerRating(auto);
     const normalizedManager = this.normalizeManagerRating(manager);
-    return ((0.4 * normalizedAuto) + (0.6 * normalizedManager)) * 2;
+    return (0.4 * normalizedAuto + 0.6 * normalizedManager) * 2;
   }
 }

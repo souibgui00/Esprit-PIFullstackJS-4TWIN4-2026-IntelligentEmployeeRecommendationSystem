@@ -6,12 +6,12 @@ import { Skill, SkillSchema } from './schema/skill.schema';
 import { AuditModule } from '../common/audit/audit.module';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Skill.name, schema: SkillSchema }]),
-        AuditModule,
-    ],
-    controllers: [SkillsController],
-    providers: [SkillsService],
-    exports: [SkillsService],
+  imports: [
+    MongooseModule.forFeature([{ name: Skill.name, schema: SkillSchema }]),
+    AuditModule,
+  ],
+  controllers: [SkillsController],
+  providers: [SkillsService],
+  exports: [SkillsService],
 })
-export class SkillsModule { }
+export class SkillsModule {}

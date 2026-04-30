@@ -9,4 +9,4 @@ import { SkillsModule } from '../skills/skills.module';
   providers: [EmailService, CvExtractionService],
   exports: [EmailService, CvExtractionService],
 })
-export class CommonModule { }
+export class CommonModule {}

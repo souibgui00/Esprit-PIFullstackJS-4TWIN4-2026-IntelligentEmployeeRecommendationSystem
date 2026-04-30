@@ -18,7 +18,9 @@ export class EmailService {
     const emailSmtpPort = this.configService.get<number>('EMAIL_SMTP_PORT');
 
     if (!emailUser || !emailPassword) {
-      this.logger.warn('Email credentials not configured. Email service disabled.');
+      this.logger.warn(
+        'Email credentials not configured. Email service disabled.',
+      );
       return;
     }
 
@@ -47,17 +49,28 @@ export class EmailService {
       }
 
       const mailOptions = {
-        from: this.configService.get<string>('EMAIL_FROM') || this.configService.get<string>('EMAIL_USER'),
+        from:
+          this.configService.get<string>('EMAIL_FROM') ||
+          this.configService.get<string>('EMAIL_USER'),
         to: userEmail,
         subject: '🎉 Welcome to Our HR Platform - Your Login Credentials',
-        html: this.getNewUserEmailTemplate(userName, userEmail, password, matricule),
+        html: this.getNewUserEmailTemplate(
+          userName,
+          userEmail,
+          password,
+          matricule,
+        ),
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Email sent successfully to ${userEmail}. Message ID: ${info.messageId}`);
+      this.logger.log(
+        `Email sent successfully to ${userEmail}. Message ID: ${info.messageId}`,
+      );
       return true;
     } catch (error) {
-      this.logger.error(`Failed to send email to ${userEmail}: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Failed to send email to ${userEmail}: ${error instanceof Error ? error.message : String(error)}`,
+      );
       // Don't throw - email is non-critical
       return false;
     }
@@ -245,7 +258,9 @@ export class EmailService {
       }
 
       const mailOptions = {
-        from: this.configService.get<string>('EMAIL_FROM') || this.configService.get<string>('EMAIL_USER'),
+        from:
+          this.configService.get<string>('EMAIL_FROM') ||
+          this.configService.get<string>('EMAIL_USER'),
         to: userEmail,
         subject: 'Reset Your Password - HR Platform',
         html: `
@@ -260,7 +275,9 @@ export class EmailService {
       this.logger.log(`Password reset email sent to ${userEmail}`);
       return true;
     } catch (error) {
-      this.logger.error(`Failed to send password reset email: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Failed to send password reset email: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return false;
     }
   }

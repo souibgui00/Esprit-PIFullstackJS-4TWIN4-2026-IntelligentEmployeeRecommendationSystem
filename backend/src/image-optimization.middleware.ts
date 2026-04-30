@@ -3,7 +3,11 @@ import * as path from 'path';
 import * as fs from 'fs';
 import sharp from 'sharp';
 
-export async function imageOptimizationMiddleware(req: Request, res: Response, next: NextFunction) {
+export async function imageOptimizationMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   // We only care about GET requests for images
   if (req.method !== 'GET') {
     return next();
@@ -41,10 +45,10 @@ export async function imageOptimizationMiddleware(req: Request, res: Response, n
 
     const format = acceptsWebp ? 'webp' : ext.replace('.', '');
     const contentType = `image/${format === 'jpg' ? 'jpeg' : format}`;
-    
+
     // Configure sharp
     let processor = sharp(absolutePath);
-    
+
     if (width && !isNaN(width)) {
       processor = processor.resize({ width, withoutEnlargement: true });
     }

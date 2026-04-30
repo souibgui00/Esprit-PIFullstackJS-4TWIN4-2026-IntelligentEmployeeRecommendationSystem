@@ -6,14 +6,14 @@ import { Department, DepartmentSchema } from './schema/department.schema';
 import { User, UserSchema } from '../users/schema/user.schema';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Department.name, schema: DepartmentSchema },
-            { name: User.name, schema: UserSchema }
-        ]),
-    ],
-    providers: [DepartmentsService],
-    controllers: [DepartmentsController],
-    exports: [DepartmentsService],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Department.name, schema: DepartmentSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
+  ],
+  providers: [DepartmentsService],
+  controllers: [DepartmentsController],
+  exports: [DepartmentsService],
 })
-export class DepartmentsModule { }
+export class DepartmentsModule {}

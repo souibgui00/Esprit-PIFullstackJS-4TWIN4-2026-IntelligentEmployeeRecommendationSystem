@@ -39,22 +39,32 @@ export class RecommendationModelService {
     ]);
 
     if (!user) throw new NotFoundException(`User ${userId} not found`);
-    if (!activity) throw new NotFoundException(`Activity ${activityId} not found`);
+    if (!activity)
+      throw new NotFoundException(`Activity ${activityId} not found`);
 
     const skillIds = this.buildSkillUniverse(user, activity);
 
-    const contentScore       = this.computeCosineSimilarity(user, activity, skillIds);
-    const profileScore       = this.computeProfileScore(user);
-    const collaborativeScore = await this.computeCollaborativeScore(userId, activityId, user, skillIds);
+    const contentScore = this.computeCosineSimilarity(user, activity, skillIds);
+    const profileScore = this.computeProfileScore(user);
+    const collaborativeScore = await this.computeCollaborativeScore(
+      userId,
+      activityId,
+      user,
+      skillIds,
+    );
 
-    const hybrid = (0.5 * contentScore) + (0.3 * profileScore) + (0.2 * collaborativeScore);
+    const hybrid =
+      0.5 * contentScore + 0.3 * profileScore + 0.2 * collaborativeScore;
     return Math.min(Math.max(hybrid, 0), 1);
   }
 
   /**
    * Full breakdown of each component for transparency / debugging.
    */
-  async getScoreBreakdown(userId: string, activityId: string): Promise<{
+  async getScoreBreakdown(
+    userId: string,
+    activityId: string,
+  ): Promise<{
     overallScore: number;
     components: {
       contentScore: number;
@@ -75,16 +85,25 @@ export class RecommendationModelService {
     ]);
 
     if (!user) throw new NotFoundException(`User ${userId} not found`);
-    if (!activity) throw new NotFoundException(`Activity ${activityId} not found`);
+    if (!activity)
+      throw new NotFoundException(`Activity ${activityId} not found`);
 
     const skillIds = this.buildSkillUniverse(user, activity);
 
-    const contentScore       = this.computeCosineSimilarity(user, activity, skillIds);
-    const profileScore       = this.computeProfileScore(user);
-    const collaborativeScore = await this.computeCollaborativeScore(userId, activityId, user, skillIds);
+    const contentScore = this.computeCosineSimilarity(user, activity, skillIds);
+    const profileScore = this.computeProfileScore(user);
+    const collaborativeScore = await this.computeCollaborativeScore(
+      userId,
+      activityId,
+      user,
+      skillIds,
+    );
 
     const overallScore = Math.min(
-      Math.max((0.5 * contentScore) + (0.3 * profileScore) + (0.2 * collaborativeScore), 0),
+      Math.max(
+        0.5 * contentScore + 0.3 * profileScore + 0.2 * collaborativeScore,
+        0,
+      ),
       1,
     );
 
@@ -95,10 +114,10 @@ export class RecommendationModelService {
         profileScore,
         collaborativeScore,
         // Legacy aliases (kept so existing UI code doesn't break)
-        skillMatch:   contentScore,
-        experience:   Math.min((user.yearsOfExperience || 0) / 15, 1),
-        progression:  this.avgProgression(user),
-        performance:  Math.min((user.rankScore || 0) / 120, 1),
+        skillMatch: contentScore,
+        experience: Math.min((user.yearsOfExperience || 0) / 15, 1),
+        progression: this.avgProgression(user),
+        performance: Math.min((user.rankScore || 0) / 120, 1),
       },
       weights: { content: 0.5, profile: 0.3, collaborative: 0.2 },
       labels: { overall: this.scoreLabel(overallScore) },
@@ -116,7 +135,11 @@ export class RecommendationModelService {
    *
    * Returns 1.0 when the activity has NO required skills (no barrier to entry).
    */
-  private computeCosineSimilarity(user: any, activity: any, skillIds: string[]): number {
+  private computeCosineSimilarity(
+    user: any,
+    activity: any,
+    skillIds: string[],
+  ): number {
     const requiredSkills: any[] = activity.requiredSkills || [];
 
     // If no required skills → perfect content match (open to everyone)
@@ -131,13 +154,15 @@ export class RecommendationModelService {
     };
 
     const userMap = new Map<string, number>();
-    for (const s of (user.skills || [])) {
+    for (const s of user.skills || []) {
       const id = s.skillId?._id?.toString() ?? s.skillId?.toString();
       if (id) {
         const baseScore = levelScoreMap[s.level] || 25;
         const feedbackBonus = Math.min(
-          ((0.4 * (s.auto_eval || 0) / 20) + (0.6 * (s.hierarchie_eval || 0) / 20)) * 2,
-          10
+          ((0.4 * (s.auto_eval || 0)) / 20 +
+            (0.6 * (s.hierarchie_eval || 0)) / 20) *
+            2,
+          10,
         );
         const computedScore = Math.min(baseScore + feedbackBonus, 120);
         userMap.set(id, computedScore / 120);
@@ -150,11 +175,13 @@ export class RecommendationModelService {
       if (id) activityMap.set(id, Math.min((req.weight || 0.5) / 2.0, 1));
     }
 
-    let dot = 0, normU = 0, normA = 0;
+    let dot = 0,
+      normU = 0,
+      normA = 0;
     for (const skillId of skillIds) {
       const u = userMap.get(skillId) ?? 0;
       const a = activityMap.get(skillId) ?? 0;
-      dot   += u * a;
+      dot += u * a;
       normU += u * u;
       normA += a * a;
     }
@@ -195,7 +222,9 @@ export class RecommendationModelService {
     );
     const recencyBonus = hasRecentUpdate ? 1.0 : 0.5;
 
-    return (0.3 * expScore) + (0.3 * avgProg) + (0.3 * rankScore) + (0.1 * recencyBonus);
+    return (
+      0.3 * expScore + 0.3 * avgProg + 0.3 * rankScore + 0.1 * recencyBonus
+    );
   }
 
   // ─── Component γ: Collaborative Filtering ────────────────────────────────────
@@ -240,7 +269,7 @@ export class RecommendationModelService {
     // ────────────────────────────────────────────────────────────────────────
 
     let weightedFeedbackSum = 0;
-    let similaritySum       = 0;
+    let similaritySum = 0;
 
     for (const peer of peers) {
       const peerUser = peerMap.get(peer.userId?.toString());
@@ -250,17 +279,21 @@ export class RecommendationModelService {
       const peerAsActivity = {
         requiredSkills: (peerUser.skills || []).map((s: any) => ({
           skillId: s.skillId?._id?.toString() ?? s.skillId?.toString(),
-          weight:  Math.min((s.score || 0) / 120, 1) * 2, // scale back to [0, 2]
+          weight: Math.min((s.score || 0) / 120, 1) * 2, // scale back to [0, 2]
         })),
       };
 
-      const sim = this.computeCosineSimilarity(targetUser, peerAsActivity, skillIds);
+      const sim = this.computeCosineSimilarity(
+        targetUser,
+        peerAsActivity,
+        skillIds,
+      );
 
       // Normalise feedback from [0, 10] → [0, 1]
       const normFeedback = Math.min((peer.feedback || 0) / 10, 1);
 
       weightedFeedbackSum += sim * normFeedback;
-      similaritySum       += sim;
+      similaritySum += sim;
     }
 
     if (similaritySum === 0) return 0;
@@ -276,12 +309,12 @@ export class RecommendationModelService {
   private buildSkillUniverse(user: any, activity: any): string[] {
     const ids = new Set<string>();
 
-    for (const s of (user?.skills || [])) {
+    for (const s of user?.skills || []) {
       const id = s.skillId?._id?.toString() ?? s.skillId?.toString();
       if (id) ids.add(id);
     }
 
-    for (const req of (activity?.requiredSkills || [])) {
+    for (const req of activity?.requiredSkills || []) {
       const id = req.skillId?.toString();
       if (id) ids.add(id);
     }
@@ -301,8 +334,8 @@ export class RecommendationModelService {
   /** Human-readable label for a score */
   private scoreLabel(score: number): string {
     if (score >= 0.85) return 'Top Pick';
-    if (score >= 0.70) return 'Highly Recommended';
-    if (score >= 0.50) return 'Recommended';
+    if (score >= 0.7) return 'Highly Recommended';
+    if (score >= 0.5) return 'Recommended';
     if (score >= 0.05) return 'Consider';
     return 'Not Relevant';
   }

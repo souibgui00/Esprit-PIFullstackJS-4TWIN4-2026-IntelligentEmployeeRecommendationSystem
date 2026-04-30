@@ -14,7 +14,8 @@ function parseDurationToDays(duration: string): number {
   const num = parseFloat(d) || 1;
   if (d.includes('week')) return num * 7;
   if (d.includes('day')) return num;
-  if (d.includes('hour') || d.includes('hr') || d.includes('h')) return num / 24;
+  if (d.includes('hour') || d.includes('hr') || d.includes('h'))
+    return num / 24;
   if (d.includes('min')) return num / 1440;
   return 1; // Fallback: 1 day
 }
@@ -32,7 +33,8 @@ export class ParticipationSchedulerService {
   private readonly logger = new Logger(ParticipationSchedulerService.name);
 
   constructor(
-    @InjectModel(Participation.name) private participationModel: Model<Participation>,
+    @InjectModel(Participation.name)
+    private participationModel: Model<Participation>,
     private notificationsService: NotificationsService,
     private usersService: UsersService,
     private activitiesService: ActivitiesService,
@@ -55,14 +57,18 @@ export class ParticipationSchedulerService {
       const createdAt = (p as any).createdAt as Date;
       if (!createdAt) continue;
 
-      const elapsedDays = (now.getTime() - new Date(createdAt).getTime()) / DAY_MS;
+      const elapsedDays =
+        (now.getTime() - new Date(createdAt).getTime()) / DAY_MS;
 
       // Auto-decline after 7 days
       if (elapsedDays >= 7) {
-        this.logger.log(`[Scheduler] Auto-declining participation ${p._id} (${elapsedDays.toFixed(1)} days elapsed)`);
+        this.logger.log(
+          `[Scheduler] Auto-declining participation ${p._id} (${elapsedDays.toFixed(1)} days elapsed)`,
+        );
         await this.participationModel.findByIdAndUpdate(p._id, {
           status: 'declined',
-          declineReason: 'No response within 7 days — automatically declined by system.',
+          declineReason:
+            'No response within 7 days — automatically declined by system.',
           declinedAt: now,
           lastUpdated: now,
         });
@@ -78,25 +84,35 @@ export class ParticipationSchedulerService {
               title: '⏰ Auto-Declined: No Response',
               message: `${employee?.name} did not respond to "${activity?.title}" within 7 days. They have been automatically removed.`,
               type: 'participation_auto_declined',
-              metadata: { participationId: p._id.toString(), userId: p.userId.toString() },
+              metadata: {
+                participationId: p._id.toString(),
+                userId: p.userId.toString(),
+              },
             });
           }
         } catch (err) {
-          this.logger.error(`[Scheduler] Failed to notify manager of auto-decline: ${err}`);
+          this.logger.error(
+            `[Scheduler] Failed to notify manager of auto-decline: ${err}`,
+          );
         }
         continue;
       }
 
       // Send reminder after 3 days (only once)
       if (elapsedDays >= 3 && !p.reminderSentAt) {
-        this.logger.log(`[Scheduler] Sending response reminder for participation ${p._id}`);
+        this.logger.log(
+          `[Scheduler] Sending response reminder for participation ${p._id}`,
+        );
         const activity = p.activityId as any;
         await this.notificationsService.create({
           recipientId: p.userId.toString(),
           title: '⏳ Reminder: Respond to Activity',
           message: `Please respond to your assignment for "${activity?.title}". You have ${Math.ceil(7 - elapsedDays)} days left before it is auto-declined.`,
           type: 'response_reminder',
-          metadata: { activityId: activity?._id?.toString(), participationId: p._id.toString() },
+          metadata: {
+            activityId: activity?._id?.toString(),
+            participationId: p._id.toString(),
+          },
         });
 
         await this.participationModel.findByIdAndUpdate(p._id, {
@@ -110,7 +126,9 @@ export class ParticipationSchedulerService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleActivityEndTransitions(): Promise<void> {
-    this.logger.log('[Scheduler] Checking activity end dates for completion transitions...');
+    this.logger.log(
+      '[Scheduler] Checking activity end dates for completion transitions...',
+    );
     const now = new Date();
 
     const allActivities = await this.activitiesService.findAll();
@@ -118,29 +136,40 @@ export class ParticipationSchedulerService {
     for (const activity of allActivities) {
       if (!activity.date) continue;
 
-      const endDate = computeActivityEndDate(activity.date, activity.duration || '1 day');
+      const endDate = computeActivityEndDate(
+        activity.date,
+        activity.duration || '1 day',
+      );
       if (endDate > now) continue; // Activity hasn't ended yet
 
       // Update the activity status to completed now that it is finished
       try {
         await this.activitiesService.update((activity as any)._id.toString(), {
-           status: 'completed',
-           workflowStatus: 'completed'
+          status: 'completed',
+          workflowStatus: 'completed',
         } as any);
-        this.logger.log(`[Scheduler] Activity "${activity.title}" marked as completed.`);
+        this.logger.log(
+          `[Scheduler] Activity "${activity.title}" marked as completed.`,
+        );
       } catch (err) {
-        this.logger.error(`[Scheduler] Failed to mark activity ${(activity as any)._id} as completed: ${err}`);
+        this.logger.error(
+          `[Scheduler] Failed to mark activity ${(activity as any)._id} as completed: ${err}`,
+        );
       }
 
       // Find all accepted/in_progress participations for this activity
-      const participations = await this.participationModel.find({
-        activityId: (activity as any)._id,
-        status: { $in: ['accepted', 'in_progress'] },
-      }).exec();
+      const participations = await this.participationModel
+        .find({
+          activityId: (activity as any)._id,
+          status: { $in: ['accepted', 'in_progress'] },
+        })
+        .exec();
 
       if (participations.length === 0) continue;
 
-      this.logger.log(`[Scheduler] Transitioning ${participations.length} participations to awaiting_organizer.`);
+      this.logger.log(
+        `[Scheduler] Transitioning ${participations.length} participations to awaiting_organizer.`,
+      );
 
       // Group employees by manager to notify each manager once
       const managerNotified = new Set<string>();
@@ -167,7 +196,9 @@ export class ParticipationSchedulerService {
             managerNotified.add(managerId);
           }
         } catch (err) {
-          this.logger.error(`[Scheduler] Failed to notify manager for activity ${activity._id}: ${err}`);
+          this.logger.error(
+            `[Scheduler] Failed to notify manager for activity ${activity._id}: ${err}`,
+          );
         }
       }
     }
@@ -182,7 +213,7 @@ export class ParticipationSchedulerService {
     const DAY_MS = 24 * 60 * 60 * 1000;
 
     // Find all HR users (for alerts)
-    const allUsers = await this.usersService.findAll() as any[];
+    const allUsers = await this.usersService.findAll();
     const hrUsers = allUsers.filter((u: any) => u.role?.toLowerCase() === 'hr');
 
     // ── Organizer (manager) overdue: >3 days no report → reminder, >5 days → HR alert
@@ -193,7 +224,8 @@ export class ParticipationSchedulerService {
 
     for (const p of awaitingOrganizer) {
       if (!p.awaitingOrganizerSince) continue;
-      const elapsed = (now.getTime() - new Date(p.awaitingOrganizerSince).getTime()) / DAY_MS;
+      const elapsed =
+        (now.getTime() - new Date(p.awaitingOrganizerSince).getTime()) / DAY_MS;
       const activity = p.activityId as any;
 
       try {
@@ -222,7 +254,9 @@ export class ParticipationSchedulerService {
           });
         }
       } catch (err) {
-        this.logger.error(`[Scheduler] Escalation check failed for participation ${p._id}: ${err}`);
+        this.logger.error(
+          `[Scheduler] Escalation check failed for participation ${p._id}: ${err}`,
+        );
       }
     }
 
@@ -234,7 +268,9 @@ export class ParticipationSchedulerService {
 
     for (const p of awaitingManager) {
       if (!p.organizerSubmittedAt) continue;
-      const elapsedHours = (now.getTime() - new Date(p.organizerSubmittedAt).getTime()) / (60 * 60 * 1000);
+      const elapsedHours =
+        (now.getTime() - new Date(p.organizerSubmittedAt).getTime()) /
+        (60 * 60 * 1000);
 
       if (elapsedHours >= 48) {
         const activity = p.activityId as any;
@@ -245,10 +281,15 @@ export class ParticipationSchedulerService {
               title: '🚨 Manager Validation Overdue (48h)',
               message: `A completion for "${activity?.title}" has been awaiting manager validation for over 48 hours.`,
               type: 'escalation_manager_validation_overdue',
-              metadata: { participationId: p._id.toString(), activityId: activity?._id?.toString() },
+              metadata: {
+                participationId: p._id.toString(),
+                activityId: activity?._id?.toString(),
+              },
             });
           } catch (err) {
-            this.logger.error(`[Scheduler] Failed to send validation escalation alert: ${err}`);
+            this.logger.error(
+              `[Scheduler] Failed to send validation escalation alert: ${err}`,
+            );
           }
         }
       }

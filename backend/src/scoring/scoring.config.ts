@@ -6,28 +6,28 @@ export const ScoringConfig = {
 
   // Score Range Configuration
   minScore: 0,
-  maxScore: 120,  // Allows for bonus growth beyond typical 100-point scale
-  
+  maxScore: 120, // Allows for bonus growth beyond typical 100-point scale
+
   // Level-based Base Scores
   baseLevelScores: {
-    'beginner': 25,
-    'intermediate': 50,
-    'advanced': 75,
-    'expert': 100,
+    beginner: 25,
+    intermediate: 50,
+    advanced: 75,
+    expert: 100,
   },
 
   // Experience Bonus
-  experienceBonusMultiplier: 2,  // Points per year of experience
-  experienceBonusMax: 20,         // Maximum bonus from experience
+  experienceBonusMultiplier: 2, // Points per year of experience
+  experienceBonusMax: 20, // Maximum bonus from experience
 
   // Progression Bonus
-  progressionBonusWindow: 6,      // Months for recent update consideration
-  progressionBonus: 5,            // Bonus points for recent updates
+  progressionBonusWindow: 6, // Months for recent update consideration
+  progressionBonus: 5, // Bonus points for recent updates
 
   // Evaluation Weights
   evaluationWeights: {
-    selfEvaluation: 0.4,           // 40%
-    managerEvaluation: 0.6,        // 60%
+    selfEvaluation: 0.4, // 40%
+    managerEvaluation: 0.6, // 60%
   },
   evaluationFeedbackMultiplier: 2, // Multiplier to normalize evaluation feedback
 
@@ -35,28 +35,28 @@ export const ScoringConfig = {
 
   // Learning Rate for Participation
   learningRatePerFeedbackUnit: 0.1, // 10% growth per unit of feedback
-  participationFeedbackMax: 10,     // Maximum feedback rating
-  participationFeedbackMin: 0,      // Minimum feedback rating
+  participationFeedbackMax: 10, // Maximum feedback rating
+  participationFeedbackMin: 0, // Minimum feedback rating
 
   // ─── CONTEXTUAL PRIORITIZATION PARAMETERS ─────────────────────────────────
 
   // Context Profile Thresholds
   contextProfiles: {
     low: {
-      minGlobalScore: 0,            // Include everyone
+      minGlobalScore: 0, // Include everyone
       minMatchPercentage: 0,
       scoringFormula: 'learning_potential', // Emphasize learning potential
       learningPotentialBonus: true,
     },
     medium: {
-      minGlobalScore: 25,           // Exclude very weak performers
+      minGlobalScore: 25, // Exclude very weak performers
       minMatchPercentage: 0,
-      scoringFormula: 'balanced',   // Use actual scores
+      scoringFormula: 'balanced', // Use actual scores
     },
     expert: {
-      minGlobalScore: 70,           // Top performers only
-      minMatchPercentage: 80,        // Must have 80%+ skills
-      scoringFormula: 'weighted',   // 60% score + 40% match
+      minGlobalScore: 70, // Top performers only
+      minMatchPercentage: 80, // Must have 80%+ skills
+      scoringFormula: 'weighted', // 60% score + 40% match
       scoreWeight: 0.6,
       matchWeight: 0.4,
     },
@@ -66,16 +66,16 @@ export const ScoringConfig = {
 
   // Base multiplier for each importance level
   importanceMultipliers: {
-    1: 0.70,   // Very light
+    1: 0.7, // Very light
     2: 0.75,
-    3: 0.80,
-    4: 0.90,
-    5: 1.00,   // Normal (no adjustment)
-    6: 1.10,
-    7: 1.20,
-    8: 1.40,   // Heavy
-    9: 1.50,
-    10: 1.60,  // Critical
+    3: 0.8,
+    4: 0.9,
+    5: 1.0, // Normal (no adjustment)
+    6: 1.1,
+    7: 1.2,
+    8: 1.4, // Heavy
+    9: 1.5,
+    10: 1.6, // Critical
   },
 
   // Maximum allowed weight for any skill in an activity
@@ -86,25 +86,25 @@ export const ScoringConfig = {
   // Factors affecting importance suggestion
   importanceSuggestion: {
     skillCountWeights: {
-      1: 1,     // 1 skill = +1 importance point
-      3: 2,     // 3 skills = +2
-      5: 3,     // 5+ skills = +3
+      1: 1, // 1 skill = +1 importance point
+      3: 2, // 3 skills = +2
+      5: 3, // 5+ skills = +3
     },
     skillWeightWeights: {
-      0.5: 1,   // Average weight 0.5 = +1
-      1.0: 2,   // Average weight 1.0 = +2
-      1.5: 3,   // Average weight 1.5+ = +3
+      0.5: 1, // Average weight 0.5 = +1
+      1.0: 2, // Average weight 1.0 = +2
+      1.5: 3, // Average weight 1.5+ = +3
     },
     activityLevelWeights: {
-      'beginner': 0,
-      'intermediate': 1,
-      'advanced': 2,
+      beginner: 0,
+      intermediate: 1,
+      advanced: 2,
     },
     activityTypeWeights: {
-      'training': 0,
-      'workshop': 1,
-      'mentoring': 1,
-      'webinar': 0,
+      training: 0,
+      workshop: 1,
+      mentoring: 1,
+      webinar: 0,
     },
     baseImportance: 1, // Minimum importance suggestion
   },
@@ -122,34 +122,34 @@ export const ScoringConfig = {
 
   // Rank thresholds based on score
   rankThresholds: {
-    'Junior': { min: 0, max: 45 },
-    'Mid': { min: 45, max: 75 },
-    'Senior': { min: 75, max: 95 },
-    'Expert': { min: 95, max: 120 },
+    Junior: { min: 0, max: 45 },
+    Mid: { min: 45, max: 75 },
+    Senior: { min: 75, max: 95 },
+    Expert: { min: 95, max: 120 },
   },
 
   // Category weights for rank calculation
   rankCategoryWeights: {
-    'knowledge': 0.50,      // 50%
-    'knowHow': 0.30,        // 30%
-    'softSkill': 0.20,      // 20%
+    knowledge: 0.5, // 50%
+    knowHow: 0.3, // 30%
+    softSkill: 0.2, // 20%
   },
 
   // ─── TIE RESOLUTION PRIORITY ─────────────────────────────────────────────
 
   tieResolutionPriority: [
-    'contextScore',          // 1. Primary sorting criterion
-    'rank',                  // 2. Overall rank (Expert > Senior > Mid > Junior)
-    'rankScore',            // 3. Global skill score
-    'globalActivityScore',  // 4. Score for this activity
-    'name',                 // 5. Alphabetical (final tiebreaker)
+    'contextScore', // 1. Primary sorting criterion
+    'rank', // 2. Overall rank (Expert > Senior > Mid > Junior)
+    'rankScore', // 3. Global skill score
+    'globalActivityScore', // 4. Score for this activity
+    'name', // 5. Alphabetical (final tiebreaker)
   ],
 
   rankOrderForTieResolution: {
-    'Expert': 4,
-    'Senior': 3,
-    'Mid': 2,
-    'Junior': 1,
+    Expert: 4,
+    Senior: 3,
+    Mid: 2,
+    Junior: 1,
   },
 
   // ─── GROUPING PARAMETERS ─────────────────────────────────────────────────
@@ -191,11 +191,11 @@ export const ScoringConfig = {
   // ─── CACHING CONFIGURATION ──────────────────────────────────────────────
 
   cache: {
-    enabled: false,  // Set to true to enable caching
+    enabled: false, // Set to true to enable caching
     defaults: {
-      analyticsDuration: 300,      // 5 minutes
+      analyticsDuration: 300, // 5 minutes
       recommendationsDuration: 600, // 10 minutes
-      skillScoreDuration: 300,      // 5 minutes
+      skillScoreDuration: 300, // 5 minutes
     },
   },
 
@@ -203,7 +203,7 @@ export const ScoringConfig = {
 
   logging: {
     enabled: true,
-    logScoreCalculations: false,      // Verbose logging
+    logScoreCalculations: false, // Verbose logging
     logRecommendationGeneration: false,
     logSkillGapAnalysis: false,
   },
@@ -211,9 +211,9 @@ export const ScoringConfig = {
   // ─── VALIDATION ──────────────────────────────────────────────────────────
 
   validation: {
-    requireSkillsForActivity: true,   // Activity must have required skills
-    allowSelfHealing: true,            // Auto-add missing skills from activities
-    validateFeedbackRange: true,      // Enforce 0-10 feedback range
+    requireSkillsForActivity: true, // Activity must have required skills
+    allowSelfHealing: true, // Auto-add missing skills from activities
+    validateFeedbackRange: true, // Enforce 0-10 feedback range
   },
 
   // ─── ADJUSTABLE WEIGHTS FOR CUSTOM FORMULAS ──────────────────────────────
@@ -231,13 +231,13 @@ export const ScoringConfig = {
       // More emphasis on growth potential
       baseScore: 0.25,
       experience: 0.15,
-      progression: 0.30,
-      feedback: 0.30,
+      progression: 0.3,
+      feedback: 0.3,
     },
     balanced: {
       // Evenly weighted (current default)
-      baseScore: 0.40,
-      experience: 0.20,
+      baseScore: 0.4,
+      experience: 0.2,
       progression: 0.15,
       feedback: 0.25,
     },
@@ -246,36 +246,36 @@ export const ScoringConfig = {
 
 /**
  * CONFIGURATION GUIDE
- * 
+ *
  * How to customize these parameters:
- * 
+ *
  * 1. LEARNING RATE (learningRatePerFeedbackUnit)
  *    Current: 0.1 (10% per feedback unit)
  *    Higher: Employees gain skills faster (0.15 = 15% per unit)
  *    Lower: Slower but steadier growth (0.05 = 5% per unit)
  *    Use case: Adjust based on organization's expected growth pace
- * 
+ *
  * 2. CONTEXT PROFILE THRESHOLDS
  *    Customize minGlobalScore and minMatchPercentage for each context
  *    Example: Make 'expert' more inclusive by lowering from (70, 80) to (60, 70)
- * 
+ *
  * 3. IMPORTANCE MULTIPLIERS
  *    Adjust how importance level affects skill weights
  *    Range per importance: 0.7 (light) to 1.6 (critical)
  *    Can be extended or made more granular
- * 
+ *
  * 4. BASE LEVEL SCORES
  *    Current: beginner=25, intermediate=50, advanced=75, expert=100
  *    Can adjust these to reflect your organization's skill baseline
- * 
+ *
  * 5. RANK THRESHOLDS
  *    Current: Junior (0-45), Mid (45-75), Senior (75-95), Expert (95-120)
  *    Adjust to make ranks harder/easier to achieve
- * 
+ *
  * 6. CATEGORY WEIGHTS
  *    Currently: 50% knowledge, 30% know-how, 20% soft skills
  *    Adjust based on what your organization values most
- * 
+ *
  * TESTING CHANGES:
  * - Update config values
  * - Run score calculations on test data

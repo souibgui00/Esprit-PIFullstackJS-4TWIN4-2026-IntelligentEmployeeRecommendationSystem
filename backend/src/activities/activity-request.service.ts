@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ActivityRequest } from './activity-request.schema';
@@ -10,7 +14,8 @@ import { AuditService } from '../common/audit/audit.service';
 @Injectable()
 export class ActivityRequestService {
   constructor(
-    @InjectModel(ActivityRequest.name) private activityRequestModel: Model<ActivityRequest>,
+    @InjectModel(ActivityRequest.name)
+    private activityRequestModel: Model<ActivityRequest>,
     @InjectModel(Activity.name) private activityModel: Model<Activity>,
     private readonly auditService: AuditService,
   ) {}
@@ -38,7 +43,8 @@ export class ActivityRequestService {
   async review(id: string, dto: ReviewActivityRequestDto, reviewerId: string) {
     const req = await this.activityRequestModel.findById(id);
     if (!req) throw new NotFoundException('Request not found');
-    if (req.status !== 'PENDING') throw new ForbiddenException('Already reviewed');
+    if (req.status !== 'PENDING')
+      throw new ForbiddenException('Already reviewed');
     req.status = dto.status;
     req.reviewedBy = reviewerId;
     req.reviewedAt = new Date();
@@ -62,7 +68,7 @@ export class ActivityRequestService {
         approvedBy: reviewerId,
         approvedAt: new Date(),
       });
-      
+
       // Log activity creation
       await this.auditService.logAction({
         action: 'CREATE_ACTIVITY_FROM_REQUEST',

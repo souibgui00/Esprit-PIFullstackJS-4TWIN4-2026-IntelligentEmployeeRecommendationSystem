@@ -6,14 +6,14 @@ import { Evaluation, EvaluationSchema } from './schema/evaluation.schema';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Evaluation.name, schema: EvaluationSchema }
-        ]),
-        UsersModule,
-    ],
-    controllers: [EvaluationsController],
-    providers: [EvaluationsService],
-    exports: [EvaluationsService]
+  imports: [
+    MongooseModule.forFeature([
+      { name: Evaluation.name, schema: EvaluationSchema },
+    ]),
+    UsersModule,
+  ],
+  controllers: [EvaluationsController],
+  providers: [EvaluationsService],
+  exports: [EvaluationsService],
 })
-export class EvaluationsModule { }
+export class EvaluationsModule {}

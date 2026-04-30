@@ -18,6 +18,7 @@ import { AssignmentsModule } from './assignments/assignments.module';
 import { EvaluationsModule } from './evaluations/evaluations.module';
 import { SettingsModule } from './settings/settings.module';
 import { ScoringModule } from './scoring/scoring.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { AuditModule } from './common/audit/audit.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -39,7 +40,9 @@ import { ScheduleModule } from '@nestjs/schedule';
           uri,
           connectionFactory: (connection) => {
             connection.on('connected', () => console.log('MongoDB connected'));
-            connection.on('error', (err: Error) => console.error('MongoDB connection error:', err));
+            connection.on('error', (err: Error) =>
+              console.error('MongoDB connection error:', err),
+            );
             return connection;
           },
         };
@@ -61,11 +64,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     EvaluationsModule,
     SettingsModule,
     ScoringModule,
+    DashboardModule,
     AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
-
-
+export class AppModule {}

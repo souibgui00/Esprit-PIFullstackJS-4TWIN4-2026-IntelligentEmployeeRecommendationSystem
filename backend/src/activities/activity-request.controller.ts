@@ -1,4 +1,14 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Param, Patch, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Param,
+  Patch,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ActivityRequestService } from './activity-request.service';
 import { CreateActivityRequestDto } from './dto/create-activity-request.dto';
 import { ReviewActivityRequestDto } from './dto/review-activity-request.dto';
@@ -12,7 +22,8 @@ export class ActivityRequestController {
   @Post()
   async create(@Body() dto: CreateActivityRequestDto, @Request() req: any) {
     const userId = req.user?.id || req.user?.userId;
-    if (!userId) throw new UnauthorizedException('User ID not found in request');
+    if (!userId)
+      throw new UnauthorizedException('User ID not found in request');
     return this.service.create(dto, userId);
   }
 
@@ -32,7 +43,8 @@ export class ActivityRequestController {
     @Request() req: any,
   ) {
     const reviewerId = req.user?.id || req.user?.userId;
-    if (!reviewerId) throw new UnauthorizedException('User ID not found in request');
+    if (!reviewerId)
+      throw new UnauthorizedException('User ID not found in request');
     return this.service.review(id, dto, reviewerId);
   }
 }

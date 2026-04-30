@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty, IsNumber, Min } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  ArrayNotEmpty,
+  IsNumber,
+  Min,
+} from 'class-validator';
 
 export class CreateActivityRequestDto {
   @IsString()

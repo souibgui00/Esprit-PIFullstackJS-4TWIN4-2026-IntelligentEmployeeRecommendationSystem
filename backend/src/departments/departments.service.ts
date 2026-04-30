@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Department } from './schema/department.schema';
@@ -10,15 +15,19 @@ import { User } from '../users/schema/user.schema';
 export class DepartmentsService {
   constructor(
     @InjectModel(Department.name) private deptModel: Model<Department>,
-    @InjectModel(User.name) private userModel: Model<User>
-  ) { }
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
 
   private generateCode(name: string): string {
-    return name
-      .split(/[\s-]+/)
-      .map(word => word[0])
-      .join('')
-      .toUpperCase() + '-' + Math.floor(10 + Math.random() * 90);
+    return (
+      name
+        .split(/[\s-]+/)
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase() +
+      '-' +
+      Math.floor(10 + Math.random() * 90)
+    );
   }
 
   async create(dto: CreateDepartmentDto) {
@@ -27,7 +36,7 @@ export class DepartmentsService {
     }
 
     const exist = await this.deptModel.findOne({
-      $or: [{ name: dto.name }, { code: dto.code }]
+      $or: [{ name: dto.name }, { code: dto.code }],
     });
 
     if (exist) {
@@ -42,14 +51,16 @@ export class DepartmentsService {
   }
 
   async findAll() {
-    return this.deptModel.find()
+    return this.deptModel
+      .find()
       .populate('manager_id', '_id name email')
       .sort({ createdAt: -1 })
       .exec();
   }
 
   async findOne(id: string) {
-    const dept = await this.deptModel.findById(id)
+    const dept = await this.deptModel
+      .findById(id)
       .populate('manager_id', '_id name email')
       .exec();
     if (!dept) throw new NotFoundException('Department not found');
@@ -62,15 +73,18 @@ export class DepartmentsService {
         _id: { $ne: id },
         $or: [
           ...(dto.name ? [{ name: dto.name }] : []),
-          ...(dto.code ? [{ code: dto.code }] : [])
-        ]
+          ...(dto.code ? [{ code: dto.code }] : []),
+        ],
       });
       if (conflict) {
-        throw new ConflictException('Another department already uses this name or code');
+        throw new ConflictException(
+          'Another department already uses this name or code',
+        );
       }
     }
 
-    const updated = await this.deptModel.findByIdAndUpdate(id, dto, { new: true })
+    const updated = await this.deptModel
+      .findByIdAndUpdate(id, dto, { new: true })
       .populate('manager_id', '_id name email')
       .exec();
     if (!updated) throw new NotFoundException('Department not found');
@@ -78,9 +92,13 @@ export class DepartmentsService {
   }
 
   async remove(id: string) {
-    const assignedUsers = await this.userModel.countDocuments({ department_id: id });
+    const assignedUsers = await this.userModel.countDocuments({
+      department_id: id,
+    });
     if (assignedUsers > 0) {
-      throw new BadRequestException(`Cannot delete department: ${assignedUsers} users are currently assigned to it`);
+      throw new BadRequestException(
+        `Cannot delete department: ${assignedUsers} users are currently assigned to it`,
+      );
     }
 
     const deleted = await this.deptModel.findByIdAndDelete(id).exec();

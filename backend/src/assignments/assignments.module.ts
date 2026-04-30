@@ -10,15 +10,17 @@ import { UsersModule } from '../users/users.module';
 import { ParticipationsModule } from '../participations/participations.module';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Assignment.name, schema: AssignmentSchema }]),
-        ActivitiesModule,
-        NotificationsModule,
-        UsersModule,
-        ParticipationsModule
-    ],
-    controllers: [AssignmentsController],
-    providers: [AssignmentsService],
-    exports: [AssignmentsService]
+  imports: [
+    MongooseModule.forFeature([
+      { name: Assignment.name, schema: AssignmentSchema },
+    ]),
+    ActivitiesModule,
+    NotificationsModule,
+    UsersModule,
+    ParticipationsModule,
+  ],
+  controllers: [AssignmentsController],
+  providers: [AssignmentsService],
+  exports: [AssignmentsService],
 })
-export class AssignmentsModule { }
+export class AssignmentsModule {}
