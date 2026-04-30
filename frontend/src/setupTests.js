@@ -54,28 +54,23 @@ const sessionStorageMock = {
 };
 global.sessionStorage = sessionStorageMock;
 
-// Mock window.location safely: delete then redefine as configurable
+// Mock window.location safely by patching only needed fields
+// Avoid deleting or redefining the property to remain compatible with jsdom
 try {
-  delete window.location;
-} catch (e) {}
-Object.defineProperty(window, 'location', {
-  configurable: true,
-  writable: true,
-  value: {
-    href: 'http://localhost:3000',
-    origin: 'http://localhost:3000',
-    protocol: 'http:',
-    host: 'localhost:3000',
-    hostname: 'localhost',
-    port: '3000',
-    pathname: '/',
-    search: '',
-    hash: '',
-    assign: jest.fn(),
-    replace: jest.fn(),
-    reload: jest.fn(),
-  },
-});
+  Object.assign(window, {
+    location: {
+      ...window.location,
+      href: 'http://localhost:3000',
+      origin: 'http://localhost:3000',
+      protocol: 'http:',
+      assign: jest.fn(),
+      replace: jest.fn(),
+      reload: jest.fn(),
+    },
+  });
+} catch (e) {
+  // ignore in environments where window.location is not writable
+}
 
 // Mock console methods to reduce noise in tests
 const originalError = console.error;
