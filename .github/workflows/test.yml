@@ -1,0 +1,46 @@
+name: Test Workflow
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run Backend Tests
+        working-directory: backend
+        run: |
+          echo "Running backend tests..."
+          npm install --legacy-peer-deps
+          npm test -- --coverage --ci
+
+      - name: Upload Coverage Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            backend/coverage/
+            frontend/coverage/
+
+      - name: Display Coverage Summary
+        run: |
+          echo "Backend Coverage Summary:"
+          if [ -f "backend/coverage/lcov.info" ]; then
+            echo "Coverage report generated successfully"
+            cat backend/coverage/lcov.info | head -10
+          else
+            echo "No coverage report found"
+          fi
