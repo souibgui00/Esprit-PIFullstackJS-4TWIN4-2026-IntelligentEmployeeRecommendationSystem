@@ -1,3 +1,4 @@
+import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { useAuth } from '../useAuth';
@@ -8,24 +9,6 @@ jest.mock('../../services/api', () => ({
   get: jest.fn(),
 }));
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
-global.localStorage = localStorageMock;
-
-// Mock sessionStorage
-const sessionStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
-global.sessionStorage = sessionStorageMock;
-
 const wrapper = ({ children }) => (
   <AuthProvider>{children}</AuthProvider>
 );
@@ -34,15 +17,18 @@ describe('useAuth', () => {
   const mockPost = require('../../services/api').post;
   const mockGet = require('../../services/api').get;
 
+  // Get references to the mocked storage (set up in setupTests.js)
+  const getSessionStorage = () => global.sessionStorage;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorageMock.clear();
-    sessionStorageMock.clear();
+    global.sessionStorage.clear();
+    global.localStorage.clear();
   });
 
   it('should initialize with null user', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.loading).toBe(false);
@@ -65,11 +51,11 @@ describe('useAuth', () => {
     mockPost.mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
       await result.current.login('test@example.com', 'password123');
     });
-    
+
     expect(result.current.user).toEqual(mockResponse.data.user);
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.loading).toBe(false);
@@ -77,8 +63,8 @@ describe('useAuth', () => {
       email: 'test@example.com',
       password: 'password123',
     });
-    expect(sessionStorageMock.setItem).toHaveBeenCalledWith('access_token', 'mock-token');
-    expect(sessionStorageMock.setItem).toHaveBeenCalledWith('user', JSON.stringify(mockResponse.data.user));
+    expect(getSessionStorage().setItem).toHaveBeenCalledWith('access_token', 'mock-token');
+    expect(getSessionStorage().setItem).toHaveBeenCalledWith('user', JSON.stringify(mockResponse.data.user));
   });
 
   it('should handle login failure', async () => {
@@ -93,11 +79,11 @@ describe('useAuth', () => {
     mockPost.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await expect(result.current.login('test@example.com', 'wrongpassword')).rejects.toThrow();
+      await expect(result.current.login('test@example.com', 'wrongpassword')).rejects.toEqual(mockError);
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.error).toBe('Invalid credentials');
@@ -111,31 +97,35 @@ describe('useAuth', () => {
       role: 'EMPLOYEE',
     };
 
-    const mockResponse = {
-      data: { message: 'Logout successful' },
+    const mockLoginResponse = {
+      data: {
+        access_token: 'mock-token',
+        refresh_token: 'mock-refresh-token',
+        user: mockUser,
+      },
     };
 
-    mockPost.mockResolvedValue(mockResponse);
+    mockPost.mockResolvedValue(mockLoginResponse);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     // First login
     await act(async () => {
       await result.current.login('test@example.com', 'password123');
     });
-    
+
     expect(result.current.user).toEqual(mockUser);
     expect(result.current.isAuthenticated).toBe(true);
-    
+
     // Then logout
     await act(async () => {
       result.current.logout();
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
-    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('access_token');
-    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('user');
+    expect(getSessionStorage().removeItem).toHaveBeenCalledWith('access_token');
+    expect(getSessionStorage().removeItem).toHaveBeenCalledWith('user');
   });
 
   it('should register successfully', async () => {
@@ -155,7 +145,7 @@ describe('useAuth', () => {
     mockPost.mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
       await result.current.register({
         email: 'newuser@example.com',
@@ -164,7 +154,7 @@ describe('useAuth', () => {
         matricule: 'EMP-002',
       });
     });
-    
+
     expect(result.current.user).toEqual(mockResponse.data.user);
     expect(result.current.isAuthenticated).toBe(true);
     expect(mockPost).toHaveBeenCalledWith('/auth/register', {
@@ -187,15 +177,15 @@ describe('useAuth', () => {
     mockPost.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
       await expect(result.current.register({
         email: 'existing@example.com',
         password: 'password123',
         name: 'Existing User',
-      })).rejects.toThrow();
+      })).rejects.toEqual(mockError);
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.error).toBe('Email already exists');
@@ -212,13 +202,13 @@ describe('useAuth', () => {
     mockPost.mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
       await result.current.refreshToken('old-refresh-token');
     });
-    
-    expect(sessionStorageMock.setItem).toHaveBeenCalledWith('access_token', 'new-access-token');
-    expect(sessionStorageMock.setItem).toHaveBeenCalledWith('refresh_token', 'new-refresh-token');
+
+    expect(getSessionStorage().setItem).toHaveBeenCalledWith('access_token', 'new-access-token');
+    expect(getSessionStorage().setItem).toHaveBeenCalledWith('refresh_token', 'new-refresh-token');
     expect(mockPost).toHaveBeenCalledWith('/auth/refresh', {
       refreshToken: 'old-refresh-token',
     });
@@ -234,11 +224,15 @@ describe('useAuth', () => {
     mockPost.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.refreshToken('invalid-token');
+      try {
+        await result.current.refreshToken('invalid-token');
+      } catch (e) {
+        // expected to throw
+      }
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });
@@ -251,14 +245,15 @@ describe('useAuth', () => {
       role: 'EMPLOYEE',
     };
 
-    sessionStorageMock.getItem.mockImplementation((key) => {
+    // Set storage values BEFORE rendering the hook
+    getSessionStorage().getItem.mockImplementation((key) => {
       if (key === 'access_token') return 'mock-token';
       if (key === 'user') return JSON.stringify(mockUser);
       return null;
     });
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     expect(result.current.user).toEqual(mockUser);
     expect(result.current.isAuthenticated).toBe(true);
   });
@@ -274,11 +269,11 @@ describe('useAuth', () => {
     mockGet.mockResolvedValue({ data: mockUser });
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
       await result.current.fetchUserProfile();
     });
-    
+
     expect(result.current.user).toEqual(mockUser);
     expect(mockGet).toHaveBeenCalledWith('/auth/profile');
   });
@@ -287,31 +282,36 @@ describe('useAuth', () => {
     mockGet.mockRejectedValue(new Error('Failed to fetch profile'));
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.fetchUserProfile();
+      try {
+        await result.current.fetchUserProfile();
+      } catch (e) {
+        // expected to throw
+      }
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });
 
   it('should update user profile', async () => {
-    const mockUser = {
-      id: '1',
-      email: 'test@example.com',
-      name: 'Updated Name',
-      role: 'EMPLOYEE',
-    };
-
-    mockGet.mockResolvedValue({ data: mockUser });
-
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
+    // First set a user
+    await act(async () => {
+      result.current.setUser({
+        id: '1',
+        email: 'test@example.com',
+        name: 'Old Name',
+        role: 'EMPLOYEE',
+      });
+    });
+
     await act(async () => {
       result.current.updateUserProfile({ name: 'Updated Name' });
     });
-    
+
     expect(result.current.user.name).toBe('Updated Name');
   });
 
@@ -327,33 +327,40 @@ describe('useAuth', () => {
     mockPost.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await expect(result.current.login('test@example.com', 'wrongpassword')).rejects.toThrow();
+      await expect(result.current.login('test@example.com', 'wrongpassword')).rejects.toEqual(mockError);
     });
-    
+
     expect(result.current.error).toBe('Some error');
-    
+
     await act(async () => {
       result.current.clearError();
     });
-    
+
     expect(result.current.error).toBeNull();
   });
 
   it('should handle loading states', async () => {
-    mockPost.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 1000)));
+    let resolveLogin;
+    mockPost.mockImplementation(() => new Promise(resolve => {
+      resolveLogin = resolve;
+    }));
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
-    const loginPromise = act(async () => {
+
+    // Start login without awaiting
+    act(() => {
       result.current.login('test@example.com', 'password123');
     });
-    
+
     expect(result.current.loading).toBe(true);
-    
-    await loginPromise;
-    
+
+    // Resolve and finish
+    await act(async () => {
+      resolveLogin({ data: { access_token: 'token', user: { id: '1' } } });
+    });
+
     expect(result.current.loading).toBe(false);
   });
 
@@ -366,11 +373,11 @@ describe('useAuth', () => {
     };
 
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
       result.current.setUser(mockUser);
     });
-    
+
     expect(result.current.hasRole('ADMIN')).toBe(true);
     expect(result.current.hasRole('MANAGER')).toBe(false);
     expect(result.current.hasRole(['ADMIN', 'MANAGER'])).toBe(true);
@@ -379,7 +386,7 @@ describe('useAuth', () => {
 
   it('should handle user state updates', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     const mockUser = {
       id: '1',
       email: 'test@example.com',
@@ -390,14 +397,14 @@ describe('useAuth', () => {
     await act(async () => {
       result.current.setUser(mockUser);
     });
-    
+
     expect(result.current.user).toEqual(mockUser);
     expect(result.current.isAuthenticated).toBe(true);
-    
+
     await act(async () => {
       result.current.setUser(null);
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });

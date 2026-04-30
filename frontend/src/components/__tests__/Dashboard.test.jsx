@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import Dashboard from '../Dashboard';
 
@@ -24,7 +25,7 @@ const renderWithProviders = (component) => {
 describe('Dashboard', () => {
   const mockGet = require('../../services/api').get;
   const mockUseAuth = require('../../contexts/AuthContext').useAuth;
-  
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -39,7 +40,7 @@ describe('Dashboard', () => {
 
     const mockStats = {
       users: { total: 150 },
-      activities: { total: 25, recent: [] },
+      activities: { total: 25 },
       departments: { total: 10 },
     };
 
@@ -62,10 +63,10 @@ describe('Dashboard', () => {
     renderWithProviders(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
-      expect(screen.getByText(/150/i)).toBeInTheDocument(); // total users
-      expect(screen.getByText(/25/i)).toBeInTheDocument(); // total activities
-      expect(screen.getByText(/10/i)).toBeInTheDocument(); // total departments
+      expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
+      expect(screen.getByText('150')).toBeInTheDocument();
+      expect(screen.getByText('25')).toBeInTheDocument();
+      expect(screen.getByText('10')).toBeInTheDocument();
     });
   });
 
@@ -112,19 +113,22 @@ describe('Dashboard', () => {
     };
 
     const mockStats = {
-      users: { total: 0 }, // Managers can't see total users
-      activities: { total: 15, recent: [] },
+      users: { total: 0 },
+      activities: { total: 15 },
       departments: { total: 5 },
     };
 
     mockUseAuth.mockReturnValue({ user: mockManager, isAuthenticated: true });
-    mockGet.mockResolvedValue({ data: mockStats });
+    mockGet
+      .mockResolvedValueOnce({ data: mockStats })
+      .mockResolvedValueOnce({ data: [] })
+      .mockResolvedValueOnce({ data: [] });
 
     renderWithProviders(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.queryByText(/150/i)).not.toBeInTheDocument(); // Should not show total users
-      expect(screen.getByText(/15/i)).toBeInTheDocument(); // Should show activities
+      expect(screen.queryByText('150')).not.toBeInTheDocument();
+      expect(screen.getByText('15')).toBeInTheDocument();
     });
   });
 
@@ -136,7 +140,12 @@ describe('Dashboard', () => {
       role: 'ADMIN',
     };
 
-    const mockStats = { users: { total: 150 }, activities: { total: 25 }, departments: { total: 10 } };
+    const mockStats = {
+      users: { total: 150 },
+      activities: { total: 25 },
+      departments: { total: 10 },
+    };
+
     const mockDepartments = [
       { id: '1', name: 'Engineering', employeeCount: 25 },
       { id: '2', name: 'HR', employeeCount: 5 },
@@ -146,12 +155,13 @@ describe('Dashboard', () => {
     mockUseAuth.mockReturnValue({ user: mockUser, isAuthenticated: true });
     mockGet
       .mockResolvedValueOnce({ data: mockStats })
-      .mockResolvedValueOnce({ data: mockDepartments });
+      .mockResolvedValueOnce({ data: mockDepartments })
+      .mockResolvedValueOnce({ data: [] });
 
     renderWithProviders(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText(/departments/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /departments/i })).toBeInTheDocument();
       expect(screen.getByText(/engineering/i)).toBeInTheDocument();
       expect(screen.getByText(/25 employees/i)).toBeInTheDocument();
       expect(screen.getByText(/hr/i)).toBeInTheDocument();
@@ -167,8 +177,14 @@ describe('Dashboard', () => {
       role: 'ADMIN',
     };
 
-    const mockStats = { users: { total: 150 }, activities: { total: 25 }, departments: { total: 10 } };
+    const mockStats = {
+      users: { total: 150 },
+      activities: { total: 25 },
+      departments: { total: 10 },
+    };
+
     const mockDepartments = [];
+
     const mockActivities = [
       { id: '1', title: 'Team Meeting', status: 'completed', date: '2024-01-15' },
       { id: '2', title: 'Training Session', status: 'ongoing', date: '2024-01-16' },
@@ -184,7 +200,7 @@ describe('Dashboard', () => {
     renderWithProviders(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText(/recent activities/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /recent activities/i })).toBeInTheDocument();
       expect(screen.getByText(/team meeting/i)).toBeInTheDocument();
       expect(screen.getByText(/training session/i)).toBeInTheDocument();
       expect(screen.getByText(/project review/i)).toBeInTheDocument();
@@ -199,10 +215,17 @@ describe('Dashboard', () => {
       role: 'ADMIN',
     };
 
-    const mockStats = { users: { total: 150 }, activities: { total: 25 }, departments: { total: 10 } };
+    const mockStats = {
+      users: { total: 150 },
+      activities: { total: 25 },
+      departments: { total: 10 },
+    };
 
     mockUseAuth.mockReturnValue({ user: mockUser, isAuthenticated: true });
-    mockGet.mockResolvedValue({ data: mockStats });
+    mockGet
+      .mockResolvedValueOnce({ data: mockStats })
+      .mockResolvedValueOnce({ data: [] })
+      .mockResolvedValueOnce({ data: [] });
 
     renderWithProviders(<Dashboard />);
 
@@ -219,11 +242,16 @@ describe('Dashboard', () => {
       role: 'ADMIN',
     };
 
-    const mockStats = { users: { total: 150 }, activities: { total: 25 }, departments: { total: 0 } };
+    const mockStats = {
+      users: { total: 150 },
+      activities: { total: 25 },
+      departments: { total: 0 },
+    };
 
     mockUseAuth.mockReturnValue({ user: mockUser, isAuthenticated: true });
     mockGet
       .mockResolvedValueOnce({ data: mockStats })
+      .mockResolvedValueOnce({ data: [] })
       .mockResolvedValueOnce({ data: [] });
 
     renderWithProviders(<Dashboard />);
@@ -241,7 +269,11 @@ describe('Dashboard', () => {
       role: 'ADMIN',
     };
 
-    const mockStats = { users: { total: 150 }, activities: { total: 0 }, departments: { total: 10 } };
+    const mockStats = {
+      users: { total: 150 },
+      activities: { total: 0 },
+      departments: { total: 10 },
+    };
 
     mockUseAuth.mockReturnValue({ user: mockUser, isAuthenticated: true });
     mockGet
@@ -265,7 +297,11 @@ describe('Dashboard', () => {
       role: 'ADMIN',
     };
 
-    const mockStats = { users: { total: 150 }, activities: { total: 25 }, departments: { total: 10 } };
+    const mockStats = {
+      users: { total: 150 },
+      activities: { total: 25 },
+      departments: { total: 10 },
+    };
 
     mockUseAuth.mockReturnValue({ user: mockUser, isAuthenticated: true });
     mockGet.mockResolvedValue({ data: mockStats });
@@ -273,21 +309,23 @@ describe('Dashboard', () => {
     renderWithProviders(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
     });
 
     const refreshButton = screen.getByRole('button', { name: /refresh/i });
     await user.click(refreshButton);
 
-    expect(mockGet).toHaveBeenCalledTimes(3); // Initial load + refresh
+    // 3 calls on initial load + 3 calls on refresh
+    expect(mockGet).toHaveBeenCalledTimes(6);
   });
 
   it('redirects to login if user is not authenticated', () => {
     mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false });
+    mockGet.mockResolvedValue({ data: {} });
 
     renderWithProviders(<Dashboard />);
 
-    // Should redirect to login page or show authentication message
-    expect(screen.queryByText(/dashboard/i)).not.toBeInTheDocument();
+    // Dashboard returns null when not authenticated
+    expect(screen.queryByRole('heading', { name: /dashboard/i })).not.toBeInTheDocument();
   });
 });

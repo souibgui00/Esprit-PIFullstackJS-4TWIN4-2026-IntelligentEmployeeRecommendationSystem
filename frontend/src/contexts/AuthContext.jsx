@@ -8,22 +8,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Initialize from sessionStorage on mount (guarded and tolerant)
+  // Initialize from sessionStorage on mount
   useEffect(() => {
     try {
-      const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('user') : null;
-      const token = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('access_token') : null;
-      if (stored && stored !== 'undefined' && stored !== 'null' && token) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed) setUser(parsed);
-        } catch (e) {
-          // ignore parse errors and clear stored value
-          try { sessionStorage.removeItem('user'); } catch (e) {}
-        }
+      const token = sessionStorage.getItem('access_token');
+      const stored = sessionStorage.getItem('user');
+      if (token && stored && stored !== 'undefined' && stored !== 'null') {
+        const parsed = JSON.parse(stored);
+        if (parsed) setUser(parsed);
       }
     } catch (e) {
-      // sessionStorage might be mocked or unavailable; ignore
+      // ignore
     }
   }, []);
 
@@ -36,12 +31,13 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post('/auth/login', { email, password });
       if (!res || !res.data) throw new Error('Login failed');
       const userData = res.data.user;
-      const token = res.data.token;
+      const token = res.data.access_token;
       setUser(userData);
-      try {
-        sessionStorage.setItem('access_token', token);
-        sessionStorage.setItem('user', JSON.stringify(userData));
-      } catch (e) {}
+      sessionStorage.setItem('access_token', token);
+      sessionStorage.setItem('user', JSON.stringify(userData));
+      if (res.data.refresh_token) {
+        sessionStorage.setItem('refresh_token', res.data.refresh_token);
+      }
       return res.data;
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Login failed';
@@ -58,6 +54,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('refresh_token');
   };
 
   const register = async (userData) => {
@@ -67,13 +64,14 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post('/auth/register', userData);
       if (!res || !res.data) throw new Error('Registration failed');
       const newUser = res.data.user;
-      const token = res.data.token;
+      const token = res.data.access_token;
       if (newUser) {
         setUser(newUser);
-        try {
-          sessionStorage.setItem('access_token', token);
-          sessionStorage.setItem('user', JSON.stringify(newUser));
-        } catch (e) {}
+        sessionStorage.setItem('access_token', token);
+        sessionStorage.setItem('user', JSON.stringify(newUser));
+        if (res.data.refresh_token) {
+          sessionStorage.setItem('refresh_token', res.data.refresh_token);
+        }
       }
       return res.data;
     } catch (err) {
@@ -89,12 +87,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.post('/auth/refresh', { refreshToken: token });
       if (!res || !res.data) throw new Error('Refresh failed');
-      try {
-        sessionStorage.setItem('access_token', res.data.access_token);
-        if (res.data.refresh_token) {
-          sessionStorage.setItem('refresh_token', res.data.refresh_token);
-        }
-      } catch (e) {}
+      sessionStorage.setItem('access_token', res.data.access_token);
+      if (res.data.refresh_token) {
+        sessionStorage.setItem('refresh_token', res.data.refresh_token);
+      }
       return res.data;
     } catch (err) {
       logout();
@@ -115,12 +111,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUserProfile = (updates) => {
-    setUser((prev) => ({ ...prev, ...updates }));
+    setUser((prev) => (prev ? { ...prev, ...updates } : updates));
   };
 
   const clearError = () => setError(null);
 
-  const hasRole = (role) => user?.role === role;
+  // hasRole accepts a single role string or an array of roles
+  const hasRole = (role) => {
+    if (!user) return false;
+    if (Array.isArray(role)) return role.includes(user.role);
+    return user.role === role;
+  };
 
   return (
     <AuthContext.Provider value={{

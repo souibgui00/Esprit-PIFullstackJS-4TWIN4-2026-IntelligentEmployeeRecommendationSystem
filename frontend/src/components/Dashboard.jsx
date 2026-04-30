@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard = () => {
-  const [data, setData] = useState(null);
+  const { user, isAuthenticated } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [departments, setDepartments] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -11,7 +15,15 @@ const Dashboard = () => {
     setError(null);
     api.get('/dashboard')
       .then(res => {
-        setData(res.data);
+        setStats(res.data);
+        return Promise.all([
+          api.get('/dashboard/departments').catch(() => ({ data: [] })),
+          api.get('/dashboard/activities').catch(() => ({ data: [] })),
+        ]);
+      })
+      .then(([deptRes, actRes]) => {
+        setDepartments(Array.isArray(deptRes.data) ? deptRes.data : []);
+        setActivities(Array.isArray(actRes.data) ? actRes.data : []);
         setLoading(false);
       })
       .catch(() => {
@@ -20,23 +32,22 @@ const Dashboard = () => {
       });
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
+  if (!isAuthenticated) return null;
   if (loading) return <div>Loading Dashboard...</div>;
   if (error) return <div role="alert">{error}</div>;
-  if (!data) return null;
-
-  const departments = Array.isArray(data.departments) ? data.departments : [];
-  const activities = Array.isArray(data.activities) ? data.activities : [];
-  const users = data.users || {};
-  const activitiesStats = data.activities && !Array.isArray(data.activities) ? data.activities : {};
+  if (!stats) return null;
 
   return (
     <div>
       <h1>Dashboard</h1>
-      {data.user && <p>Welcome, {data.user.name}</p>}
-      {users.total !== undefined && <p>{users.total}</p>}
-      {activitiesStats.total !== undefined && <p>{activitiesStats.total}</p>}
+      {user && <p>Welcome, {user.name}</p>}
+      {stats.users?.total !== undefined && <p>{stats.users.total}</p>}
+      {stats.activities?.total !== undefined && <p>{stats.activities.total}</p>}
+      {stats.departments?.total !== undefined && <p>{stats.departments.total}</p>}
       <section>
         <h2>Departments</h2>
         {departments.length === 0

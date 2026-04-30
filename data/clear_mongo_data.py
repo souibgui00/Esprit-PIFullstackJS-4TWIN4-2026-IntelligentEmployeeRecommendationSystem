@@ -1,7 +1,7 @@
 import pymongo
 
 # Connect to MongoDB
-MONGO_URI = "mongodb+srv://mohamedaminesouibgui_db_user:232JMT4753@pi.nwdrgwz.mongodb.net/"
+MONGO_URI = "mongodb://sarra_mrabet:sarra@ac-skuyy89-shard-00-00.thpvndq.mongodb.net:27017,ac-skuyy89-shard-00-01.thpvndq.mongodb.net:27017,ac-skuyy89-shard-00-02.thpvndq.mongodb.net:27017/test?authSource=admin&replicaSet=atlas-cr5hej-shard-0&tls=true&retryWrites=true&w=majority"
 DB_NAME = "test"
 
 client = pymongo.MongoClient(MONGO_URI)
