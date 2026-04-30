@@ -2,8 +2,8 @@
  * Upserts two test accounts: MANAGER and HR (bcrypt password, same format as UsersService).
  * Usage (from backend folder): node scripts/seed-test-manager-hr.cjs
  */
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 

@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
+const fs = require('node:fs');
 
 async function getSampleData() {
-  const uri = 'mongodb://sarra_mrabet:sarra@ac-skuyy89-shard-00-00.thpvndq.mongodb.net:27017,ac-skuyy89-shard-00-01.thpvndq.mongodb.net:27017,ac-skuyy89-shard-00-02.thpvndq.mongodb.net:27017/test?authSource=admin&replicaSet=atlas-cr5hej-shard-0&tls=true&retryWrites=true&w=majority';
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/test';
+  if (!uri.includes('mongodb://')) {
+    throw new Error('MONGODB_URI environment variable not set or invalid');
+  }
   
   try {
     await mongoose.connect(uri);

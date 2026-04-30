@@ -2,8 +2,8 @@
  * Creates a test EMPLOYEE account for CV upload testing
  * Usage (from backend folder): node scripts/seed-test-employee.cjs
  */
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 

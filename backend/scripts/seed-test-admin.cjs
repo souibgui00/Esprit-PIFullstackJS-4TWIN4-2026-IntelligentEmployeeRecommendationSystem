@@ -4,8 +4,8 @@
  * Upserts test ADMIN account directly in MongoDB
  * Usage (from backend folder): node scripts/seed-test-admin.cjs
  */
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
