@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// Safe, linear-time email validation regex
+const isValidEmail = (email) =>
+  typeof email === 'string' &&
+  email.length <= 254 &&
+  /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email);
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
