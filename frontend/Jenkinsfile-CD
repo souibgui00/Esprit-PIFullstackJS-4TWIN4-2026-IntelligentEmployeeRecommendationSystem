@@ -1,61 +1,65 @@
 pipeline {
     agent any
+
     environment {
-        KUBECONFIG  = '/var/lib/jenkins/.kube/config'
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
         IMAGE_NAME  = 'mon-frontend'
         IMAGE_TAG   = "${BUILD_NUMBER}"
         DEPLOY_NAME = 'frontend-deployment'
         NAMESPACE   = 'default'
     }
+
     stages {
+
         stage('📥 Checkout') {
             steps {
                 checkout scm
             }
         }
+
         stage('🔨 Build Image') {
             steps {
-                dir('frontend') {
-                    sh '''
-                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
-                    '''
-                }
+                sh '''
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker tag  ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                '''
             }
         }
+
         stage('🐳 Import Image to Containerd') {
             steps {
                 sh '''
                     docker save ${IMAGE_NAME}:${IMAGE_TAG} -o /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
                     sudo ctr -n k8s.io images import /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
-                    sudo ctr -n k8s.io images tag \
-                        docker.io/library/${IMAGE_NAME}:${IMAGE_TAG} \
-                        docker.io/library/${IMAGE_NAME}:latest || true
                     rm -f /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
                 '''
             }
         }
+
         stage('🚀 Deploy to Kubernetes') {
             steps {
                 sh '''
-                    kubectl apply -f k8s/frontend-deployment.yaml -n ${NAMESPACE} --validate=false
+                    # Update image tag in deployment
                     kubectl set image deployment/${DEPLOY_NAME} \
                         frontend=${IMAGE_NAME}:${IMAGE_TAG} \
                         -n ${NAMESPACE}
+
                     kubectl rollout status deployment/${DEPLOY_NAME} \
-                        --timeout=180s -n ${NAMESPACE}
+                        --timeout=120s -n ${NAMESPACE}
                 '''
             }
         }
+
         stage('🔎 Verify Deployment') {
             steps {
                 sh '''
-                    kubectl get pods -l app=frontend -n ${NAMESPACE} -o wide
+                    kubectl get pods -l app=frontend -n ${NAMESPACE}
                     kubectl get services -n ${NAMESPACE}
-                    kubectl logs deployment/${DEPLOY_NAME} -n ${NAMESPACE} --tail=20
                 '''
             }
         }
     }
+
     post {
         success {
             echo "✅ Frontend deployed successfully — build #${BUILD_NUMBER}"
@@ -63,16 +67,13 @@ pipeline {
         failure {
             echo '❌ Deployment failed — rolling back...'
             sh '''
-                kubectl rollout undo deployment/${DEPLOY_NAME} -n ${NAMESPACE} || true
-                kubectl get pods -l app=frontend -n ${NAMESPACE}
-                kubectl logs deployment/${DEPLOY_NAME} -n ${NAMESPACE} --tail=30 || true
+                kubectl rollout undo deployment/${DEPLOY_NAME} \
+                    -n ${NAMESPACE} || true
             '''
         }
         always {
-            sh '''
-                docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true
-                docker rmi ${IMAGE_NAME}:latest || true
-            '''
+            // Clean up local Docker image to save disk space
+            sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
         }
     }
 }

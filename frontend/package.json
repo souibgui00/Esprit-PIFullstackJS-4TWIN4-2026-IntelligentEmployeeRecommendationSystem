@@ -21,6 +21,7 @@
     "scan": "unlighthouse --site http://localhost:4173"
   },
   "dependencies": {
+    "axios": "^1.6.0",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
