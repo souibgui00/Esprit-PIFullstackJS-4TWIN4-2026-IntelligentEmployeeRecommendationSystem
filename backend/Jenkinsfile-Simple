@@ -2,93 +2,118 @@ pipeline {
     agent any
 
     environment {
-        NODE_OPTIONS = "--max-old-space-size=4096"
-        SONAR_HOST_URL = "http://100.105.57.78:9000"
+        NODE_OPTIONS    = "--max-old-space-size=4096"
+        SONAR_HOST_URL  = "http://100.105.57.78:9000"
         SONAR_PROJECT_KEY = "employee-recommendation-backend"
     }
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+    }
+
     stages {
+
+        // ── 1. Checkout ──────────────────────────────────────
         stage('📥 Checkout') {
             steps {
                 checkout scm
-                echo '✅ Code checkout completed'
+                echo "✅ Code checked out — Branch: ${env.GIT_BRANCH}"
             }
         }
 
+        // ── 2. Setup & verify environment ────────────────────
         stage('🔧 Setup') {
             steps {
                 dir('backend') {
                     sh '''
-                        echo "🔍 Node version: $(node --version)"
-                        echo "🔍 NPM version: $(npm --version)"
-                        echo "🔍 Current directory: $(pwd)"
-                        echo "🔍 List files:"
+                        echo "Node: $(node --version)"
+                        echo "NPM:  $(npm --version)"
+                        echo "PWD:  $(pwd)"
                         ls -la
                     '''
                 }
             }
         }
 
+        // ── 3. Install dependencies ───────────────────────────
         stage('📦 Install Dependencies') {
             steps {
                 dir('backend') {
                     sh '''
                         echo "📦 Installing dependencies..."
-                        npm ci --prefer-offline --no-audit --no-fund || npm install --legacy-peer-deps
+                        npm ci --prefer-offline --no-audit --no-fund \
+                            || npm install --legacy-peer-deps
+                        echo "✅ Dependencies installed"
                     '''
                 }
             }
         }
 
-        stage('🧪 Run Tests') {
+        // ── 4. Run tests + generate coverage ─────────────────
+        //    MUST come BEFORE SonarQube stage
+        stage('🧪 Run Tests & Coverage') {
             steps {
                 dir('backend') {
                     sh '''
                         echo "🧪 Running tests with coverage..."
-                        npm run test:cov || {
-                            echo "❌ Tests failed, checking what went wrong..."
-                            npm run test:cov -- --verbose
-                            exit 1
-                        }
-                        
-                        echo "🔍 Checking coverage results..."
+                        npm run test:cov
+
+                        echo ""
+                        echo "🔍 Checking coverage output..."
                         if [ -d "coverage" ]; then
-                            echo "✅ Coverage directory found"
+                            echo "✅ Coverage directory found:"
                             ls -la coverage/
                             if [ -f "coverage/lcov.info" ]; then
-                                echo "✅ LCOV file found"
-                                echo "📊 Coverage summary:"
-                                tail -5 coverage/lcov.info
+                                echo "✅ lcov.info generated"
+                                TOTAL_LF=$(grep "^LF:" coverage/lcov.info | awk -F: \'{sum+=$2} END {print sum}\')
+                                TOTAL_LH=$(grep "^LH:" coverage/lcov.info | awk -F: \'{sum+=$2} END {print sum}\')
+                                echo "📊 Lines Found: $TOTAL_LF"
+                                echo "📊 Lines Hit:   $TOTAL_LH"
+                                if [ "$TOTAL_LF" -gt 0 ]; then
+                                    PCT=$(awk "BEGIN {printf \\"%.2f\\", ($TOTAL_LH/$TOTAL_LF)*100}")
+                                    echo "📈 Coverage:    ${PCT}%"
+                                fi
                             else
-                                echo "❌ LCOV file not found"
-                                ls -la coverage/
+                                echo "❌ lcov.info NOT found — SonarQube will show 0% coverage!"
+                                exit 1
                             fi
                         else
-                            echo "❌ No coverage directory"
+                            echo "❌ No coverage directory found"
+                            exit 1
                         fi
                     '''
                 }
             }
         }
 
+        // ── 5. SonarQube Analysis ─────────────────────────────
+        //    AFTER tests so lcov.info exists
         stage('🔍 SonarQube Analysis') {
             steps {
                 dir('backend') {
                     sh '''
                         echo "🔍 Starting SonarQube analysis..."
-                        if [ -f "coverage/lcov.info" ]; then
-                            sonar-scanner \
-                                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                                -Dsonar.projectName="Employee Recommendation Backend" \
-                                -Dsonar.sources=src \
-                                -Dsonar.tests=test \
-                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                -Dsonar.host.url=${SONAR_HOST_URL} \
-                                -Dsonar.login=${SONAR_AUTH_TOKEN}
-                        else
-                            echo "❌ No coverage file found, skipping SonarQube analysis"
+
+                        # Double-check coverage file exists
+                        if [ ! -f "coverage/lcov.info" ]; then
+                            echo "❌ coverage/lcov.info not found — aborting Sonar scan"
                             exit 1
                         fi
+
+                        sonar-scanner \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.projectName="Employee Recommendation Backend" \
+                            -Dsonar.sources=src \
+                            -Dsonar.tests=src \
+                            -Dsonar.test.inclusions="**/*.spec.ts,**/*.test.ts" \
+                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.token=${SONAR_AUTH_TOKEN}
+
+                        echo "✅ SonarQube analysis completed"
                     '''
                 }
             }
@@ -100,10 +125,10 @@ pipeline {
             echo '🏁 Pipeline completed'
         }
         success {
-            echo '✅ All stages completed successfully'
+            echo '✅ All stages passed'
         }
         failure {
-            echo '❌ Pipeline failed - check logs above'
+            echo '❌ Pipeline failed — check logs above'
         }
     }
 }
