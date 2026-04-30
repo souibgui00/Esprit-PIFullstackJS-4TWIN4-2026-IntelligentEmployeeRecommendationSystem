@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from '../../contexts/AuthContext';
 import LoginForm from '../LoginForm';
 
 // Mock the API service
@@ -11,9 +12,11 @@ jest.mock('../../services/api', () => ({
 
 const renderWithProviders = (component) => {
   return render(
-    <BrowserRouter>
-      {component}
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        {component}
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 
