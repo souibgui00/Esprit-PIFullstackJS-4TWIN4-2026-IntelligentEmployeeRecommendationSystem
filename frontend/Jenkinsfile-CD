@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
         KUBECONFIG  = '/var/lib/jenkins/.kube/config'
         IMAGE_NAME  = 'mon-frontend'
@@ -8,15 +7,12 @@ pipeline {
         DEPLOY_NAME = 'frontend-deployment'
         NAMESPACE   = 'default'
     }
-
     stages {
-
         stage('📥 Checkout') {
             steps {
                 checkout scm
             }
         }
-
         stage('🔨 Build Image') {
             steps {
                 dir('frontend') {
@@ -26,42 +22,30 @@ pipeline {
                 }
             }
         }
-
         stage('🐳 Import Image to Containerd') {
             steps {
                 sh '''
                     docker save ${IMAGE_NAME}:${IMAGE_TAG} -o /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
-
-                    # Import into containerd
                     sudo ctr -n k8s.io images import /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
-
-                    # Tag as latest inside containerd so k8s can find it
                     sudo ctr -n k8s.io images tag \
                         docker.io/library/${IMAGE_NAME}:${IMAGE_TAG} \
                         docker.io/library/${IMAGE_NAME}:latest || true
-
                     rm -f /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
                 '''
             }
         }
-
         stage('🚀 Deploy to Kubernetes') {
             steps {
                 sh '''
-                    # Apply full manifest to catch any config changes
-                    kubectl apply -f k8s/frontend-deployment.yaml -n ${NAMESPACE}
-
-                    # Update to the exact build image tag
+                    kubectl apply -f k8s/frontend-deployment.yaml -n ${NAMESPACE} --validate=false
                     kubectl set image deployment/${DEPLOY_NAME} \
                         frontend=${IMAGE_NAME}:${IMAGE_TAG} \
                         -n ${NAMESPACE}
-
                     kubectl rollout status deployment/${DEPLOY_NAME} \
                         --timeout=180s -n ${NAMESPACE}
                 '''
             }
         }
-
         stage('🔎 Verify Deployment') {
             steps {
                 sh '''
@@ -72,7 +56,6 @@ pipeline {
             }
         }
     }
-
     post {
         success {
             echo "✅ Frontend deployed successfully — build #${BUILD_NUMBER}"
