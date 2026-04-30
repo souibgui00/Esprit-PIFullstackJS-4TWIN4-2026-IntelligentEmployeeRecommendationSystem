@@ -44,7 +44,8 @@ pipeline {
                 dir('frontend') {
                     sh '''/opt/sonar-scanner/bin/sonar-scanner \
                         -Dsonar.projectKey=frontend \
-                        -Dsonar.sources=. \
+                        -Dsonar.sources=app,components,lib,src \
+                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.vite/**,**/coverage/**,**/.scannerwork/**,**/public/**,**/*.json,**/*.md,**/*.yml,**/*.yaml,**/*.lock \
                         -Dsonar.host.url=http://localhost:9000 \
                         -Dsonar.login=squ_3638fe03cb73ea0e15f747beb004d1493dafa066'''
                 }
