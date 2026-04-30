@@ -34,11 +34,27 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
+                        echo '🔍 Verifying coverage file exists...'
+                        if [ -f "coverage/lcov.info" ]; then
+                            echo '✅ Coverage file found'
+                            echo '📊 Coverage summary:'
+                            cat coverage/lcov.info | grep -E "LF:|LH:" | tail -2
+                        else
+                            echo '❌ Coverage file not found'
+                            echo '📁 Available files:'
+                            ls -la coverage/ || echo 'No coverage directory'
+                            exit 1
+                        fi
+                        
                         echo '🔍 Starting SonarQube analysis...'
                         /opt/sonar-scanner/bin/sonar-scanner \\
                             -Dsonar.projectKey=${SONAR_PROJECT_KEY} \\
                             -Dsonar.projectName=Employee Recommendation Backend \\
                             -Dsonar.sources=src \\
+                            -Dsonar.tests=test \\
+                            -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts \\
+                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
+                            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \\
                             -Dsonar.host.url=${SONAR_HOST_URL} \\
                             -Dsonar.login=${SONAR_AUTH_TOKEN}
                     '''
