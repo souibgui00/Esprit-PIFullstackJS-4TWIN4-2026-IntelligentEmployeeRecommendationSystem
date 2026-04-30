@@ -163,9 +163,13 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /departments/i })).toBeInTheDocument();
       expect(screen.getByText(/engineering/i)).toBeInTheDocument();
-      expect(screen.getByText(/25 employees/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) =>
+        element?.tagName === 'DIV' && content.includes('Engineering') && content.includes('25 employees')
+      )).toBeInTheDocument();
       expect(screen.getByText(/hr/i)).toBeInTheDocument();
-      expect(screen.getByText(/5 employees/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) =>
+        element?.tagName === 'DIV' && content.includes('HR') && content.includes('5 employees')
+      )).toBeInTheDocument();
     });
   });
 

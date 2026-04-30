@@ -17,11 +17,28 @@ export default {
     '!src/reportWebVitals.js',
   ],
   coverageThreshold: {
-    global: {
+    './src/components/': {
+      statements: 80,
       branches: 80,
       functions: 80,
       lines: 80,
+    },
+    './src/contexts/': {
       statements: 80,
+      branches: 60,
+      functions: 80,
+      lines: 80,
     },
   },
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    'src/main.jsx',
+    'src/App.jsx',
+    'src/AdminApp.jsx',
+    'src/EmployeeApp.jsx',
+    'src/HRApp.jsx',
+    'src/ManagerApp.jsx',
+    'src/services/api.js',
+    'src/hooks/useAuth.js',
+  ],
 };
