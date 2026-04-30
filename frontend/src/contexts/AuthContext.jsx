@@ -12,8 +12,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const stored = sessionStorage.getItem('user');
     const token = sessionStorage.getItem('access_token');
-    if (stored && token) {
-      setUser(JSON.parse(stored));
+    if (stored && stored !== 'undefined' && token) {
+      try {
+        setUser(JSON.parse(stored));
+      } catch (e) {
+        sessionStorage.removeItem('user');
+      }
     }
   }, []);
 
