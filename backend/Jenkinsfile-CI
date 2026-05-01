@@ -6,6 +6,7 @@ pipeline {
     }
 
     stages {
+
         stage('📥 Checkout') {
             steps {
                 checkout scm
@@ -14,7 +15,7 @@ pipeline {
 
         stage('📦 Install') {
             steps {
-                dir('backend') {
+                dir('frontend') {
                     retry(3) {
                         sh 'npm install --prefer-offline --fetch-timeout=600000'
                     }
@@ -24,41 +25,38 @@ pipeline {
 
         stage('🧪 Tests') {
             steps {
-                dir('backend') {
-                    // Ignore E2E tests in CI to avoid database connection issues
-                    sh 'npm run test:cov -- --testPathIgnorePatterns="e2e-spec.ts"'
+                dir('frontend') {
+                    sh 'npm test -- --watchAll=false --coverage'
                 }
             }
         }
 
         stage('🏗️ Build') {
             steps {
-                dir('backend') {
-                    sh 'npm run build'
+                dir('frontend') {
+                    sh 'npx vite build'
                 }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                dir('backend') {
+                dir('frontend') {
                     sh '''/opt/sonar-scanner/bin/sonar-scanner \
-                        -Dsonar.projectKey=backend \
-                        -Dsonar.sources=src \
+                        -Dsonar.projectKey=frontend \
+                        -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=squ_3638fe03cb73ea0e15f747beb004d1493dafa066 \
-                        -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
-                        -Dsonar.testExecutionReportPaths=test-report.xml || true'''
+                        -Dsonar.login=squ_3638fe03cb73ea0e15f747beb004d1493dafa066'''
                 }
             }
         }
 
         stage('🐳 Docker Build') {
             steps {
-                dir('backend') {
+                dir('frontend') {
                     sh '''
-                        docker build -t mon-backend:${BUILD_NUMBER} .
-                        docker tag mon-backend:${BUILD_NUMBER} mon-backend:latest
+                        docker build -t mon-frontend:${BUILD_NUMBER} .
+                        docker tag mon-frontend:${BUILD_NUMBER} mon-frontend:latest
                     '''
                 }
             }
@@ -72,7 +70,7 @@ pipeline {
                         --exit-code 0 \
                         --severity HIGH,CRITICAL \
                         --format table \
-                        mon-backend:${BUILD_NUMBER}
+                        mon-frontend:${BUILD_NUMBER}
                 '''
             }
             post {
@@ -83,10 +81,10 @@ pipeline {
                             --exit-code 0 \
                             --severity HIGH,CRITICAL \
                             --format json \
-                            --output trivy-backend-report.json \
-                            mon-backend:${BUILD_NUMBER}
+                            --output trivy-frontend-report.json \
+                            mon-frontend:${BUILD_NUMBER}
                     '''
-                    archiveArtifacts artifacts: 'trivy-backend-report.json', fingerprint: true
+                    archiveArtifacts artifacts: 'trivy-frontend-report.json', fingerprint: true
                 }
             }
         }
@@ -94,9 +92,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Backend CI completed successfully!'
-            // Trigger Backend CD job
-            build job: 'CD-Backend', wait: false
+            build job: 'CD-Frontend', wait: false
         }
     }
 }

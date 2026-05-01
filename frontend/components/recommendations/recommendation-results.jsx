@@ -246,22 +246,7 @@ export default function RecommendationResults({
                       {rec.recommendation_reason && (
                         <div className="flex items-start gap-2 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                           <Brain className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
-                          <p className="text-sm font-medium text-slate-700 leading-snug">
-                            {(() => {
-                               let reason = rec.recommendation_reason;
-                               const gaps = rec.skillGaps || rec.gap || [];
-                               if (Array.isArray(gaps)) {
-                                 gaps.forEach(g => {
-                                   if (g.skillId) {
-                                     const actualSkill = skills?.find(s => s.id === g.skillId || s._id === g.skillId);
-                                     const name = actualSkill?.name || g.skillName;
-                                     if (name) reason = reason.replace(g.skillId, name);
-                                   }
-                                 });
-                               }
-                               return reason;
-                            })()}
-                          </p>
+                          <p className="text-sm font-medium text-slate-700 leading-snug">{rec.recommendation_reason}</p>
                         </div>
                       )}
                       <div className="flex items-start gap-2 text-slate-400">
@@ -272,7 +257,7 @@ export default function RecommendationResults({
                           <ul className="list-disc pl-4 marker:text-slate-300 space-y-1">
                             {(rec.skillGaps || rec.gap).map((g, idx) => {
                                const actualSkill = skills?.find(s => s.id === g.skillId || s._id === g.skillId);
-                               const sName = actualSkill?.name || g.skillName || "Unknown Skill";
+                               const sName = actualSkill?.name || g.skillName || g.skillId || "Unknown";
                                return (
                                  <li key={idx} className="flex flex-col">
                                    <span className="font-medium text-slate-800">{sName}</span>

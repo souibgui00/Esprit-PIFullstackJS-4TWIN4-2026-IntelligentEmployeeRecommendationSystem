@@ -388,16 +388,6 @@ def _analyze_single(text: str) -> SentimentResponse:
 # API Endpoints
 # ──────────────────────────────────────────────────────────────────────────────
 
-@app.get("/")
-def root():
-    return {
-        "message": "NLP Recommendation Service is LIVE",
-        "docs": "/docs",
-        "health": "/health",
-        "version": "4.0.0",
-        "status": "online"
-    }
-
 @app.get("/health")
 def health():
     return {

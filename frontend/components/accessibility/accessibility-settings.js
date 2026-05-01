@@ -9,11 +9,6 @@ export const defaultAccessibilitySettings = {
   readingGuide: false,
   focusHighlight: false,
   letterSpacing: false,
-  hoverRead: false,
-  highlightLinks: false,
-  largeCursor: false,
-  lineHeight: false,
-  focusMask: false,
 }
 
 export const FONT_LABELS = ["Sm", "Norm", "Lg", "XL", "2XL"]
@@ -59,9 +54,4 @@ export function applyAccessibilitySettings(settings) {
   toggleClass("a11y-reading-guide", settings.readingGuide)
   toggleClass("a11y-focus-highlight", settings.focusHighlight)
   toggleClass("a11y-letter-spacing", settings.letterSpacing)
-  toggleClass("a11y-hover-read", settings.hoverRead)
-  toggleClass("a11y-highlight-links", settings.highlightLinks)
-  toggleClass("a11y-large-cursor", settings.largeCursor)
-  toggleClass("a11y-line-height", settings.lineHeight)
-  toggleClass("a11y-focus-mask", settings.focusMask)
 }

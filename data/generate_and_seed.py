@@ -22,13 +22,8 @@ from pymongo.errors import BulkWriteError
 # ══════════════════════════════════════════════════════════════
 # CONFIG — modifie ici si besoin
 # ══════════════════════════════════════════════════════════════
-# Attempt to load from .env first
-from dotenv import load_dotenv
-import os
-load_dotenv(os.path.join(os.path.dirname(__file__), "../backend/.env"))
-
-MONGO_URI = os.getenv("MONGODB_URI") or "mongodb://localhost:27017/test"
-DB_NAME   = "test"
+MONGO_URI = "mongodb+srv://mohamedaminesouibgui_db_user:232JMT4753@pi.nwdrgwz.mongodb.net/"
+DB_NAME   = "pi"
 DATASET   = "dataset.xlsx"          # fichier dataset dans le même dossier
 PASSWORD_HASH = "$2b$10$Y1Q9tdCgdR.OSl2pHrlRUuIsI16VojYyIhpfE/2Fjl7M..JiHtkLe"  # "Admin1234!" hashé bcrypt
 
@@ -180,7 +175,7 @@ print(f"  {len(df)} lignes, {df['Matricule'].nunique()} employés uniques")
 
 # Une ligne par employé (première occurrence)
 emp_df = df.drop_duplicates('Matricule').copy()
-emp_df['Date_Embauche'] = pd.to_datetime(emp_df['Date_Embauche'], errors='coerce')
+emp_df['Date Embauche'] = pd.to_datetime(emp_df['Date Embauche'], errors='coerce')
 
 # ══════════════════════════════════════════════════════════════
 # ÉTAPE 2 — Générer les USERS
@@ -222,9 +217,9 @@ for _, row in emp_df.iterrows():
     uid         = oid()
     matricule   = str(row['Matricule'])
     name        = str(row['Name'])
-    dept_code   = str(row['Dept_Code'])
+    dept_code   = str(row['Department Code'])
     statut      = str(row['Statut']).lower() if pd.notna(row['Statut']) else 'active'
-    hire_date   = row['Date_Embauche'] if pd.notna(row['Date_Embauche']) else rand_date()
+    hire_date   = row['Date Embauche'] if pd.notna(row['Date Embauche']) else rand_date()
     dept_id_str = DEPT_CODE_MAP.get(dept_code, "69a908ca99f13c1d9ce26139")
 
     # email: prénom.nom@company.com

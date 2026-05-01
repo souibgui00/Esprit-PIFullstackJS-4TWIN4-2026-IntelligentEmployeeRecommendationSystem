@@ -380,7 +380,7 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* High Contrast Mode - More refined than just * override */
+/* High Contrast Mode */
 .a11y-high-contrast {
   --color-background: #000000;
   --color-foreground: #ffffff;
@@ -397,12 +397,9 @@ html {
   --color-border: #ffffff;
   --color-primary: #ffff00;
   --color-primary-dark: #ffff00;
-  --theme-accent: #ffff00;
-  --theme-content-bg: #000000;
-  --theme-sidebar-bg: #000000;
 }
 
-.a11y-high-contrast :not(.a11y-widget-panel *) {
+.a11y-high-contrast * {
   background-color: var(--color-background) !important;
   color: var(--color-foreground) !important;
   border-color: var(--color-border) !important;
@@ -415,23 +412,15 @@ html {
 .a11y-high-contrast .nav-item.active {
   background: var(--color-primary) !important;
   color: #000000 !important;
-  outline: 2px solid #ffffff;
-  font-weight: 900 !important;
+  outline: 2px solid #000000;
 }
 
 /* Grayscale Mode */
 .a11y-grayscale {
-  filter: grayscale(100%) contrast(1.1) !important;
+  filter: grayscale(100%) !important;
 }
 
 /* Dyslexic Font Mode */
-@font-face {
-  font-family: 'OpenDyslexic';
-  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/dist/external/OpenDyslexic-Regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
 .a11y-dyslexic {
   --font-sans: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
   --font-display: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
@@ -463,67 +452,36 @@ html {
   line-height: 1.8 !important;
 }
 
-/* Highlight Links Mode */
-.a11y-highlight-links a, 
-.a11y-highlight-links button:not(.a11y-widget-panel *) {
-  text-decoration: underline 3px var(--color-primary) !important;
-  text-underline-offset: 4px !important;
-  outline: 2px solid var(--color-primary) !important;
-  outline-offset: 2px !important;
-  background-color: rgba(242, 140, 27, 0.05) !important;
-}
-
-/* Large Cursor Mode */
-.a11y-large-cursor * {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='black' stroke='white' stroke-width='1.5'%3E%3Cpath d='M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z'/%3E%3C/svg%3E"), auto !important;
-}
-
-/* Line Height Mode */
-.a11y-line-height * {
-  line-height: 2 !important;
-}
-
-/* Focus Mask Mode Overlay Style */
-.a11y-focus-mask-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99990;
-  pointer-events: none;
-  background: rgba(0, 0, 0, 0.85);
-  transition: clip-path 0.15s ease-out;
-}
-
 /* Reading Guide Helper */
 .a11y-reading-guide-line {
   pointer-events: none;
   position: fixed;
   left: 0;
   right: 0;
-  height: 30px;
-  background: rgba(242, 140, 27, 0.15);
-  border-top: 2px solid var(--color-primary);
-  border-bottom: 2px solid var(--color-primary);
+  height: 4px;
+  background: var(--color-primary);
   z-index: 99999;
-  box-shadow: 0 0 30px rgba(242, 140, 27, 0.2);
-  transition: top 0.1s ease-out;
+  box-shadow: 0 0 15px var(--color-primary);
+  opacity: 0.6;
 }
 
-/* Custom Scrollbar Utility */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
   border-radius: 10px;
 }
 
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(242, 140, 27, 0.4);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
 }
 
 /* Page Load Animation */

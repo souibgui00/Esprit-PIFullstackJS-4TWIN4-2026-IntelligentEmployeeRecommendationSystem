@@ -1,4 +1,3 @@
-// Maghrebia Enterprise Platform - Main Entry Point
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { useState, useEffect, lazy, Suspense } from "react"
@@ -695,7 +694,7 @@ function AppContent() {
 
     return (
         <>
-            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <a href="#main-content" className="skip-link">Aller au contenu principal</a>
             <Suspense fallback={null}>
                 <AccessibilityWidget />
             </Suspense>

@@ -1,4 +1,3 @@
-// Accessibility System v1.1 - Optimized for Focus Mode and Screen Reading
 import { useState, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 import {
@@ -13,11 +12,6 @@ import {
     ScanLine,
     Space,
     RotateCcw,
-    Volume2,
-    MousePointer2,
-    Link as LinkIcon,
-    Baseline,
-    Target,
 } from "lucide-react"
 import {
     applyAccessibilitySettings,
@@ -31,11 +25,10 @@ import {
 export function AccessibilityWidget() {
     const [open, setOpen] = useState(false)
     const [settings, setSettings] = useState(() => loadAccessibilitySettings())
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+    const [guideY, setGuideY] = useState(-100)
     const panelRef = useRef(null)
     const toggleRef = useRef(null)
     const restoreFocusRef = useRef(null)
-    const speechRef = useRef(null)
 
     useEffect(() => {
         applyAccessibilitySettings(settings)
@@ -52,58 +45,12 @@ export function AccessibilityWidget() {
         return () => window.removeEventListener("storage", onStorage)
     }, [])
 
-    // Global Mouse Tracking for Reading Guide and Focus Mask
     useEffect(() => {
-        if (!settings.readingGuide && !settings.focusMask) return
-        const handler = (e) => {
-            requestAnimationFrame(() => {
-                setMousePos({ x: e.clientX, y: e.clientY })
-            })
-        }
+        if (!settings.readingGuide) return
+        const handler = (e) => setGuideY(e.clientY)
         window.addEventListener("mousemove", handler)
         return () => window.removeEventListener("mousemove", handler)
-    }, [settings.readingGuide, settings.focusMask])
-
-    // Screen Reader (Hover Read) Logic
-    useEffect(() => {
-        if (!settings.hoverRead) {
-            window.speechSynthesis?.cancel()
-            return
-        }
-
-        const handleHover = (e) => {
-            const target = e.target
-            let text = target.innerText || target.getAttribute("aria-label") || target.alt
-            
-            if (text && text.length > 0) {
-                // Clean text: strip special characters and symbols for smoother reading
-                const cleanedText = text.replace(/[:/?;!@#$%^&*()_+={}\[\]|\\<>,.~`]/g, " ").trim()
-                
-                if (cleanedText && cleanedText !== speechRef.current) {
-                    window.speechSynthesis?.cancel()
-                    const utterance = new SpeechSynthesisUtterance(cleanedText)
-                    utterance.lang = "en-US"
-                    utterance.rate = 1.0
-                    utterance.pitch = 1.0
-                    window.speechSynthesis?.speak(utterance)
-                    speechRef.current = cleanedText
-                }
-            }
-        }
-
-        const handleLeave = () => {
-            window.speechSynthesis?.cancel()
-            speechRef.current = null
-        }
-
-        document.addEventListener("mouseover", handleHover)
-        document.addEventListener("mouseleave", handleLeave)
-        return () => {
-            document.removeEventListener("mouseover", handleHover)
-            document.removeEventListener("mouseleave", handleLeave)
-            window.speechSynthesis?.cancel()
-        }
-    }, [settings.hoverRead])
+    }, [settings.readingGuide])
 
     useEffect(() => {
         if (!open) return
@@ -153,42 +100,34 @@ export function AccessibilityWidget() {
 
     return (
         <>
-            {/* Focus Mask (Cognitive Accessibility) */}
-            {settings.focusMask && (
-                <div 
-                    className="a11y-focus-mask-overlay" 
-                    style={{ 
-                        clipPath: `circle(150px at ${mousePos.x}px ${mousePos.y}px)`
-                    }}
-                />
-            )}
-
             {settings.readingGuide && (
                 <div
-                    className="a11y-reading-guide-line"
-                    style={{ top: mousePos.y - 15 }}
-                />
+                    className="pointer-events-none fixed left-0 right-0 z-[99999]"
+                    style={{ top: guideY - 14, height: 28 }}
+                >
+                    <div className="w-full h-full bg-[#F28C1B]/10 border-y border-[#F28C1B]/30" />
+                </div>
             )}
 
             <button
                 ref={toggleRef}
                 onClick={() => setOpen((current) => !current)}
-                aria-label={open ? "Close accessibility settings" : "Open accessibility settings"}
+                aria-label="Open accessibility settings"
                 aria-controls="accessibility-panel"
                 aria-expanded={open}
                 className={cn(
-                    "a11y-widget-fixed-btn group transition-all duration-500",
+                    "a11y-widget-fixed-btn group transition-all duration-300",
                     open
-                        ? "bg-[#F28C1B] rotate-180 shadow-[0_0_30px_rgba(242,140,27,0.5)]"
-                        : "bg-[#222222] hover:bg-[#F28C1B] shadow-[0_10px_30px_rgba(34,34,34,0.3)] hover:shadow-[0_10px_30px_rgba(242,140,27,0.4)]"
+                        ? "bg-[#F28C1B] rotate-180 shadow-[#F28C1B]/40"
+                        : "bg-[#222222] hover:bg-[#F28C1B] shadow-[#222222]/30 hover:shadow-[#F28C1B]/30"
                 )}
             >
                 {open
                     ? <X className="w-6 h-6 text-white" />
                     : <PersonStanding className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
                 }
-                {hasAnyActive && !open && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#F28C1B] rounded-full border-[3px] border-white animate-bounce shadow-md" />
+                {hasAnyActive && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F28C1B] rounded-full border-2 border-white animate-pulse" />
                 )}
             </button>
 
@@ -196,226 +135,170 @@ export function AccessibilityWidget() {
                 ref={panelRef}
                 id="accessibility-panel"
                 role="dialog"
-                aria-modal="true"
+                aria-modal="false"
                 aria-label="Accessibility settings"
                 tabIndex={-1}
                 className={cn(
-                    "a11y-widget-panel fixed right-8 z-[9997] w-96 bg-white/95 backdrop-blur-xl border border-[#EEEEEE] rounded-3xl shadow-[0_30px_100px_rgba(0,0,0,0.15)] overflow-hidden transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1)",
+                    "fixed right-8 z-[9997] w-80 bg-white border border-[#EEEEEE] rounded-[4px] shadow-2xl shadow-[#222222]/10 overflow-hidden transition-all duration-500",
                     open
-                        ? "opacity-100 translate-y-0 pointer-events-auto scale-100"
-                        : "opacity-0 translate-y-12 pointer-events-none scale-95"
+                        ? "opacity-100 translate-y-0 pointer-events-auto"
+                        : "opacity-0 translate-y-4 pointer-events-none"
                 )}
-                style={{ bottom: "7rem" }}
+                style={{ bottom: "calc(7rem)" }}
             >
-                {/* Header */}
-                <div className="bg-[#222222] px-8 py-8 flex items-center justify-between relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#F28C1B]/10 rounded-full blur-3xl -mr-16 -mt-16" />
-                    <div className="relative z-10">
-                        <p className="text-[10px] font-bold text-[#F28C1B] uppercase tracking-[0.3em] mb-1">Assistive Interface</p>
-                        <h2 className="text-2xl font-black font-display text-white tracking-tight">
+                <div className="bg-[#222222] px-8 py-6 flex items-center justify-between">
+                    <div>
+                        <p className="text-[9px] font-bold text-[#F28C1B] tracking-[0.4em]">Assist Protocol</p>
+                        <h2 className="text-lg font-black font-display text-white tracking-tighter leading-tight">
                             Accessibility
                         </h2>
                     </div>
                     <button
                         onClick={reset}
                         title="Reset all settings"
-                        className="relative z-10 flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-gray-300 tracking-widest hover:bg-[#F28C1B] hover:text-white transition-all"
+                        className="flex items-center gap-2 text-[9px] font-bold text-gray-400 tracking-widest hover:text-[#F28C1B] transition-colors"
                     >
                         <RotateCcw className="w-3.5 h-3.5" />
-                        RESET
+                        Reset
                     </button>
                 </div>
 
-                <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar bg-gray-50/30">
-                    {/* Text Size Control */}
-                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-[#F28C1B]/10 flex items-center justify-center">
-                                    <Type className="w-4 h-4 text-[#F28C1B]" />
-                                </div>
-                                <span className="text-xs font-bold text-[#222222] tracking-wide">
-                                    Text Size
-                                </span>
-                            </div>
-                            <span className="text-[10px] font-black text-[#F28C1B] px-2 py-1 bg-[#F28C1B]/10 rounded-md">
+                <div className="p-6 space-y-3 max-h-[70vh] overflow-y-auto">
+                    <div className="bg-[#F8FAFC] border border-[#EEEEEE] rounded-[4px] p-5">
+                        <div className="flex items-center gap-3 mb-4">
+                            <Type className="w-4 h-4 text-[#F28C1B]" />
+                            <span className="text-[10px] font-black font-display text-[#222222] tracking-widest">
+                                Text Size
+                            </span>
+                            <span className="ml-auto text-[9px] font-bold text-[#F28C1B] tracking-widest ">
                                 {FONT_LABELS[settings.fontSize + 1]}
                             </span>
                         </div>
-                        
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                             <button
                                 onClick={() => update("fontSize", Math.max(-1, settings.fontSize - 1))}
                                 disabled={settings.fontSize <= -1}
-                                className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 text-[#222222] font-black text-lg flex items-center justify-center hover:bg-white hover:border-[#F28C1B] hover:text-[#F28C1B] transition-all disabled:opacity-20"
+                                className="w-8 h-8 rounded-[4px] bg-white border border-[#EEEEEE] text-[#222222] font-black text-sm hover:border-[#F28C1B] hover:text-[#F28C1B] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                 aria-label="Decrease text size"
                             >−</button>
-                            
-                            <div className="flex-1 flex gap-1.5 h-3">
+                            <div className="flex-1 flex gap-1">
                                 {FONT_LABELS.map((label, i) => (
                                     <button
                                         key={i}
                                         onClick={() => update("fontSize", i - 1)}
                                         className={cn(
-                                            "flex-1 rounded-full transition-all duration-300",
+                                            "flex-1 h-2 rounded-full transition-all",
                                             i <= settings.fontSize + 1
-                                                ? "bg-[#F28C1B] shadow-[0_0_10px_rgba(242,140,27,0.3)]"
-                                                : "bg-gray-200 hover:bg-gray-300"
+                                                ? "bg-[#F28C1B]"
+                                                : "bg-[#EEEEEE] hover:bg-[#F28C1B]/40"
                                         )}
                                         aria-label={`Set text size to ${label}`}
                                     />
                                 ))}
                             </div>
-                            
                             <button
                                 onClick={() => update("fontSize", Math.min(3, settings.fontSize + 1))}
                                 disabled={settings.fontSize >= 3}
-                                className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 text-[#222222] font-black text-lg flex items-center justify-center hover:bg-white hover:border-[#F28C1B] hover:text-[#F28C1B] transition-all disabled:opacity-20"
+                                className="w-8 h-8 rounded-[4px] bg-white border border-[#EEEEEE] text-[#222222] font-black text-sm hover:border-[#F28C1B] hover:text-[#F28C1B] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                 aria-label="Increase text size"
                             >+</button>
                         </div>
                     </div>
 
-                    {/* Feature Toggles */}
-                    <div className="grid gap-3">
-                        {[
-                            {
-                                key: "highContrast",
-                                icon: Contrast,
-                                label: "High Contrast",
-                                desc: "Sharp visibility for low vision",
-                            },
-                            {
-                                key: "focusMask",
-                                icon: Target,
-                                label: "Focus Mode",
-                                desc: "Highlight area around cursor",
-                            },
-                            {
-                                key: "hoverRead",
-                                icon: Volume2,
-                                label: "Screen Reader",
-                                desc: "Read text aloud on hover",
-                            },
-                            {
-                                key: "highlightLinks",
-                                icon: LinkIcon,
-                                label: "Highlight Links",
-                                desc: "Emphasize all clickable items",
-                            },
-                            {
-                                key: "largeCursor",
-                                icon: MousePointer2,
-                                label: "Large Cursor",
-                                desc: "High visibility mouse pointer",
-                            },
-                            {
-                                key: "lineHeight",
-                                icon: Baseline,
-                                label: "Line Spacing",
-                                desc: "Expand vertical text rhythm",
-                            },
-                            {
-                                key: "dyslexicFont",
-                                icon: AlignLeft,
-                                label: "Dyslexia Font",
-                                desc: "Easier reading typeface",
-                            },
-                            {
-                                key: "readingGuide",
-                                icon: ScanLine,
-                                label: "Reading Guide",
-                                desc: "Visual line focus tracker",
-                            },
-                            {
-                                key: "grayscale",
-                                icon: Eye,
-                                label: "Grayscale",
-                                desc: "Remove all color saturation",
-                            },
-                            {
-                                key: "reduceMotion",
-                                icon: ZapOff,
-                                label: "Reduce Motion",
-                                desc: "Stop all UI animations",
-                            },
-                            {
-                                key: "focusHighlight",
-                                icon: Move,
-                                label: "Focus Rings",
-                                desc: "Emphasize active elements",
-                            },
-                            {
-                                key: "letterSpacing",
-                                icon: Space,
-                                label: "Text Spacing",
-                                desc: "Expand word separation",
-                            },
-                        ].map(({ key, icon: Icon, label, desc }) => {
-                            const active = settings[key]
-                            return (
-                                <button
-                                    key={key}
-                                    onClick={() => toggle(key)}
-                                    className={cn(
-                                        "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 group",
-                                        active
-                                            ? "bg-[#222222] border-[#222222] shadow-md scale-[1.02]"
-                                            : "bg-white border-gray-100 hover:border-[#F28C1B]/30 hover:shadow-sm"
-                                    )}
-                                    aria-pressed={active}
-                                >
-                                    <div className={cn(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300",
-                                        active 
-                                            ? "bg-[#F28C1B] rotate-6" 
-                                            : "bg-gray-50 group-hover:bg-[#F28C1B]/10"
+                    {[
+                        {
+                            key: "highContrast",
+                            icon: Contrast,
+                            label: "High Contrast",
+                            desc: "Increases color contrast for better visibility",
+                        },
+                        {
+                            key: "grayscale",
+                            icon: Eye,
+                            label: "Grayscale",
+                            desc: "Removes all colors for color-blind users",
+                        },
+                        {
+                            key: "dyslexicFont",
+                            icon: AlignLeft,
+                            label: "Dyslexia Font",
+                            desc: "Switches to a dyslexia-friendly typeface",
+                        },
+                        {
+                            key: "reduceMotion",
+                            icon: ZapOff,
+                            label: "Reduce Motion",
+                            desc: "Disables animations and transitions",
+                        },
+                        {
+                            key: "readingGuide",
+                            icon: ScanLine,
+                            label: "Reading Guide",
+                            desc: "Highlights the line under your cursor",
+                        },
+                        {
+                            key: "focusHighlight",
+                            icon: Move,
+                            label: "Focus Highlight",
+                            desc: "Adds strong focus rings to all elements",
+                        },
+                        {
+                            key: "letterSpacing",
+                            icon: Space,
+                            label: "Letter Spacing",
+                            desc: "Increases spacing between letters and words",
+                        },
+                    ].map(({ key, icon: Icon, label, desc }) => {
+                        const active = settings[key]
+                        return (
+                            <button
+                                key={key}
+                                onClick={() => toggle(key)}
+                                className={cn(
+                                    "w-full flex items-start gap-4 p-5 rounded-[4px] border text-left transition-all group",
+                                    active
+                                        ? "bg-[#222222] border-[#222222] shadow-lg shadow-[#222222]/10"
+                                        : "bg-[#F8FAFC] border-[#EEEEEE] hover:border-[#F28C1B]/30 hover:bg-white"
+                                )}
+                                aria-pressed={active}
+                            >
+                                <div className={cn(
+                                    "w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0 transition-colors",
+                                    active ? "bg-[#F28C1B]" : "bg-[#EEEEEE] group-hover:bg-[#F28C1B]/10"
+                                )}>
+                                    <Icon className={cn("w-4 h-4", active ? "text-white" : "text-[#222222]")} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className={cn(
+                                        "text-[11px] font-black font-display tracking-widest leading-none mb-1",
+                                        active ? "text-white" : "text-[#222222]"
                                     )}>
-                                        <Icon className={cn("w-5 h-5", active ? "text-white" : "text-[#222222]")} />
-                                    </div>
-                                    <div className="flex-1 text-left min-w-0">
-                                        <p className={cn(
-                                            "text-xs font-black font-display tracking-tight mb-0.5",
-                                            active ? "text-white" : "text-[#222222]"
-                                        )}>
-                                            {label}
-                                        </p>
-                                        <p className="text-[10px] font-medium text-gray-400">
-                                            {desc}
-                                        </p>
-                                    </div>
-                                    
-                                    {/* Premium Switch UI */}
-                                    <div className={cn(
-                                        "w-10 h-5 rounded-full relative transition-all duration-500",
-                                        active ? "bg-[#F28C1B]" : "bg-gray-200"
-                                    )}>
-                                        <div className={cn(
-                                            "absolute top-1 w-3 h-3 rounded-full bg-white transition-all duration-500 shadow-sm",
-                                            active ? "left-6" : "left-1"
-                                        )} />
-                                    </div>
-                                </button>
-                            )
-                        })}
-                    </div>
+                                        {label}
+                                    </p>
+                                    <p className="text-[9px] font-medium leading-relaxed text-gray-400">
+                                        {desc}
+                                    </p>
+                                </div>
+                                <div className={cn(
+                                    "w-5 h-5 rounded-full border-2 shrink-0 mt-1 flex items-center justify-center transition-all",
+                                    active
+                                        ? "bg-[#F28C1B] border-[#F28C1B]"
+                                        : "border-[#EEEEEE] group-hover:border-[#F28C1B]/50"
+                                )}>
+                                    {active && <div className="w-2 h-2 rounded-full bg-white" />}
+                                </div>
+                            </button>
+                        )
+                    })}
                 </div>
 
-                {/* Footer */}
-                <div className="px-8 py-6 border-t border-gray-100 bg-white/50">
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                            WCAG 2.1 AAA Ready
-                        </p>
-                    </div>
-                    <p className="text-[9px] text-gray-400 text-center">
-                        Auto-applied to your current session
+                <div className="px-6 py-4 border-t border-[#EEEEEE] bg-[#F8FAFC]">
+                    <p className="text-[9px] font-bold text-gray-400 tracking-widest text-center">
+                        Settings saved automatically - WCAG 2.1 Compliant
                     </p>
                 </div>
             </div>
         </>
     )
 }
-
 

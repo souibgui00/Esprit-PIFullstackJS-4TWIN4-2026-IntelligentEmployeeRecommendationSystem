@@ -8,7 +8,6 @@ import { Model, Types } from 'mongoose';
 import { User } from '../users/schema/user.schema';
 import { Role } from '../common/enums/role.enum';
 import { Activity } from '../activities/schema/activity.schema';
-import { Skill } from '../skills/schema/skill.schema';
 import { ScoringService } from '../scoring/scoring.service';
 
 type CandidateSummary = {
@@ -37,8 +36,8 @@ export class PrioritizationService {
     private activityModel: Model<Activity>,
     @InjectModel('Participation')
     private participationModel: Model<any>,
-    @InjectModel(Skill.name)
-    private skillModel: Model<Skill>,
+    @InjectModel('Skill')
+    private skillModel: Model<any>,
     private scoringService: ScoringService,
   ) {}
 
@@ -191,15 +190,21 @@ export class PrioritizationService {
    * Identify skill gaps for an employee relative to activity requirements
    */
   async identifySkillGaps(userId: string, activityId: string): Promise<any[]> {
-    const user = await this.userModel.findById(userId).lean();
-    const activity = await this.activityModel.findById(activityId).lean();
+    // Use raw MongoDB queries — bypass Mongoose type casting
+    const db = this.userModel.db.db as any;
+    const user = await db
+      .collection('users')
+      .findOne({ _id: new (require('mongoose').Types.ObjectId)(userId) });
+    const activity = await db
+      .collection('activities')
+      .findOne({ _id: new (require('mongoose').Types.ObjectId)(activityId) });
 
     if (!user) throw new NotFoundException('User not found');
     if (!activity) throw new NotFoundException('Activity not found');
 
-    // Build user skill map
+    // Build user skill map — key = skillId as plain string
     const userSkillMap = new Map<string, any>();
-    for (const s of (user as any).skills || []) {
+    for (const s of user.skills || []) {
       const id = s.skillId?.toString().trim();
       if (id) userSkillMap.set(id, s);
     }
@@ -216,8 +221,10 @@ export class PrioritizationService {
       const reqSkillId = req.skillId?.toString().trim();
       if (!reqSkillId) continue;
 
-      // Use the injected skillModel for reliable lookups
-      const skillDoc = await this.skillModel.findById(reqSkillId).lean();
+      // Fetch skill name
+      const skillDoc = await db
+        .collection('skills')
+        .findOne({ _id: reqSkillId });
       const skillName = skillDoc?.name ?? reqSkillId;
 
       const userSkill = userSkillMap.get(reqSkillId);
