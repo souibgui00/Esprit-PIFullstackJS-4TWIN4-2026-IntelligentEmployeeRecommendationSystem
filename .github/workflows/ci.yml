@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: npm
           cache-dependency-path: |
             backend/package-lock.json
@@ -27,7 +27,7 @@ jobs:
         working-directory: backend
         run: |
           npm install --legacy-peer-deps
-          npm test
+          npm test -- --testPathIgnorePatterns="e2e-spec.ts"
 
       - name: Frontend - install
         working-directory: frontend

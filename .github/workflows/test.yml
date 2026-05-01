@@ -17,14 +17,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
 
       - name: Run Backend Tests
         working-directory: backend
         run: |
           echo "Running backend tests..."
           npm install --legacy-peer-deps
-          npm test -- --coverage --ci
+          # Ignore E2E tests to avoid database dependency
+          npm run test:cov -- --testPathIgnorePatterns="e2e-spec.ts" --ci
 
       - name: Upload Coverage Reports
         uses: actions/upload-artifact@v4
