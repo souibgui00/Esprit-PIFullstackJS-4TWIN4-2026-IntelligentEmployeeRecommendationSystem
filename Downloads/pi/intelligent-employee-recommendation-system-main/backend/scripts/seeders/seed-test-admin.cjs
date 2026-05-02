@@ -1,3 +1,0 @@
-// Déplacé depuis backend/scripts/seed-test-admin.cjs
-// Seeder admin
-// ...existing code...

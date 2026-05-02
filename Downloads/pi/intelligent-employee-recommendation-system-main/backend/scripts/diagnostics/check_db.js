@@ -1,3 +1,0 @@
-// Déplacé depuis backend/check_db.js
-// Script de diagnostic de la base de données
-// ...existing code...

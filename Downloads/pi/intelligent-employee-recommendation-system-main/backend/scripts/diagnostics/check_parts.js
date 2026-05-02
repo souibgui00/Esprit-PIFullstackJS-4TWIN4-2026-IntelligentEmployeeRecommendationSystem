@@ -1,3 +1,0 @@
-// Déplacé depuis backend/check_parts.js
-// Script de diagnostic des parties
-// ...existing code...

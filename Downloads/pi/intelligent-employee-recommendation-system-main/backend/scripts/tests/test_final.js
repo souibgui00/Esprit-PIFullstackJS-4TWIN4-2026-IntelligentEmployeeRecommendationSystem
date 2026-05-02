@@ -1,3 +1,0 @@
-// Déplacé depuis backend/test_final.js
-// Script de test final
-// ...existing code...
