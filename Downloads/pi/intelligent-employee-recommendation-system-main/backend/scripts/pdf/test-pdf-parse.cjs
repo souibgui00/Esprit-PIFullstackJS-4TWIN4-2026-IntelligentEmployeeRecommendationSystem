@@ -1,0 +1,3 @@
+// Déplacé depuis backend/scripts/test-pdf-parse.cjs
+// Test de parsing PDF
+// ...existing code...

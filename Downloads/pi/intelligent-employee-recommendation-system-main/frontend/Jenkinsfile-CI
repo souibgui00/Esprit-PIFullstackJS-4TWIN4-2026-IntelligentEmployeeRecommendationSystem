@@ -1,0 +1,147 @@
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+    }
+
+    tools {
+        nodejs 'NodeJS-20'
+    }
+
+    stages {
+
+        stage('📥 Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+<<<<<<< HEAD
+        stage('📦 Install') {
+            steps {
+                dir('frontend') {
+                    sh 'rm -rf node_modules'
+                    retry(3) {
+                        sh 'npm install --prefer-offline --fetch-timeout=600000 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000'
+                    }
+                }
+            }
+        }
+
+        stage('🧪 Tests') {
+            steps {
+                dir('frontend') {
+                    sh 'npm test -- --watchAll=false --coverage'
+                    sh 'sed -i "s|\\\\|/|g" coverage/lcov.info || true'
+                }
+            }
+        }
+=======
+       stage('📦 Install') {
+    steps {
+        dir('frontend') {
+            sh 'rm -rf node_modules'
+            retry(3) {
+                sh 'npm install --prefer-offline --fetch-timeout=600000 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000'
+            }
+        }
+    }
+}
+
+        stage('🧪 Tests') {
+    steps {
+        dir('frontend') {
+            sh 'npm test -- --watchAll=false --coverage'
+            sh 'tr "\\\\" "/" < coverage/lcov.info > coverage/lcov.info.tmp && mv coverage/lcov.info.tmp coverage/lcov.info'
+        }
+    }
+}
+>>>>>>> dd895aa (reverting old work)
+
+        stage('🏗️ Build') {
+            steps {
+                dir('frontend') {
+                    sh 'npx vite build'
+                }
+            }
+        }
+
+<<<<<<< HEAD
+        stage('🔍 SonarQube Analysis') {
+=======
+        stage('SonarQube Analysis') {
+>>>>>>> dd895aa (reverting old work)
+            steps {
+                dir('frontend') {
+                    sh '''/opt/sonar-scanner/bin/sonar-scanner \
+                        -Dsonar.projectKey=frontend \
+                        -Dsonar.sources=app,components,lib,src \
+                        -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/.vite/**,**/coverage/**,**/.scannerwork/**,**/public/**,**/*.json,**/*.md,**/*.yml,**/*.yaml,**/*.lock,**/components/ui/** \
+                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                        -Dsonar.coverage.exclusions=**/node_modules/**,**/dist/**,**/*.test.*,**/*.spec.*,**/components/ui/** \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.token=squ_3638fe03cb73ea0e15f747beb004d1493dafa066'''
+                }
+            }
+        }
+
+        stage('🐳 Docker Build') {
+            steps {
+                dir('frontend') {
+                    sh '''
+                        docker build -t mon-frontend:${BUILD_NUMBER} .
+                        docker tag mon-frontend:${BUILD_NUMBER} mon-frontend:latest
+                    '''
+                }
+            }
+        }
+
+<<<<<<< HEAD
+=======
+        stage('🔒 Trivy Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                        --cache-dir /var/lib/jenkins/.cache/trivy \
+                        --exit-code 0 \
+                        --severity HIGH,CRITICAL \
+                        --format table \
+                        mon-frontend:${BUILD_NUMBER}
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        trivy image \
+                            --cache-dir /var/lib/jenkins/.cache/trivy \
+                            --exit-code 0 \
+                            --severity HIGH,CRITICAL \
+                            --format json \
+                            --output trivy-frontend-report.json \
+                            mon-frontend:${BUILD_NUMBER}
+                    '''
+                    archiveArtifacts artifacts: 'trivy-frontend-report.json', fingerprint: true
+                }
+            }
+        }
+>>>>>>> dd895aa (reverting old work)
+    }
+
+    post {
+        success {
+            build job: 'CD-Frontend', wait: false
+        }
+<<<<<<< HEAD
+        always {
+            echo '🏁 Frontend CI pipeline completed'
+        }
+        failure {
+            echo '❌ Frontend CI pipeline failed'
+        }
+    }
+}
+=======
+    }
+}
+>>>>>>> dd895aa (reverting old work)

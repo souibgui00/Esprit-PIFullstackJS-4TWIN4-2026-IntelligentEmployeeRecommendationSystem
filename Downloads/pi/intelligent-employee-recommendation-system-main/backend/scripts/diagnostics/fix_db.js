@@ -1,0 +1,3 @@
+// Déplacé depuis backend/fix_db.js
+// Script de correction de la base de données
+// ...existing code...
