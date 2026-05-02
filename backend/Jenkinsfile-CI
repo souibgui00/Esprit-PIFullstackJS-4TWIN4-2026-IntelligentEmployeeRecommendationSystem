@@ -49,17 +49,7 @@ pipeline {
         stage('🔍 SonarQube Analysis') {
   steps {
     dir('backend') {
-      sh '''/opt/sonar-scanner/bin/sonar-scanner \
-          -Dsonar.projectKey=backend \
-          -Dsonar.projectName=backend \
-          -Dsonar.sources=src \
-          -Dsonar.tests=src \
-          -Dsonar.test.inclusions=**/*.spec.ts \
-          -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/*.spec.ts,**/coverage/** \
-          -Dsonar.javascript.lcov.reportPaths=$(pwd)/coverage/lcov.info \
-          -Dsonar.coverage.exclusions=**/*.spec.ts,**/*.module.ts,**/main.ts \
-          -Dsonar.host.url=http://localhost:9000 \
-          -Dsonar.token=squ_3638fe03cb73ea0e15f747beb004d1493dafa066'''
+      sh '/opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=squ_3638fe03cb73ea0e15f747beb004d1493dafa066'
     }
   }
 }
