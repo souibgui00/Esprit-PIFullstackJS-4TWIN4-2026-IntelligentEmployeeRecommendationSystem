@@ -8,7 +8,14 @@ pipeline {
         DEPLOY_NAME = 'frontend-deployment'
         NAMESPACE   = 'default'
     }
-
+stage('🔍 Debug') {
+    steps {
+        sh '''
+            echo "Workspace: $(pwd)"
+            find . -name Dockerfile
+        '''
+    }
+}
     stages {
 
         stage('📥 Checkout') {
