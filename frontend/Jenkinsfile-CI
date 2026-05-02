@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        disableConcurrentBuilds()
+    }
+
     tools {
         nodejs 'NodeJS-20'
     }
@@ -16,8 +20,8 @@ pipeline {
         stage('📦 Install') {
             steps {
                 dir('frontend') {
-                    sh 'npm cache clean --force'
                     sh 'rm -rf node_modules'
+                    sh 'npm cache clean --force'
                     retry(3) {
                         sh 'npm install --fetch-timeout=600000'
                     }
