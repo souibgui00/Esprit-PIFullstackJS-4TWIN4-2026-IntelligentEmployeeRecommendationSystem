@@ -169,4 +169,27 @@ export class PrioritizationService {
   resolveTies(candidates: any[]) {
     return candidates.sort((a: any, b: any) => (b.contextScore || 0) - (a.contextScore || 0));
   }
+
+  async weightSkillsByActivityImportance(activityId: string): Promise<any> {
+    const activity = await this.activityModel.findById(activityId).lean();
+    if (!activity) throw new Error('Activity not found');
+    
+    const requiredSkills = (activity as any).requiredSkills || [];
+    return requiredSkills.map((skill: any, index: number) => ({
+      skill,
+      weight: Math.max(1 - index * 0.1, 0.1),
+    }));
+  }
+
+  async getEmployeesBySkillLevel(activityId: string): Promise<any> {
+    const activity = await this.activityModel.findById(activityId).lean();
+    if (!activity) throw new Error('Activity not found');
+
+    const users = await this.userModel.find().select('-password').lean();
+    return {
+      beginner: users.filter((u: any) => u.rank === 'Junior'),
+      intermediate: users.filter((u: any) => u.rank === 'Mid'),
+      advanced: users.filter((u: any) => u.rank === 'Senior'),
+    };
+  }
 }
