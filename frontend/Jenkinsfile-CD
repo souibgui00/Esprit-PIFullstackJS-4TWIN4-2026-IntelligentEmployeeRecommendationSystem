@@ -8,14 +8,7 @@ pipeline {
         DEPLOY_NAME = 'frontend-deployment'
         NAMESPACE   = 'default'
     }
-stage('🔍 Debug') {
-    steps {
-        sh '''
-            echo "Workspace: $(pwd)"
-            find . -name Dockerfile
-        '''
-    }
-}
+
     stages {
 
         stage('📥 Checkout') {
@@ -23,17 +16,27 @@ stage('🔍 Debug') {
                 checkout scm
             }
         }
+
+        stage('🔍 Debug') {
+            steps {
+                sh '''
+                    echo "Workspace: $(pwd)"
+                    find . -name Dockerfile
+                '''
+            }
+        }
+
         stage('🔨 Build Image') {
-    steps {
-        sh '''
-            echo "Current directory: $(pwd)"
-            ls -la
-            ls -la frontend/
-            docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f frontend/Dockerfile frontend/
-            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
-        '''
-    }
-}
+            steps {
+                sh '''
+                    echo "Current directory: $(pwd)"
+                    ls -la
+                    ls -la frontend/
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f frontend/Dockerfile frontend/
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                '''
+            }
+        }
 
         stage('🐳 Import Image to Containerd') {
             steps {
@@ -51,7 +54,6 @@ stage('🔍 Debug') {
                     kubectl set image deployment/${DEPLOY_NAME} \
                         frontend=${IMAGE_NAME}:${IMAGE_TAG} \
                         -n ${NAMESPACE}
-
                     kubectl rollout status deployment/${DEPLOY_NAME} \
                         --timeout=120s -n ${NAMESPACE}
                 '''
