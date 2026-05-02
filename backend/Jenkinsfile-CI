@@ -106,43 +106,6 @@ pipeline {
             }
         }
 
-        stage('🔒 Trivy Scan') {
-            steps {
-                sh '''
-                    trivy image \
-                        --cache-dir /var/lib/jenkins/.cache/trivy \
-                        --exit-code 0 \
-                        --severity HIGH,CRITICAL \
-                        --format table \
-<<<<<<< HEAD
-                        mon-backend:${BUILD_NUMBER}
-=======
-                        mon-frontend:${BUILD_NUMBER}
->>>>>>> dd895aa (reverting old work)
-                '''
-            }
-            post {
-                always {
-                    sh '''
-                        trivy image \
-                            --cache-dir /var/lib/jenkins/.cache/trivy \
-                            --exit-code 0 \
-                            --severity HIGH,CRITICAL \
-                            --format json \
-<<<<<<< HEAD
-                            --output trivy-backend-report.json \
-                            mon-backend:${BUILD_NUMBER}
-                    '''
-                    archiveArtifacts artifacts: 'trivy-backend-report.json', fingerprint: true
-=======
-                            --output trivy-frontend-report.json \
-                            mon-frontend:${BUILD_NUMBER}
-                    '''
-                    archiveArtifacts artifacts: 'trivy-frontend-report.json', fingerprint: true
->>>>>>> dd895aa (reverting old work)
-                }
-            }
-        }
     }
 
     post {
