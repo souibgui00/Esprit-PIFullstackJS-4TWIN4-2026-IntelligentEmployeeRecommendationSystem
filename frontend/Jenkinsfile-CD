@@ -17,11 +17,19 @@ pipeline {
             }
         }
 
-        stage('🔍 Debug') {
+        stage('📋 Verify Checkout') {
             steps {
                 sh '''
-                    echo "Workspace: $(pwd)"
-                    find . -name Dockerfile
+                    echo "=== PWD ==="
+                    pwd
+                    echo "=== ROOT FILES ==="
+                    ls -la
+                    echo "=== FRONTEND FILES ==="
+                    ls -la frontend/ || echo "frontend/ does not exist"
+                    echo "=== GIT LOG ==="
+                    git log --oneline -5
+                    echo "=== JENKINSFILE-CD CONTENT ==="
+                    cat frontend/Jenkinsfile-CD
                 '''
             }
         }
@@ -29,9 +37,6 @@ pipeline {
         stage('🔨 Build Image') {
             steps {
                 sh '''
-                    echo "Current directory: $(pwd)"
-                    ls -la
-                    ls -la frontend/
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f frontend/Dockerfile frontend/
                     docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
                 '''
@@ -70,22 +75,6 @@ pipeline {
         }
 
     }
-    stage('📋 Verify Checkout') {
-    steps {
-        sh '''
-            echo "=== PWD ==="
-            pwd
-            echo "=== ROOT FILES ==="
-            ls -la
-            echo "=== FRONTEND FILES ==="
-            ls -la frontend/ || echo "frontend/ does not exist"
-            echo "=== GIT LOG ==="
-            git log --oneline -5
-            echo "=== JENKINSFILE-CD CONTENT ==="
-            cat frontend/Jenkinsfile-CD
-        '''
-    }
-}
 
     post {
         success {
