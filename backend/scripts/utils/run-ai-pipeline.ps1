@@ -1,3 +1,0 @@
-# Déplacé depuis scripts/run-ai-pipeline.ps1
-# Script PowerShell pour pipeline IA
-# ...existing code...

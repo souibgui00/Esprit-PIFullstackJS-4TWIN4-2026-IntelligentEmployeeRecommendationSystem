@@ -1,3 +1,0 @@
-// Déplacé depuis backend/test_atlas.js
-// Script de test Atlas
-// ...existing code...

@@ -1,3 +1,0 @@
-// Déplacé depuis scripts/db_audit.js
-// Script d’audit de base de données
-// ...existing code...

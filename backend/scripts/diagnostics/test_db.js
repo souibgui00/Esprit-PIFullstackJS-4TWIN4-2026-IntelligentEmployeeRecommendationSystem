@@ -1,3 +1,0 @@
-// Déplacé depuis backend/test_db.js
-// Script de test de la base de données
-// ...existing code...
