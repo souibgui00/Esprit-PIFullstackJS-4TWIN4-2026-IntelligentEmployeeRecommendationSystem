@@ -16,9 +16,12 @@ pipeline {
                 checkout scm
             }
         }
-stage('🔨 Build Image') {
+        stage('🔨 Build Image') {
     steps {
         sh '''
+            echo "Current directory: $(pwd)"
+            ls -la
+            ls -la frontend/
             docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f frontend/Dockerfile frontend/
             docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
         '''
