@@ -121,4 +121,117 @@ export class PrioritizationService {
        reasoning: 'Calculated based on skill complexity and target audience.' 
      };
   }
+
+  // --- Public helpers used by other services and tests ---
+  inferIntent(type: string): string {
+    const mapping: Record<string, string> = {
+      training: 'development',
+      workshop: 'development',
+      project: 'performance',
+      assignment: 'performance',
+    };
+    return mapping[type] || 'balanced';
+  }
+
+  async identifySkillGaps(activity: any, candidate: any): Promise<any[]> {
+    // Simple safe fallback: if activity lists requiredSkills and candidate has skills, return missing ones
+    try {
+      const required = (activity?.requiredSkills || []).map((s: any) => (s.skillId && s.skillId.name) || s.name || s);
+      const candidateSkills = (candidate?.skills || []).map((s: any) => (s.skillId && s.skillId.name) || s.name || s);
+      const gaps = required.filter((r: string) => !candidateSkills.includes(r));
+      return gaps;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  applyIntentAwareScoring(candidates: any[], activity: any) {
+    const intent = activity?.intent || this.inferIntent(activity?.type);
+    return candidates.map((c: any) => {
+      let contextScore = 0;
+      if (intent === 'development') {
+        const gaps = Array.isArray(c.skillGaps) ? c.skillGaps.length : 0;
+        contextScore = Math.min(100, 10 + gaps * 10 + (c.globalScore || 0) * 0.1);
+      } else if (intent === 'performance') {
+        contextScore = Math.min(100, (c.matchPercentage || 0) * 0.6 + (c.globalScore || 0) * 0.4);
+      } else {
+        contextScore = (c.matchPercentage || 0) * 0.5 + (c.globalScore || 0) * 0.5;
+      }
+
+      return {
+        ...c,
+        intent,
+        contextScore,
+      };
+    });
+  }
+
+  resolveTies(candidates: any[]) {
+    return candidates.sort((a: any, b: any) => (b.contextScore || 0) - (a.contextScore || 0));
+  }
+
+  /**
+   * PUT /api/scoring/activity/:activityId/weight-skills
+   * Adjusts the weight of each required skill for an activity
+   * based on an importance multiplier (0.5 = half weight, 2.0 = double weight).
+   */
+  async weightSkillsByActivityImportance(
+    activityId: string,
+    importance: number,
+  ): Promise<any> {
+    const activity = await this.activityModel.findById(activityId);
+    if (!activity) throw new NotFoundException('Activity not found');
+
+    const clampedImportance = Math.max(0.1, Math.min(2.0, importance));
+
+    const updatedSkills = (activity.requiredSkills || []).map((s: any) => ({
+      ...s,
+      weight: Math.round(Math.min(2.0, (s.weight || 0.5) * clampedImportance) * 100) / 100,
+    }));
+
+    activity.requiredSkills = updatedSkills as any;
+    await activity.save();
+
+    return {
+      activityId,
+      importance: clampedImportance,
+      updatedSkills,
+    };
+  }
+
+  /**
+   * GET /api/scoring/activity/:activityId/skill-levels
+   * Groups all employees by their skill level for each required skill
+   * of the given activity.
+   */
+  async getEmployeesBySkillLevel(activityId: string): Promise<any> {
+    const activity = await this.activityModel.findById(activityId);
+    if (!activity) throw new NotFoundException('Activity not found');
+
+    const requiredSkillIds = (activity.requiredSkills || []).map((r: any) =>
+      r.skillId?.toString(),
+    ).filter(Boolean);
+
+    const employees = await this.userModel
+      .find({ role: { $regex: /^employee$/i } })
+      .select('name skills')
+      .lean();
+
+    const grouped: Record<string, { beginner: any[]; intermediate: any[]; advanced: any[]; expert: any[]; missing: any[] }> = {};
+
+    for (const skillId of requiredSkillIds) {
+      grouped[skillId] = { beginner: [], intermediate: [], advanced: [], expert: [], missing: [] };
+
+      for (const emp of employees as any[]) {
+        const match = (emp.skills || []).find(
+          (s: any) => s.skillId?.toString() === skillId,
+        );
+        const level: string = match?.level || 'missing';
+        const bucket = grouped[skillId][level as keyof typeof grouped[string]] || grouped[skillId].missing;
+        bucket.push({ userId: emp._id.toString(), name: emp.name });
+      }
+    }
+
+    return grouped;
+  }
 }

@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        KUBECONFIG  = '/var/lib/jenkins/.kube/config'
         IMAGE_NAME  = 'mon-frontend'
         IMAGE_TAG   = "${BUILD_NUMBER}"
         DEPLOY_NAME = 'frontend-deployment'
@@ -17,11 +17,28 @@ pipeline {
             }
         }
 
+        stage('📋 Verify Checkout') {
+            steps {
+                sh '''
+                    echo "=== PWD ==="
+                    pwd
+                    echo "=== ROOT FILES ==="
+                    ls -la
+                    echo "=== FRONTEND FILES ==="
+                    ls -la frontend/ || echo "frontend/ does not exist"
+                    echo "=== GIT LOG ==="
+                    git log --oneline -5
+                    echo "=== JENKINSFILE-CD CONTENT ==="
+                    cat frontend/Jenkinsfile-CD
+                '''
+            }
+        }
+
         stage('🔨 Build Image') {
             steps {
                 sh '''
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag  ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f frontend/Dockerfile frontend/
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
                 '''
             }
         }
@@ -39,11 +56,9 @@ pipeline {
         stage('🚀 Deploy to Kubernetes') {
             steps {
                 sh '''
-                    # Update image tag in deployment
                     kubectl set image deployment/${DEPLOY_NAME} \
                         frontend=${IMAGE_NAME}:${IMAGE_TAG} \
                         -n ${NAMESPACE}
-
                     kubectl rollout status deployment/${DEPLOY_NAME} \
                         --timeout=120s -n ${NAMESPACE}
                 '''
@@ -58,6 +73,7 @@ pipeline {
                 '''
             }
         }
+
     }
 
     post {
@@ -72,8 +88,8 @@ pipeline {
             '''
         }
         always {
-            // Clean up local Docker image to save disk space
             sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
+            echo '🏁 Frontend CD pipeline completed'
         }
     }
 }

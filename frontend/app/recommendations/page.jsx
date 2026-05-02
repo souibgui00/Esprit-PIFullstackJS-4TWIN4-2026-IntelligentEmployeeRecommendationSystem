@@ -42,7 +42,7 @@ function RecommendationsContent() {
     try {
       const actId = selectedActivity._id || selectedActivity.id
       console.log('Calling API with actId:', actId)
-      const response = await api.post(`/activities/${actId}/recommendations`, options)
+      const response = await api.post(`/api/activities/${actId}/recommendations`, options)
       const candidates = Array.isArray(response?.candidates) ? response.candidates : []
 
       const mappedResults = candidates.map((c) => ({
@@ -77,7 +77,7 @@ function RecommendationsContent() {
       const avgScore = selectedRecs.length > 0
         ? Math.round(selectedRecs.reduce((acc, r) => acc + (r.overallScore || 0), 0) / selectedRecs.length)
         : 0
-      await api.post('/assignments/forward-to-department-manager', {
+      await api.post('/api/assignments/forward-to-department-manager', {
         candidateIds: employeeIds,
         activityId: actId,
         aiScore: avgScore,
