@@ -169,4 +169,69 @@ export class PrioritizationService {
   resolveTies(candidates: any[]) {
     return candidates.sort((a: any, b: any) => (b.contextScore || 0) - (a.contextScore || 0));
   }
+
+  /**
+   * PUT /api/scoring/activity/:activityId/weight-skills
+   * Adjusts the weight of each required skill for an activity
+   * based on an importance multiplier (0.5 = half weight, 2.0 = double weight).
+   */
+  async weightSkillsByActivityImportance(
+    activityId: string,
+    importance: number,
+  ): Promise<any> {
+    const activity = await this.activityModel.findById(activityId);
+    if (!activity) throw new NotFoundException('Activity not found');
+
+    const clampedImportance = Math.max(0.1, Math.min(2.0, importance));
+
+    const updatedSkills = (activity.requiredSkills || []).map((s: any) => ({
+      ...s,
+      weight: Math.round(Math.min(2.0, (s.weight || 0.5) * clampedImportance) * 100) / 100,
+    }));
+
+    activity.requiredSkills = updatedSkills as any;
+    await activity.save();
+
+    return {
+      activityId,
+      importance: clampedImportance,
+      updatedSkills,
+    };
+  }
+
+  /**
+   * GET /api/scoring/activity/:activityId/skill-levels
+   * Groups all employees by their skill level for each required skill
+   * of the given activity.
+   */
+  async getEmployeesBySkillLevel(activityId: string): Promise<any> {
+    const activity = await this.activityModel.findById(activityId);
+    if (!activity) throw new NotFoundException('Activity not found');
+
+    const requiredSkillIds = (activity.requiredSkills || []).map((r: any) =>
+      r.skillId?.toString(),
+    ).filter(Boolean);
+
+    const employees = await this.userModel
+      .find({ role: { $regex: /^employee$/i } })
+      .select('name skills')
+      .lean();
+
+    const grouped: Record<string, { beginner: any[]; intermediate: any[]; advanced: any[]; expert: any[]; missing: any[] }> = {};
+
+    for (const skillId of requiredSkillIds) {
+      grouped[skillId] = { beginner: [], intermediate: [], advanced: [], expert: [], missing: [] };
+
+      for (const emp of employees as any[]) {
+        const match = (emp.skills || []).find(
+          (s: any) => s.skillId?.toString() === skillId,
+        );
+        const level: string = match?.level || 'missing';
+        const bucket = grouped[skillId][level as keyof typeof grouped[string]] || grouped[skillId].missing;
+        bucket.push({ userId: emp._id.toString(), name: emp.name });
+      }
+    }
+
+    return grouped;
+  }
 }

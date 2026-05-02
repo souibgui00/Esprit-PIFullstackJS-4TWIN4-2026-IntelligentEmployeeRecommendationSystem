@@ -48,7 +48,7 @@ function RecommendationsContent() {
         prompt: promptText
       }
       
-      const endpoint = `/activities/${selectedActivityId}/recommendations`
+      const endpoint = `/api/activities/${selectedActivityId}/recommendations`
       const response = await api.post(endpoint, payload)
       const candidates = Array.isArray(response?.data?.candidates) ? response.data.candidates : (Array.isArray(response?.candidates) ? response.candidates : [])
 
