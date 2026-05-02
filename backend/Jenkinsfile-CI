@@ -32,7 +32,6 @@ pipeline {
     dir('backend') {
       sh 'npm test -- --coverage --coverageReporters=lcov --coverageReporters=text --forceExit'
       sh 'ls -lh coverage/lcov.info' // confirms file exists
-      sh 'sed -i "s|\\\\|/|g" coverage/lcov.info' // fix backslashes
       sh 'pwd' // prints exact working directory so you can verify the path
     }
   }
