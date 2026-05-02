@@ -17,25 +17,25 @@ pipeline {
             }
         }
 
-       stage('📦 Install') {
-    steps {
-        dir('frontend') {
-            sh 'rm -rf node_modules'
-            retry(3) {
-                sh 'npm install --prefer-offline --fetch-timeout=600000 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000'
+        stage('📦 Install') {
+            steps {
+                dir('frontend') {
+                    sh 'rm -rf node_modules'
+                    retry(3) {
+                        sh 'npm install --prefer-offline --fetch-timeout=600000 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000'
+                    }
+                }
             }
         }
-    }
-}
 
         stage('🧪 Tests') {
-    steps {
-        dir('frontend') {
-            sh 'npm test -- --watchAll=false --coverage'
-            sh 'tr "\\\\" "/" < coverage/lcov.info > coverage/lcov.info.tmp && mv coverage/lcov.info.tmp coverage/lcov.info'
+            steps {
+                dir('frontend') {
+                    sh 'npm test -- --watchAll=false --coverage'
+                    sh 'sed -i "s|\\\\|/|g" coverage/lcov.info || true'
+                }
+            }
         }
-    }
-}
 
         stage('🏗️ Build') {
             steps {
@@ -45,7 +45,7 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('🔍 SonarQube Analysis') {
             steps {
                 dir('frontend') {
                     sh '''/opt/sonar-scanner/bin/sonar-scanner \
@@ -71,10 +71,17 @@ pipeline {
             }
         }
 
+    }
 
     post {
         success {
             build job: 'CD-Frontend', wait: false
+        }
+        always {
+            echo '🏁 Frontend CI pipeline completed'
+        }
+        failure {
+            echo '❌ Frontend CI pipeline failed'
         }
     }
 }
