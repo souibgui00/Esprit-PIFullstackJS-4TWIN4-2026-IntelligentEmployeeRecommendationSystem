@@ -121,4 +121,52 @@ export class PrioritizationService {
        reasoning: 'Calculated based on skill complexity and target audience.' 
      };
   }
+
+  // --- Public helpers used by other services and tests ---
+  inferIntent(type: string): string {
+    const mapping: Record<string, string> = {
+      training: 'development',
+      workshop: 'development',
+      project: 'performance',
+      assignment: 'performance',
+    };
+    return mapping[type] || 'balanced';
+  }
+
+  async identifySkillGaps(activity: any, candidate: any): Promise<any[]> {
+    // Simple safe fallback: if activity lists requiredSkills and candidate has skills, return missing ones
+    try {
+      const required = (activity?.requiredSkills || []).map((s: any) => (s.skillId && s.skillId.name) || s.name || s);
+      const candidateSkills = (candidate?.skills || []).map((s: any) => (s.skillId && s.skillId.name) || s.name || s);
+      const gaps = required.filter((r: string) => !candidateSkills.includes(r));
+      return gaps;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  applyIntentAwareScoring(candidates: any[], activity: any) {
+    const intent = activity?.intent || this.inferIntent(activity?.type);
+    return candidates.map((c: any) => {
+      let contextScore = 0;
+      if (intent === 'development') {
+        const gaps = Array.isArray(c.skillGaps) ? c.skillGaps.length : 0;
+        contextScore = Math.min(100, 10 + gaps * 10 + (c.globalScore || 0) * 0.1);
+      } else if (intent === 'performance') {
+        contextScore = Math.min(100, (c.matchPercentage || 0) * 0.6 + (c.globalScore || 0) * 0.4);
+      } else {
+        contextScore = (c.matchPercentage || 0) * 0.5 + (c.globalScore || 0) * 0.5;
+      }
+
+      return {
+        ...c,
+        intent,
+        contextScore,
+      };
+    });
+  }
+
+  resolveTies(candidates: any[]) {
+    return candidates.sort((a: any, b: any) => (b.contextScore || 0) - (a.contextScore || 0));
+  }
 }
