@@ -7,11 +7,13 @@ describe('FaceRecognitionService', () => {
   let service: FaceRecognitionService;
 
   const mockUserModel = {
+    findById: jest.fn(),
     findOne: jest.fn(),
     findByIdAndUpdate: jest.fn(),
   };
 
   const mockCloudinaryService = {
+    uploadImage: jest.fn(),
     uploadFile: jest.fn(),
   };
 
@@ -23,11 +25,16 @@ describe('FaceRecognitionService', () => {
         FaceRecognitionService,
         {
           provide: getModelToken('User'),
-          useValue: mockUserModel,
+          useValue: {
+            findById: jest.fn(),
+            findByIdAndUpdate: jest.fn(),
+          },
         },
         {
           provide: CloudinaryService,
-          useValue: mockCloudinaryService,
+          useValue: {
+            uploadImage: jest.fn(),
+          },
         },
       ],
     }).compile();

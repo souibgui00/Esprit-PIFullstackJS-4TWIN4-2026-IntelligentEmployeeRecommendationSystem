@@ -17,7 +17,14 @@ describe('RecommendationModelService', () => {
   };
 
   const mockParticipationModel = {
-    find: jest.fn(),
+    find: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue([]),
+      }),
+      populate: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([]),
+      }),
+    }),
   };
 
   const mockPrioritizationService = {
@@ -118,8 +125,12 @@ describe('RecommendationModelService', () => {
       });
 
       mockParticipationModel.find.mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        lean: jest.fn().mockResolvedValue([]),
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([]),
+        }),
+        populate: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue([]),
+        }),
       });
 
       const score = await service.predictScore(userId.toString(), activityId.toString());
@@ -152,8 +163,12 @@ describe('RecommendationModelService', () => {
       });
 
       mockParticipationModel.find.mockReturnValueOnce({
-        select: jest.fn().mockReturnThis(),
-        lean: jest.fn().mockResolvedValue([]),
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([]),
+        }),
+        populate: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue([]),
+        }),
       });
 
       const breakdown = await service.getScoreBreakdown(

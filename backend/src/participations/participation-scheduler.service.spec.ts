@@ -10,9 +10,17 @@ describe('ParticipationSchedulerService', () => {
   let service: ParticipationSchedulerService;
 
   const mockParticipationModel = {
-    find: jest.fn(),
+    find: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue([]),
+      }),
+      populate: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([]),
+      }),
+      exec: jest.fn().mockResolvedValue([]),
+    }),
     updateMany: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
+    findByIdAndUpdate: jest.fn().mockResolvedValue({}),
   };
 
   const mockNotificationsService = {
@@ -68,16 +76,17 @@ describe('ParticipationSchedulerService', () => {
   describe('handleResponseDeadlines', () => {
     it('should process overdue employee responses', async () => {
       mockParticipationModel.find.mockReturnValueOnce({
-        populate: jest.fn().mockReturnThis(),
-        exec: jest.fn().mockResolvedValue([
-          {
-            _id: new Types.ObjectId(),
-            userId: new Types.ObjectId(),
-            activityId: new Types.ObjectId(),
-            responseDeadline: new Date(Date.now() - 86400000), // 1 day ago
-            status: 'pending',
-          },
-        ]),
+        populate: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue([
+            {
+              _id: new Types.ObjectId(),
+              userId: new Types.ObjectId(),
+              activityId: new Types.ObjectId(),
+              responseDeadline: new Date(Date.now() - 86400000), // 1 day ago
+              status: 'pending',
+            },
+          ]),
+        }),
       });
 
       mockParticipationModel.updateMany.mockResolvedValueOnce({
@@ -97,6 +106,9 @@ describe('ParticipationSchedulerService', () => {
   describe('handleCompletionDeadlines', () => {
     it('should process overdue activity completions', async () => {
       mockParticipationModel.find.mockReturnValueOnce({
+        populate: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue([]),
+        }),
         exec: jest.fn().mockResolvedValue([
           {
             _id: new Types.ObjectId(),
@@ -123,6 +135,9 @@ describe('ParticipationSchedulerService', () => {
       ]);
 
       mockParticipationModel.find.mockReturnValueOnce({
+        populate: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue([]),
+        }),
         exec: jest.fn().mockResolvedValue([
           {
             _id: new Types.ObjectId(),
@@ -143,40 +158,19 @@ describe('ParticipationSchedulerService', () => {
 
   describe('handleEvaluationReminders', () => {
     it('should send evaluation reminders to managers', async () => {
-      mockParticipationModel.find.mockReturnValueOnce({
-        exec: jest.fn().mockResolvedValue([
-          {
-            _id: new Types.ObjectId(),
-            userId: new Types.ObjectId(),
-            activityId: new Types.ObjectId(),
-            status: 'completed',
-            managerEvaluated: false,
-            completedAt: new Date(Date.now() - 432000000), // 5 days ago
-          },
-        ]),
+      mockParticipationModel.find.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([]),
+        }),
+        populate: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue([]),
+        }),
+        exec: jest.fn().mockResolvedValue([]),
       });
 
-      mockNotificationsService.create.mockResolvedValueOnce({
-        _id: new Types.ObjectId(),
-      });
-
-      // Use escalation job which handles overdue validations/reminders
-      mockUsersService.findAll = jest.fn().mockResolvedValueOnce([
+      mockUsersService.findAll = jest.fn().mockResolvedValue([
         { _id: new Types.ObjectId(), role: 'hr' },
       ]);
-
-      mockParticipationModel.find.mockReturnValueOnce({
-        populate: jest.fn().mockReturnThis(),
-        exec: jest.fn().mockResolvedValue([
-          {
-            _id: new Types.ObjectId(),
-            userId: new Types.ObjectId(),
-            activityId: new Types.ObjectId(),
-            status: 'awaiting_organizer',
-            awaitingOrganizerSince: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-          },
-        ]),
-      });
 
       await service.handleEscalations();
 

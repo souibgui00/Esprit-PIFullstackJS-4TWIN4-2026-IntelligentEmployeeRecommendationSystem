@@ -1,15 +1,25 @@
+jest.mock('pdfreader', () => {
+  return {
+    PdfReader: jest.fn().mockImplementation(() => ({
+      parseBuffer: jest.fn((buffer: Buffer, callback: Function) => {
+        // Yield the text from the buffer so the test can assert on it, then EOF
+        callback(null, { text: buffer.toString() });
+        callback();
+      }),
+    })),
+  };
+});
+jest.mock('pdf2json', () => {
+  return jest.fn().mockImplementation(() => ({
+    parseBuffer: jest.fn(),
+    on: jest.fn((event: string, cb: Function) => {
+      if (event === 'pdfParser_dataReady') cb({ Pages: [] });
+    }),
+  }));
+});
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { CvExtractionService } from './cv-extraction.service';
-// Mock pdfreader used by the service to avoid parsing real PDFs in unit tests
-jest.mock('pdfreader', () => ({
-  PdfReader: jest.fn().mockImplementation(() => ({
-    parseBuffer: jest.fn((buf: Buffer, cb: Function) => {
-      // simulate callback-based parser; some implementations call cb(null, {text}) repeatedly
-      cb(null, { text: 'mocked text' });
-      return null;
-    }),
-  })),
-}));
 import { SkillsService } from '../../skills/skills.service';
 
 describe('CvExtractionService', () => {
@@ -82,8 +92,8 @@ describe('CvExtractionService', () => {
       );
 
       expect(result).toHaveProperty('email');
-      expect(result).toHaveProperty('phone');
-      expect(result).toHaveProperty('skills');
+      expect(result).toHaveProperty('telephone');
+      expect(result).toHaveProperty('skillIds');
       expect(result).toHaveProperty('yearsOfExperience');
     });
   });
