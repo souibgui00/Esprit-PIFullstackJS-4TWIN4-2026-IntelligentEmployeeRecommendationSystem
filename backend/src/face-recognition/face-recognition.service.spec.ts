@@ -1,14 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getModelToken } from '@nestjs/mongoose';
 import { FaceRecognitionService } from './face-recognition.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 describe('FaceRecognitionService', () => {
   let service: FaceRecognitionService;
+
+  const mockUserModel = {
+    findOne: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+  };
+
+  const mockCloudinaryService = {
+    uploadFile: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FaceRecognitionService],
+      providers: [
+        FaceRecognitionService,
+        {
+          provide: getModelToken('User'),
+          useValue: mockUserModel,
+        },
+        {
+          provide: CloudinaryService,
+          useValue: mockCloudinaryService,
+        },
+      ],
     }).compile();
 
     service = module.get<FaceRecognitionService>(FaceRecognitionService);

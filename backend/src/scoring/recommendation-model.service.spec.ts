@@ -117,7 +117,10 @@ describe('RecommendationModelService', () => {
         ],
       });
 
-      mockParticipationModel.find.mockResolvedValueOnce([]);
+      mockParticipationModel.find.mockReturnValueOnce({
+        select: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      });
 
       const score = await service.predictScore(userId.toString(), activityId.toString());
 
@@ -148,7 +151,10 @@ describe('RecommendationModelService', () => {
         requiredSkills: [],
       });
 
-      mockParticipationModel.find.mockResolvedValueOnce([]);
+      mockParticipationModel.find.mockReturnValueOnce({
+        select: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      });
 
       const breakdown = await service.getScoreBreakdown(
         userId.toString(),

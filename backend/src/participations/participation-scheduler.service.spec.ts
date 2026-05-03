@@ -12,6 +12,7 @@ describe('ParticipationSchedulerService', () => {
   const mockParticipationModel = {
     find: jest.fn(),
     updateMany: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
   };
 
   const mockNotificationsService = {
@@ -121,14 +122,16 @@ describe('ParticipationSchedulerService', () => {
         },
       ]);
 
-      mockParticipationModel.find.mockResolvedValueOnce([
-        {
-          _id: new Types.ObjectId(),
-          userId: new Types.ObjectId(),
-          activityId: new Types.ObjectId(),
-          status: 'accepted',
-        },
-      ]);
+      mockParticipationModel.find.mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue([
+          {
+            _id: new Types.ObjectId(),
+            userId: new Types.ObjectId(),
+            activityId: new Types.ObjectId(),
+            status: 'accepted',
+          },
+        ]),
+      });
 
       mockUsersService.findOne.mockResolvedValueOnce({ _id: new Types.ObjectId(), manager_id: new Types.ObjectId() });
 
@@ -162,15 +165,18 @@ describe('ParticipationSchedulerService', () => {
         { _id: new Types.ObjectId(), role: 'hr' },
       ]);
 
-      mockParticipationModel.find.mockResolvedValueOnce([
-        {
-          _id: new Types.ObjectId(),
-          userId: new Types.ObjectId(),
-          activityId: new Types.ObjectId(),
-          status: 'awaiting_organizer',
-          awaitingOrganizerSince: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-        },
-      ]);
+      mockParticipationModel.find.mockReturnValueOnce({
+        populate: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([
+          {
+            _id: new Types.ObjectId(),
+            userId: new Types.ObjectId(),
+            activityId: new Types.ObjectId(),
+            status: 'awaiting_organizer',
+            awaitingOrganizerSince: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+          },
+        ]),
+      });
 
       await service.handleEscalations();
 
