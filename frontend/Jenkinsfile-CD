@@ -1,0 +1,106 @@
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG  = '/var/lib/jenkins/.kube/config'
+        IMAGE_NAME  = 'mon-frontend'
+        IMAGE_TAG   = "${BUILD_NUMBER}"
+        DEPLOY_NAME = 'frontend-deployment'
+        NAMESPACE   = 'default'
+    }
+
+    stages {
+
+        stage('📥 Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('🔍 Debug') {
+            steps {
+                sh '''
+                    echo "Workspace: $(pwd)"
+                    find . -name Dockerfile
+                '''
+            }
+        }
+
+        stage('🔨 Build Image') {
+            steps {
+                sh '''
+                    echo "Current directory: $(pwd)"
+                    ls -la
+                    ls -la frontend/
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f frontend/Dockerfile frontend/
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                '''
+            }
+        }
+
+        stage('🐳 Import Image to Containerd') {
+            steps {
+                sh '''
+                    docker save ${IMAGE_NAME}:${IMAGE_TAG} -o /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
+                    sudo ctr -n k8s.io images import /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
+                    rm -f /tmp/${IMAGE_NAME}-${IMAGE_TAG}.tar
+                '''
+            }
+        }
+
+        stage('🚀 Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    kubectl set image deployment/${DEPLOY_NAME} \
+                        frontend=${IMAGE_NAME}:${IMAGE_TAG} \
+                        -n ${NAMESPACE}
+                    kubectl rollout status deployment/${DEPLOY_NAME} \
+                        --timeout=120s -n ${NAMESPACE}
+                '''
+            }
+        }
+
+        stage('🔎 Verify Deployment') {
+            steps {
+                sh '''
+                    kubectl get pods -l app=frontend -n ${NAMESPACE}
+                    kubectl get services -n ${NAMESPACE}
+                '''
+            }
+        }
+
+    }
+    stage('📋 Verify Checkout') {
+    steps {
+        sh '''
+            echo "=== PWD ==="
+            pwd
+            echo "=== ROOT FILES ==="
+            ls -la
+            echo "=== FRONTEND FILES ==="
+            ls -la frontend/ || echo "frontend/ does not exist"
+            echo "=== GIT LOG ==="
+            git log --oneline -5
+            echo "=== JENKINSFILE-CD CONTENT ==="
+            cat frontend/Jenkinsfile-CD
+        '''
+    }
+}
+
+    post {
+        success {
+            echo "✅ Frontend deployed successfully — build #${BUILD_NUMBER}"
+        }
+        failure {
+            echo '❌ Deployment failed — rolling back...'
+            sh '''
+                kubectl rollout undo deployment/${DEPLOY_NAME} \
+                    -n ${NAMESPACE} || true
+            '''
+        }
+        always {
+            sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
+            echo '🏁 Frontend CD pipeline completed'
+        }
+    }
+}
