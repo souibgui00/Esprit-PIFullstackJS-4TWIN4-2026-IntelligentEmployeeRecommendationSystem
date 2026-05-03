@@ -1,18 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { SettingsService } from './settings.service';
-import { Types } from 'mongoose';
 
 describe('SettingsService', () => {
   let service: SettingsService;
 
   const mockSettingsModel = {
-    find: jest.fn(),
-    findById: jest.fn(),
-    create: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
     findOne: jest.fn(),
+    find: jest.fn(),
+    findOneAndUpdate: jest.fn(),
   };
+
+  function chainable(result: any) {
+    return {
+      exec: jest.fn().mockResolvedValue(result),
+    };
+  }
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -34,61 +37,41 @@ describe('SettingsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getAllSettings', () => {
-    it('should retrieve all settings', async () => {
-      mockSettingsModel.find.mockResolvedValueOnce([
-        { key: 'app_name', value: 'Employee Recommendation System' },
-        { key: 'max_users', value: '1000' },
-      ]);
-
-      expect(service).toBeDefined();
+  describe('findAll', () => {
+    it('returns all settings as a key-value map', async () => {
+      mockSettingsModel.find.mockReturnValue(chainable([
+        { key: 'theme', value: 'dark' },
+        { key: 'notifications', value: true }
+      ]));
+      const res = await service.findAll();
+      expect(res).toEqual({ theme: 'dark', notifications: true });
     });
   });
 
-  describe('getSetting', () => {
-    it('should retrieve setting by key', async () => {
-      mockSettingsModel.findOne.mockResolvedValueOnce({
-        key: 'app_version',
-        value: '1.0.0',
-      });
-
-      expect(service).toBeDefined();
+  describe('get', () => {
+    it('returns setting value if exists', async () => {
+      mockSettingsModel.findOne.mockReturnValue(chainable({ key: 'theme', value: 'dark' }));
+      const res = await service.get('theme');
+      expect(res).toBe('dark');
     });
 
-    it('should return null for non-existent setting', async () => {
-      mockSettingsModel.findOne.mockResolvedValueOnce(null);
-
-      expect(service).toBeDefined();
+    it('returns null if setting does not exist', async () => {
+      mockSettingsModel.findOne.mockReturnValue(chainable(null));
+      const res = await service.get('nonexistent');
+      expect(res).toBeNull();
     });
   });
 
-  describe('updateSetting', () => {
-    it('should update setting value', async () => {
-      const settingId = new Types.ObjectId();
-
-      mockSettingsModel.findByIdAndUpdate.mockResolvedValueOnce({
-        _id: settingId,
-        key: 'max_participants',
-        value: '500',
-      });
-
-      expect(service).toBeDefined();
+  describe('set', () => {
+    it('creates or updates a setting', async () => {
+      mockSettingsModel.findOneAndUpdate.mockReturnValue(chainable({ key: 'theme', value: 'light' }));
+      const res = await service.set('theme', 'light');
+      expect(res.value).toBe('light');
+      expect(mockSettingsModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { key: 'theme' },
+        { value: 'light' },
+        expect.any(Object)
+      );
     });
-  });
-
-  describe('createSetting', () => {
-    it('should create new setting', async () => {
-      mockSettingsModel.create.mockResolvedValueOnce({
-        _id: new Types.ObjectId(),
-        key: 'new_setting',
-        value: 'default_value',
-      });
-
-      expect(service).toBeDefined();
-    });
-  });
-
-  afterAll(async () => {
-    jest.clearAllMocks();
   });
 });

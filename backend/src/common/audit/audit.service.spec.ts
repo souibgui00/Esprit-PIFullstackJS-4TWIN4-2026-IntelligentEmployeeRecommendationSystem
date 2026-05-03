@@ -6,12 +6,22 @@ import { Types } from 'mongoose';
 describe('AuditService', () => {
   let service: AuditService;
 
-  // Mock model as a constructor function that returns instances with a save() method
-  const mockAuditInstance = {
-    save: jest.fn().mockResolvedValue({}),
-  };
+  const mockSave = jest.fn();
 
-  const mockAuditLogModel: any = jest.fn().mockImplementation(() => mockAuditInstance);
+  function MockAuditModel(data: any) {
+    this.save = mockSave;
+  }
+  
+  MockAuditModel.find = jest.fn();
+
+  function chainable(result: any) {
+    return {
+      sort: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(result),
+    };
+  }
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -21,7 +31,7 @@ describe('AuditService', () => {
         AuditService,
         {
           provide: getModelToken('AuditLog'),
-          useValue: mockAuditLogModel,
+          useValue: MockAuditModel,
         },
       ],
     }).compile();
@@ -34,57 +44,52 @@ describe('AuditService', () => {
   });
 
   describe('logAction', () => {
-    it('should create and save audit log', async () => {
-      const auditData = {
-        action: 'CREATE',
+    it('should save a new audit log', async () => {
+      mockSave.mockResolvedValueOnce({ _id: '123' });
+      const res = await service.logAction({
+        action: 'TEST',
         entityType: 'User',
-        entityId: new Types.ObjectId().toString(),
+        entityId: 'user-1',
         actorId: new Types.ObjectId().toString(),
-        metadata: { source: 'admin' },
-      };
-
-      const mockSaved = { _id: new Types.ObjectId(), ...auditData };
-      mockAuditInstance.save.mockResolvedValueOnce(mockSaved);
-
-      await service.logAction(auditData);
-
-      expect(mockAuditLogModel).toHaveBeenCalled();
-      expect(mockAuditInstance.save).toHaveBeenCalled();
+      });
+      expect(res).toBeDefined();
+      expect(mockSave).toHaveBeenCalled();
     });
 
-    it('should handle errors gracefully', async () => {
-      const auditData = {
-        action: 'UPDATE',
-        entityType: 'Activity',
-        entityId: new Types.ObjectId().toString(),
+    it('should return null on error', async () => {
+      mockSave.mockRejectedValueOnce(new Error('DB Error'));
+      const res = await service.logAction({
+        action: 'TEST',
+        entityType: 'User',
+        entityId: 'user-1',
         actorId: new Types.ObjectId().toString(),
-        oldValue: { name: 'Old Activity' },
-        newValue: { name: 'New Activity' },
-      };
-
-      const result = await service.logAction(auditData);
-
-      // Service should return null or handle error
-      expect(result === null || result !== undefined).toBe(true);
-    });
-
-    it('should include optional metadata', async () => {
-      const auditData = {
-        action: 'DELETE',
-        entityType: 'Department',
-        entityId: new Types.ObjectId().toString(),
-        actorId: new Types.ObjectId().toString(),
-        oldValue: { name: 'IT Department' },
-        metadata: { reason: 'Reorganization', approvedBy: 'Manager' },
-      };
-
-      await service.logAction(auditData);
-
-      expect(service).toBeDefined();
+      });
+      expect(res).toBeNull();
     });
   });
 
-  afterAll(async () => {
-    jest.clearAllMocks();
+  describe('findByEntity', () => {
+    it('returns logs by entity', async () => {
+      MockAuditModel.find.mockReturnValue(chainable([]));
+      const res = await service.findByEntity('User', 'user-1');
+      expect(res).toEqual([]);
+      expect(MockAuditModel.find).toHaveBeenCalledWith({ entityType: 'User', entityId: 'user-1' });
+    });
+  });
+
+  describe('findByActor', () => {
+    it('returns logs by actor', async () => {
+      MockAuditModel.find.mockReturnValue(chainable([]));
+      const res = await service.findByActor('actor-1');
+      expect(res).toEqual([]);
+    });
+  });
+
+  describe('findAll', () => {
+    it('returns all populated logs', async () => {
+      MockAuditModel.find.mockReturnValue(chainable([{ _id: '1' }]));
+      const res = await service.findAll();
+      expect(res).toHaveLength(1);
+    });
   });
 });
