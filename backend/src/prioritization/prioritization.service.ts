@@ -23,8 +23,8 @@ export class PrioritizationService {
   private readonly NLP_URL = 'http://localhost:8000';
 
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel('Activity') private activityModel: Model<Activity>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel('Activity') private readonly activityModel: Model<Activity>,
   ) {}
 
   /**
@@ -57,9 +57,9 @@ export class PrioritizationService {
       
       let filteredEmployees = employees;
       if (activity?.targetDepartments && Array.isArray(activity.targetDepartments)) {
-        const targetDeptIds = activity.targetDepartments.map(id => id.toString());
+        const targetDeptIds = new Set(activity.targetDepartments.map(id => id.toString()));
         filteredEmployees = employees.filter(emp => 
-          emp.department_id && targetDeptIds.includes(emp.department_id.toString())
+          emp.department_id && targetDeptIds.has(emp.department_id.toString())
         );
       }
 
@@ -76,7 +76,7 @@ export class PrioritizationService {
           name: emp.name,
           position: emp.position || '',
           jobDescription: emp.jobDescription || '',
-          skills: emp.skills?.filter(s => s.etat === 'validated').map(s => (s.skillId as any)?.name || '') || [],
+          skills: emp.skills?.filter(s => s.etat === 'validated').map(s => s.skillId?.name || '') || [],
           yearsAtCompany: emp.yearsOfExperience || 0,
           department: emp.department_id?.toString() || 'IT',
           isActive: true,
@@ -114,7 +114,6 @@ export class PrioritizationService {
   // Helper methods for UI compatibility
   async suggestActivityImportance(activityId: string): Promise<any> {
      // Simplified implementation for restoration
-     const activity = await this.activityModel.findById(activityId);
      return { 
        activityId, 
        suggestedImportance: 7, 
@@ -135,14 +134,10 @@ export class PrioritizationService {
 
   async identifySkillGaps(activity: any, candidate: any): Promise<any[]> {
     // Simple safe fallback: if activity lists requiredSkills and candidate has skills, return missing ones
-    try {
-      const required = (activity?.requiredSkills || []).map((s: any) => (s.skillId && s.skillId.name) || s.name || s);
-      const candidateSkills = (candidate?.skills || []).map((s: any) => (s.skillId && s.skillId.name) || s.name || s);
-      const gaps = required.filter((r: string) => !candidateSkills.includes(r));
-      return gaps;
-    } catch (e) {
-      return [];
-    }
+    const required = (activity?.requiredSkills || []).map((s: any) => s.skillId?.name || s.name || s);
+    const candidateSkills = new Set((candidate?.skills || []).map((s: any) => s.skillId?.name || s.name || s));
+    const gaps = required.filter((r: string) => !candidateSkills.has(r));
+    return gaps;
   }
 
   applyIntentAwareScoring(candidates: any[], activity: any) {

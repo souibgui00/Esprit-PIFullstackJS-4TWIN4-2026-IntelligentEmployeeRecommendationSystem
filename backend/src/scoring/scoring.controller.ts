@@ -372,6 +372,14 @@ export class ScoringController {
 
   // ─── Hybrid Recommendation Endpoints ───────────────────────────────────────
 
+  private getScoreLabel(score: number): string {
+    if (score >= 0.85) return 'Top Pick';
+    if (score >= 0.7) return 'Highly Recommended';
+    if (score >= 0.5) return 'Recommended';
+    if (score >= 0.05) return 'Consider';
+    return 'Not Relevant';
+  }
+
   /**
    * GET /api/scoring/predict/:userId/:activityId
    * Predict compatibility score using the hybrid model
@@ -393,16 +401,7 @@ export class ScoringController {
         activityId,
         score,
         scorePercent: Math.round(score * 100),
-        label:
-          score >= 0.85
-            ? 'Top Pick'
-            : score >= 0.7
-              ? 'Highly Recommended'
-              : score >= 0.5
-                ? 'Recommended'
-                : score >= 0.05
-                  ? 'Consider'
-                  : 'Not Relevant',
+        label: this.getScoreLabel(score),
       };
     } catch (error: any) {
       throw new HttpException(

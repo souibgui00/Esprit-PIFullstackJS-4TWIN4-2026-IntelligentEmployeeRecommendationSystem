@@ -243,9 +243,6 @@ export class ParticipationsService {
 
         // Notify manager
         try {
-          const employeeIds = await this.usersService.findManagedEmployeeIds(
-            participation.userId.toString(),
-          );
           // Alternatively just find the manager directly
           let managerId = null;
           const employee = await this.usersService.findOne(

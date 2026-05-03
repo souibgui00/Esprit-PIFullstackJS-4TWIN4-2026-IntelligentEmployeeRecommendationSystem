@@ -800,7 +800,7 @@ export class ActivitiesService {
 
     // ⚡ Performance optimization: Pre-filter by skill overlap
     const intent = activity.intent || this.prioritizationService.inferIntent(activity.type);
-    candidatesToScore = await this.preFilterBySkillOverlap(candidatesToScore, activity, intent);
+    candidatesToScore = this.preFilterBySkillOverlap(candidatesToScore, activity, intent);
     
     // ⚡ Hard cap at 300 to keep NLP fast
     if (candidatesToScore.length > 300) {

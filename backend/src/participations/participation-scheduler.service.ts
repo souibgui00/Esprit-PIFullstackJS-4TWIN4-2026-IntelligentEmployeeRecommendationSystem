@@ -34,7 +34,7 @@ export class ParticipationSchedulerService {
 
   constructor(
     @InjectModel(Participation.name)
-    private participationModel: Model<Participation>,
+    private readonly participationModel: Model<Participation>,
     private notificationsService: NotificationsService,
     private usersService: UsersService,
     private activitiesService: ActivitiesService,

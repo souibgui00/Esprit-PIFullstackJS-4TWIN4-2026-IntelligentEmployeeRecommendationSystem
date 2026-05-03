@@ -146,7 +146,7 @@ export class CvExtractionService {
         : emailRegex.exec(text)?.[0] ||
           null;
 
-      const phoneRegex = /\+?[\d\s\-()\.]{7,}/;
+      const phoneRegex = /\+?[\d\s\-().]{7,}/;
       const phoneMatch = phoneRegex.exec(text);
       const telephone = phoneMatch ? phoneMatch[0] : null;
 
@@ -192,9 +192,8 @@ export class CvExtractionService {
 
       // Years of experience extraction (improved logic)
       let yearsOfExperience = 0;
-      const experienceMatch = text.match(
-        /(\d+)\s*(?:\+)?\s*(?:years?\s*(?:of\s*)?experience|ans?\s*d.{0,5}expérience)/i,
-      );
+      const experienceRegex = /(\d+)\s*(?:\+)?\s*(?:years?\s*(?:of\s*)?experience|ans?\s*d.{0,5}expérience)/i;
+      const experienceMatch = experienceRegex.exec(text);
       if (experienceMatch) {
         yearsOfExperience = parseInt(experienceMatch[1], 10);
       } else if (sections.experience) {
@@ -453,19 +452,19 @@ export class CvExtractionService {
       availableSkills.map((s) => s.name.toLowerCase()),
     );
 
+    const context = {
+      rawTextLower,
+      cvTerms,
+      dbSkillNamesLower,
+      availableSkills,
+      matchedSkillIds,
+      suggestions,
+      options,
+    };
+
     for (const [skillType, techList] of Object.entries(skillDictionaries)) {
       for (const tech of techList) {
-        await this.processSkillFromDictionary(
-          tech,
-          skillType,
-          rawTextLower,
-          cvTerms,
-          dbSkillNamesLower,
-          availableSkills,
-          matchedSkillIds,
-          suggestions,
-          options,
-        );
+        await this.processSkillFromDictionary(tech, skillType, context);
       }
     }
   }
@@ -476,31 +475,33 @@ export class CvExtractionService {
   private async processSkillFromDictionary(
     tech: string,
     skillType: string,
-    rawTextLower: string,
-    cvTerms: string[],
-    dbSkillNamesLower: Set<string>,
-    availableSkills: any[],
-    matchedSkillIds: Set<string>,
-    suggestions: Set<string>,
-    options: { createMissing?: boolean },
+    context: {
+      rawTextLower: string;
+      cvTerms: string[];
+      dbSkillNamesLower: Set<string>;
+      availableSkills: any[];
+      matchedSkillIds: Set<string>;
+      suggestions: Set<string>;
+      options: { createMissing?: boolean };
+    },
   ): Promise<void> {
     const techLower = tech.toLowerCase();
 
-    if (dbSkillNamesLower.has(techLower)) return;
+    if (context.dbSkillNamesLower.has(techLower)) return;
 
     const escaped = this.escapeRegExp(techLower);
     const regex = new RegExp(`(?<=^|\\W)${escaped}(?=$|\\W)`, 'i');
 
-    if (regex.test(rawTextLower) || cvTerms.includes(techLower)) {
-      if (options.createMissing) {
+    if (regex.test(context.rawTextLower) || context.cvTerms.includes(techLower)) {
+      if (context.options.createMissing) {
         await this.autoCreateSkill(
           tech,
           skillType,
-          availableSkills,
-          matchedSkillIds,
+          context.availableSkills,
+          context.matchedSkillIds,
         );
       } else {
-        suggestions.add(tech);
+        context.suggestions.add(tech);
       }
     }
   }
