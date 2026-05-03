@@ -63,6 +63,7 @@ describe('ActivitiesService', () => {
   const mockPrioritizationService = {
     inferIntent: jest.fn().mockReturnValue('development'),
     identifySkillGaps: jest.fn().mockResolvedValue(['Communication']),
+    applyIntentAwareScoring: jest.fn().mockImplementation((c) => c),
   };
 
   const mockUsersService = {
@@ -85,6 +86,13 @@ describe('ActivitiesService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockActivityModel.find.mockReturnValue(chainable([mockActivity]));
+    mockActivityModel.findById.mockReturnValue(chainable(mockActivity));
+    mockActivityModel.findByIdAndUpdate.mockReturnValue(chainable(mockActivity));
+    mockActivityModel.findByIdAndDelete.mockReturnValue(chainable(mockActivity));
+    mockAssignmentModel.find.mockReturnValue(chainable([]));
+    mockParticipationModel.find.mockReturnValue(chainable([]));
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ActivitiesService,

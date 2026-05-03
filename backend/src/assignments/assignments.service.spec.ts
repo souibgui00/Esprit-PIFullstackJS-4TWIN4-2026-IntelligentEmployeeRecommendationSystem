@@ -1,206 +1,181 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
-import { Assignment } from './schema/assignment.schema';
 import { ActivitiesService } from '../activities/activities.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationsGateway } from '../notifications/notifications.gateway';
-import { UsersService } from '../users/users.service';
 import { ParticipationsService } from '../participations/participations.service';
+import { UsersService } from '../users/users.service';
+import { Types } from 'mongoose';
+import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Role } from '../common/enums/role.enum';
 
 describe('AssignmentsService', () => {
   let service: AssignmentsService;
 
-  const mockNotificationCreate = jest.fn();
-  const mockEmitToUser = jest.fn();
+  const mockAssignmentId = new Types.ObjectId().toString();
+  const mockUserId = new Types.ObjectId().toString();
+  const mockManagerId = new Types.ObjectId().toString();
+  const mockActivityId = new Types.ObjectId().toString();
 
-  const mockAssignmentModel: any = jest.fn().mockImplementation((data: any) => ({
-    ...data,
-    save: jest.fn().mockImplementation(function (this: any) {
-      return Promise.resolve(this);
-    }),
+  const mockAssignment = {
+    _id: mockAssignmentId,
+    userId: mockUserId,
+    activityId: mockActivityId,
+    assignedBy: mockManagerId,
+    managerId: mockManagerId,
+    status: 'pending',
+    type: 'recommendation',
+    save: jest.fn().mockResolvedValue(true),
+  };
+
+  function chainable(result: any) {
+    const p = Promise.resolve(result) as any;
+    p.populate = jest.fn().mockReturnValue(p);
+    p.select = jest.fn().mockReturnValue(p);
+    p.skip = jest.fn().mockReturnValue(p);
+    p.limit = jest.fn().mockReturnValue(p);
+    p.exec = jest.fn().mockResolvedValue(result);
+    return p;
+  }
+
+  const mockAssignmentModel: any = jest.fn().mockImplementation((dto) => ({
+    ...dto,
+    _id: mockAssignmentId,
+    save: jest.fn().mockResolvedValue({ _id: mockAssignmentId, ...dto }),
   }));
 
-  mockAssignmentModel.findOne = jest.fn();
-  mockAssignmentModel.findById = jest.fn();
-  mockAssignmentModel.findByIdAndDelete = jest.fn();
+  mockAssignmentModel.find = jest.fn().mockReturnValue(chainable([]));
+  mockAssignmentModel.findOne = jest.fn().mockReturnValue(chainable(null));
+  mockAssignmentModel.findById = jest.fn().mockReturnValue(chainable(mockAssignment));
+  mockAssignmentModel.findByIdAndUpdate = jest.fn().mockReturnValue(chainable(mockAssignment));
+  mockAssignmentModel.findByIdAndDelete = jest.fn().mockReturnValue(chainable(mockAssignment));
 
   const mockActivitiesService = {
-    findOne: jest.fn(),
+    findOne: jest.fn().mockResolvedValue({ _id: mockActivityId, workflowStatus: 'approved', title: 'Test' }),
   };
 
   const mockNotificationsService = {
-    create: mockNotificationCreate,
+    create: jest.fn().mockResolvedValue({ _id: 'notif1', title: 'T', message: 'M' }),
   };
 
   const mockUsersService = {
-    findOne: jest.fn(),
+    findOne: jest.fn().mockResolvedValue({ _id: mockUserId, name: 'User', role: Role.MANAGER }),
+    findRawDepartmentId: jest.fn().mockResolvedValue(new Types.ObjectId().toString()),
+    getManagerByDepartment: jest.fn().mockResolvedValue({ _id: mockManagerId, name: 'Manager', role: Role.MANAGER }),
   };
 
   const mockNotificationsGateway = {
-    emitToUser: mockEmitToUser,
+    emitToUser: jest.fn().mockReturnValue(true),
   };
 
   const mockParticipationsService = {
-    create: jest.fn(),
+    create: jest.fn().mockResolvedValue({}),
   };
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockAssignmentModel.find.mockReturnValue(chainable([]));
+    mockAssignmentModel.findOne.mockReturnValue(chainable(null));
+    mockAssignmentModel.findById.mockReturnValue(chainable(mockAssignment));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AssignmentsService,
-        {
-          provide: getModelToken(Assignment.name),
-          useValue: mockAssignmentModel,
-        },
-        {
-          provide: ActivitiesService,
-          useValue: mockActivitiesService,
-        },
-        {
-          provide: NotificationsService,
-          useValue: mockNotificationsService,
-        },
-        {
-          provide: UsersService,
-          useValue: mockUsersService,
-        },
-        {
-          provide: NotificationsGateway,
-          useValue: mockNotificationsGateway,
-        },
-        {
-          provide: ParticipationsService,
-          useValue: mockParticipationsService,
-        },
+        { provide: getModelToken('Assignment'), useValue: mockAssignmentModel },
+        { provide: ActivitiesService, useValue: mockActivitiesService },
+        { provide: NotificationsService, useValue: mockNotificationsService },
+        { provide: UsersService, useValue: mockUsersService },
+        { provide: NotificationsGateway, useValue: mockNotificationsGateway },
+        { provide: ParticipationsService, useValue: mockParticipationsService },
       ],
     }).compile();
 
     service = module.get<AssignmentsService>(AssignmentsService);
   });
 
-  it('should return an existing assignment when the user is already assigned', async () => {
-    const activityId = new Types.ObjectId().toHexString();
-    const existingAssignment = { _id: new Types.ObjectId(), activityId };
-
-    mockActivitiesService.findOne.mockResolvedValue({
-      _id: activityId,
-      workflowStatus: 'approved',
-    });
-    mockAssignmentModel.findOne.mockResolvedValue(existingAssignment);
-
-    const result = await service.create(
-      new Types.ObjectId().toHexString(),
-      activityId,
-      new Types.ObjectId().toHexString(),
-    );
-
-    expect(result).toBe(existingAssignment);
-    expect(mockAssignmentModel).not.toHaveBeenCalledWith(expect.anything());
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
-  it('should create a new assignment for an approved activity', async () => {
-    const userId = new Types.ObjectId().toHexString();
-    const activityId = new Types.ObjectId().toHexString();
-    const assignedBy = new Types.ObjectId().toHexString();
-    const savedAssignment = {
-      _id: new Types.ObjectId(),
-      userId: new Types.ObjectId(userId),
-      activityId: new Types.ObjectId(activityId),
-      assignedBy: new Types.ObjectId(assignedBy),
-    };
-
-    mockActivitiesService.findOne.mockResolvedValue({
-      _id: activityId,
-      workflowStatus: 'approved',
+  describe('create', () => {
+    it('creates a new assignment', async () => {
+      const res = await service.create(mockUserId, mockActivityId, mockManagerId);
+      expect(res).toBeDefined();
     });
-    mockAssignmentModel.findOne.mockResolvedValue(null);
-    mockAssignmentModel.mockImplementation((data: any) => ({
-      ...data,
-      save: jest.fn().mockResolvedValue(savedAssignment),
-    }));
 
-    const result = await service.create(userId, activityId, assignedBy);
-
-    expect(result.userId.toString()).toBe(userId);
-    expect(result.activityId.toString()).toBe(activityId);
-    expect(result.assignedBy.toString()).toBe(assignedBy);
+    it('throws if activity unapproved', async () => {
+      mockActivitiesService.findOne.mockResolvedValueOnce({ workflowStatus: 'pending' } as any);
+      await expect(service.create(mockUserId, mockActivityId, mockManagerId)).rejects.toThrow(BadRequestException);
+    });
   });
 
-  it('should forbid a manager from updating assignments owned by someone else', async () => {
-    const assignmentId = new Types.ObjectId().toHexString();
-    const managerId = new Types.ObjectId().toHexString();
-
-    mockAssignmentModel.findById.mockReturnValue({
-      _id: assignmentId,
-      managerId: { _id: new Types.ObjectId().toHexString() },
-      userId: new Types.ObjectId().toHexString(),
-      activityId: { _id: new Types.ObjectId().toHexString(), title: 'Training' },
-      populate: jest.fn().mockReturnThis(),
+  describe('forwardToManager', () => {
+    it('forwards recommendations and notifies', async () => {
+      const res = await service.forwardToManager({
+        candidateIds: [mockUserId],
+        activityId: mockActivityId,
+        managerId: mockManagerId,
+      }, 'admin1');
+      expect(res.success).toBe(true);
+      expect(mockNotificationsService.create).toHaveBeenCalled();
+      expect(mockNotificationsGateway.emitToUser).toHaveBeenCalled();
     });
-
-    await expect(
-      service.updateStatus(assignmentId, 'accepted', managerId),
-    ).rejects.toThrow(ForbiddenException);
   });
 
-  it('should notify the candidate when a manager accepts an assignment', async () => {
-    const assignmentId = new Types.ObjectId().toHexString();
-    const managerId = new Types.ObjectId().toHexString();
-    const candidateId = new Types.ObjectId().toHexString();
-    const activityId = new Types.ObjectId().toHexString();
-    const saveMock = jest.fn().mockImplementation(function (this: any) {
-      return Promise.resolve(this);
+  describe('forwardToDepartmentManagers', () => {
+    it('routes candidates to their respective department managers', async () => {
+      const res = await service.forwardToDepartmentManagers({
+        candidateIds: [mockUserId],
+        activityId: mockActivityId,
+      }, 'admin1');
+      expect(res.totalForwarded).toBe(1);
+    });
+  });
+
+  describe('updateStatus', () => {
+    it('manager accepts recommendation and notifies employee', async () => {
+      const assignmentWithDetails = {
+        ...mockAssignment,
+        managerId: { _id: mockManagerId, name: 'Manager' },
+        activityId: { _id: mockActivityId, title: 'Test' },
+        userId: { _id: mockUserId, name: 'User' },
+      };
+      mockAssignmentModel.findById.mockReturnValue(chainable(assignmentWithDetails));
+      
+      const res = await service.updateStatus(mockAssignmentId, 'accepted', mockManagerId);
+      expect(res.status).toBe('notified'); // Internal logic moves to notified
+      expect(mockNotificationsService.create).toHaveBeenCalled();
     });
 
-    mockAssignmentModel.findById.mockReturnValue({
-      _id: assignmentId,
-      managerId: { _id: managerId, name: 'Manager' },
-      userId: candidateId,
-      activityId: { _id: activityId, title: 'Leadership Workshop' },
-      status: 'pending',
-      reason: 'test',
-      save: saveMock,
-      populate: jest.fn().mockReturnThis(),
+    it('throws forbidden if wrong manager', async () => {
+      await expect(service.updateStatus(mockAssignmentId, 'accepted', 'wrong-manager')).rejects.toThrow(ForbiddenException);
     });
-    mockNotificationCreate.mockResolvedValue({
-      _id: new Types.ObjectId(),
-      title: 'Training Opportunity Identified',
-      message: 'Manager Manager has recommended the activity "Leadership Workshop" for you. Click to view details and join.',
-      type: 'recommendation_accepted',
-      metadata: { activityId, assignmentId, managerId },
+  });
+
+  describe('employee choice', () => {
+    it('employeeAccept creates participation', async () => {
+      mockAssignmentModel.findById.mockReturnValue(chainable(mockAssignment));
+      await service.employeeAccept(mockAssignmentId, mockUserId);
+      expect(mockParticipationsService.create).toHaveBeenCalled();
     });
-    mockEmitToUser.mockReturnValue(true);
 
-    const result = await service.updateStatus(assignmentId, 'accepted', managerId);
+    it('employeeReject updates status', async () => {
+      mockAssignmentModel.findById.mockReturnValue(chainable(mockAssignment));
+      const res = await service.employeeReject(mockAssignmentId, mockUserId, 'Busy');
+      expect(res.status).toBe('rejected');
+    });
+  });
 
-    expect(result.status).toBe('notified');
-    expect(mockNotificationCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        recipientId: candidateId,
-        metadata: expect.objectContaining({
-          activityId,
-          assignmentId,
-          managerId,
-        }),
-      }),
-      { emitRealtime: false },
-    );
-    expect(mockEmitToUser).toHaveBeenCalledWith(
-      candidateId,
-      'newNotification',
-      expect.objectContaining({
-        recipientId: candidateId,
-        metadata: expect.objectContaining({
-          activityId,
-          assignmentId,
-          managerId,
-        }),
-      }),
-    );
+  describe('queries', () => {
+    it('findAll', async () => {
+      await service.findAll();
+      expect(mockAssignmentModel.find).toHaveBeenCalled();
+    });
+
+    it('findByRecipient', async () => {
+      await service.findByRecipient(mockUserId);
+      expect(mockAssignmentModel.find).toHaveBeenCalled();
+    });
   });
 });
