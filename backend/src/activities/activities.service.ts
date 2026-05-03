@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -325,6 +324,148 @@ export class ActivitiesService {
   }
 
   /**
+   * Get human-readable recommendation label based on score
+   * @param score - The recommendation score (0-1)
+   * @returns A human-readable label
+   */
+  private getRecommendationLabel(score: number): string {
+    if (score >= 0.85) {
+      return 'Top Pick';
+    }
+    if (score >= 0.7) {
+      return 'Highly Recommended';
+    }
+    if (score >= 0.5) {
+      return 'Recommended';
+    }
+    return 'Consider';
+  }
+
+  /**
+   * Normalize options input to always return an object
+   */
+  private normalizeOptions(optionsOrPrompt: any): any {
+    return typeof optionsOrPrompt === 'string' ? { prompt: optionsOrPrompt } : optionsOrPrompt;
+  }
+
+  /**
+   * Extract and process prompt data from options
+   */
+  private async extractPromptData(options: any, activity: any): Promise<{ promptText: string; promptSkills: string[] }> {
+    let promptText = '';
+    let promptSkills: string[] = [];
+
+    if (typeof options === 'string') {
+      promptText = options.trim();
+    } else if (options && typeof options === 'object' && options.prompt) {
+      promptText = options.prompt.trim();
+    }
+
+    if (promptText) {
+      const extracted = await this.extractSkillsFromDescription(promptText, activity.title || '');
+      promptSkills = Array.from(
+        new Set(((extracted?.extractedSkills || []) as string[]).map((s) => (s || '').trim()).filter(Boolean)),
+      );
+    }
+
+    return { promptText, promptSkills };
+  }
+
+  /**
+   * Filter eligible candidates by department and excludes already invited/enrolled
+   */
+  private async filterEligibleCandidates(allUsers: any[], activity: any, activityId: string): Promise<any[]> {
+    const targetDeptIds = activity.targetDepartments || [];
+    let eligibleEmployees = (allUsers || []).filter(
+      (user: any) => String(user.role || '').toUpperCase() === Role.EMPLOYEE,
+    );
+
+    if (targetDeptIds.length > 0) {
+      eligibleEmployees = eligibleEmployees.filter((user: any) => {
+        const userDeptId = user.department_id?._id?.toString() || user.department_id?.toString();
+        return targetDeptIds.includes(userDeptId);
+      });
+    }
+
+    const existingParticipationsList = await this.participationModel.find({ activityId: new Types.ObjectId(activityId) }).lean();
+    const existingAssignmentsList = await this.assignmentModel.find({ activityId: new Types.ObjectId(activityId) }).lean();
+
+    const excludedUserIds = new Set([
+      ...existingParticipationsList.map((p: any) => p.userId.toString()),
+      ...existingAssignmentsList.map((a: any) => a.userId.toString()),
+    ]);
+
+    return eligibleEmployees.filter((user: any) => !excludedUserIds.has(user._id.toString()));
+  }
+
+  /**
+   * Pre-filter candidates by skill overlap before expensive NLP call
+   */
+  private preFilterBySkillOverlap(candidatesToScore: any[], activity: any, intent: string): any[] {
+    const requiredSkillIds = new Set(
+      (activity.requiredSkills || [])
+        .map((r: any) => (r.skillId?._id ?? r.skillId)?.toString()?.trim())
+        .filter(Boolean),
+    );
+
+    if (requiredSkillIds.size === 0) return candidatesToScore;
+
+    const filtered = candidatesToScore.filter((user: any) => {
+      const userSkillIds = (user.skills || []).map((s: any) => s.skillId?.toString()?.trim());
+      const hasOverlap = userSkillIds.some((id: string) => requiredSkillIds.has(id));
+      // For 'development' intent: keep all (employees need to develop skills)
+      if (intent === 'development') return true;
+      return hasOverlap;
+    });
+
+    // Guarantee minimum pool: if filtered is too small, include more candidates
+    return filtered.length >= 30 ? filtered : candidatesToScore.slice(0, 200);
+  }
+
+  /**
+   * Apply frontend options for filtering and scoring adjustments
+   */
+  private applyOptionsFiltering(candidates: any[], options: any): any[] {
+    if (Object.keys(options).length === 0) return candidates;
+
+    if (options.experienceFilter > 0) {
+      candidates = candidates.filter((c: any) => c.yearsOfExperience >= options.experienceFilter);
+    }
+
+    candidates = candidates.map((c: any) => {
+      let adj = c.score * 100;
+      const gapCount = c.gap.length;
+
+      if (options.skillPriority === 'skills') {
+        adj += gapCount === 0 ? 15 : -gapCount * 5;
+      } else if (options.skillPriority === 'experience') {
+        adj += c.yearsOfExperience > 5 ? 10 : 0;
+        adj += c.yearsOfExperience > 10 ? 10 : 0;
+      } else if (options.skillPriority === 'growth') {
+        adj += gapCount > 0 ? gapCount * 8 : 0;
+      }
+
+      if (options.priorityWeight > 0) adj += options.priorityWeight * 0.1;
+
+      c.score = Math.max(0, Math.min(100, Math.round(adj))) / 100;
+      return c;
+    });
+
+    return candidates;
+  }
+
+  /**
+   * Sort candidates by score, experience, and skill gaps
+   */
+  private sortCandidates(candidates: any[]): any[] {
+    return candidates.sort((a: any, b: any) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.yearsOfExperience !== a.yearsOfExperience) return b.yearsOfExperience - a.yearsOfExperience;
+      return a.gap.length - b.gap.length;
+    });
+  }
+
+  /**
    * Get activity recommendations for a user
    * Calculates compatibility score for all approved activities
    *
@@ -398,14 +539,7 @@ export class ActivitiesService {
           );
 
           // Human-readable recommendation label
-          const label =
-            score >= 0.85
-              ? 'Top Pick'
-              : score >= 0.7
-                ? 'Highly Recommended'
-                : score >= 0.5
-                  ? 'Recommended'
-                  : 'Consider';
+          const label = this.getRecommendationLabel(score);
 
           return {
             activityId: activity._id,
@@ -465,7 +599,7 @@ export class ActivitiesService {
           else perfRating = 1;
 
           const datasetScore =
-            u.avgScore ?? u.avgFicheEtat ?? u.rankScore ?? u.score ?? 50.0;
+            u.avgScore ?? u.avgFicheEtat ?? u.rankScore ?? u.score ?? 50;
           const datasetValidationRate = u.validationRate ?? null;
           const datasetCompetences = u.nbCompetences ?? null;
           const datasetDate = u.dateEmbauche ?? null;
@@ -647,112 +781,33 @@ export class ActivitiesService {
   }
 
   async getRecommendationsForActivity(activityId: string, optionsOrPrompt: any = {}): Promise<any> {
-    const options = typeof optionsOrPrompt === 'string' ? { prompt: optionsOrPrompt } : optionsOrPrompt;
-    const prompt = options.prompt;
+    const options = this.normalizeOptions(optionsOrPrompt);
     const activity = await this.activityModel.findById(activityId).populate('requiredSkills.skillId').exec();
     if (!activity) {
       throw new NotFoundException(`Activity with ID ${activityId} not found`);
     }
 
-    let promptText = '';
-    let promptSkills: string[] = [];
-    if (typeof options === 'string') {
-      promptText = options.trim();
-    } else if (options && typeof options === 'object' && options.prompt) {
-      promptText = options.prompt.trim();
-    }
-    if (promptText) {
-      const extracted = await this.extractSkillsFromDescription(
-        promptText,
-        activity.title || '',
-      );
-      promptSkills = Array.from(
-        new Set(
-          ((extracted?.extractedSkills || []) as string[])
-            .map((s) => (s || '').trim())
-            .filter(Boolean),
-        ),
-      );
-    }
+    const { promptText, promptSkills } = await this.extractPromptData(options, activity);
 
-    // 1. Initial Filtering: Department
+    // 1-2. Initial & Exclusion Filtering
     const allUsers = await this.usersService.findAll();
     const datasetMap = await this.fetchDatasetProfileMap();
-    const targetDeptIds = activity.targetDepartments || [];
-
-    let eligibleEmployees = (allUsers || []).filter(
-      (user: any) => String(user.role || '').toUpperCase() === Role.EMPLOYEE,
-    );
-
-    if (targetDeptIds.length > 0) {
-      eligibleEmployees = eligibleEmployees.filter((user: any) => {
-        const userDeptId =
-          user.department_id?._id?.toString() || user.department_id?.toString();
-        return targetDeptIds.includes(userDeptId);
-      });
-    }
-
-    // 2. Exclusion Filtering: Already Invited or Enrolled
-    const existingParticipationsList = await this.participationModel
-      .find({ activityId: new Types.ObjectId(activityId) })
-      .lean();
-    const existingAssignmentsList = await this.assignmentModel
-      .find({ activityId: new Types.ObjectId(activityId) })
-      .lean();
-
-    const excludedUserIds = new Set([
-      ...existingParticipationsList.map((p: any) => p.userId.toString()),
-      ...existingAssignmentsList.map((a: any) => a.userId.toString()),
-    ]);
-
-    let candidatesToScore = eligibleEmployees.filter(
-      (user: any) => !excludedUserIds.has(user._id.toString()),
-    );
+    let candidatesToScore = await this.filterEligibleCandidates(allUsers, activity, activityId);
 
     if (candidatesToScore.length === 0) {
       return { activity: activity, candidates: [] };
     }
 
-    // ⚡ Performance Fix 1: Pre-filter by skill overlap BEFORE the expensive NLP call.
-    // This reduces 1500 employees → ~50-300 candidates, dramatically speeding up scoring.
-    const requiredSkillIds = new Set(
-      (activity.requiredSkills || [])
-        .map((r: any) => (r.skillId?._id ?? r.skillId)?.toString()?.trim())
-        .filter(Boolean),
-    );
-
-    if (requiredSkillIds.size > 0) {
-      const intent =
-        activity.intent ||
-        this.prioritizationService.inferIntent(activity.type);
-
-      const filtered = candidatesToScore.filter((user: any) => {
-        const userSkillIds = (user.skills || []).map((s: any) =>
-          s.skillId?.toString()?.trim(),
-        );
-        const hasOverlap = userSkillIds.some((id: string) =>
-          requiredSkillIds.has(id),
-        );
-        // For 'development' intent: prefer employees MISSING skills (skill gaps = good)
-        // For 'performance' intent: prefer employees WHO HAVE the skills
-        // For 'balanced': include all with any overlap
-        if (intent === 'development') return !hasOverlap || hasOverlap; // keep all for dev
-        return hasOverlap;
-      });
-
-      // Guarantee a minimum pool so we always return results
-      candidatesToScore =
-        filtered.length >= 30 ? filtered : candidatesToScore.slice(0, 200);
-    }
-
-    // ⚡ Hard cap at 300 to keep NLP fast regardless of pool size
+    // ⚡ Performance optimization: Pre-filter by skill overlap
+    const intent = activity.intent || this.prioritizationService.inferIntent(activity.type);
+    candidatesToScore = await this.preFilterBySkillOverlap(candidatesToScore, activity, intent);
+    
+    // ⚡ Hard cap at 300 to keep NLP fast
     if (candidatesToScore.length > 300) {
       candidatesToScore = candidatesToScore.slice(0, 300);
     }
 
     // 3. Scoring — intent-aware hybrid
-    const intent =
-      activity.intent || this.prioritizationService.inferIntent(activity.type);
     const nlpActivity = {
       _id: activity._id,
       title: activity.title,
@@ -891,48 +946,9 @@ export class ActivitiesService {
     });
 
     let candidates = rankedCandidates.filter((c: any) => c !== null);
+    candidates = this.applyOptionsFiltering(candidates, options);
 
-    // If frontend options are supplied, we use them for breaking ties or adding modifiers
-    // This allows the slider for "skillPriority" to actually differentiate people correctly!
-    if (Object.keys(options).length > 0) {
-      if (options.experienceFilter > 0) {
-        candidates = candidates.filter(
-          (c: any) => c.yearsOfExperience >= options.experienceFilter,
-        );
-      }
-
-      candidates = candidates.map((c: any) => {
-        let adj = c.score * 100;
-        const gapCount = c.gap.length;
-
-        if (options.skillPriority === 'skills') {
-          if (gapCount === 0) adj += 15;
-          else adj -= gapCount * 5;
-        } else if (options.skillPriority === 'experience') {
-          if (c.yearsOfExperience > 5) adj += 10;
-          if (c.yearsOfExperience > 10) adj += 10;
-        } else if (options.skillPriority === 'growth') {
-          if (gapCount > 0) adj += gapCount * 8;
-        }
-
-        if (options.priorityWeight > 0) {
-          adj += options.priorityWeight * 0.1;
-        }
-
-        c.score = Math.max(0, Math.min(100, Math.round(adj))) / 100;
-        return c;
-      });
-    }
-
-    candidates = candidates.sort((a: any, b: any) => {
-      // Primary: Score
-      if (b.score !== a.score) return b.score - a.score;
-      // Secondary tie breaker: Experience
-      if (b.yearsOfExperience !== a.yearsOfExperience)
-        return b.yearsOfExperience - a.yearsOfExperience;
-      // Tertiary tie breaker: Fewest gaps
-      return a.gap.length - b.gap.length;
-    });
+    candidates = this.sortCandidates(candidates);
 
     if (options.seatsToFill && options.seatsToFill > 0) {
       candidates = candidates.slice(0, options.seatsToFill);

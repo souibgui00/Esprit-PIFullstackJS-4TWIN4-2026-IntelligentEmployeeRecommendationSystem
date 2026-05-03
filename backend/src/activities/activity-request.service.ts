@@ -15,8 +15,8 @@ import { AuditService } from '../common/audit/audit.service';
 export class ActivityRequestService {
   constructor(
     @InjectModel(ActivityRequest.name)
-    private activityRequestModel: Model<ActivityRequest>,
-    @InjectModel(Activity.name) private activityModel: Model<Activity>,
+    private readonly activityRequestModel: Model<ActivityRequest>,
+    @InjectModel(Activity.name) private readonly activityModel: Model<Activity>,
     private readonly auditService: AuditService,
   ) {}
 

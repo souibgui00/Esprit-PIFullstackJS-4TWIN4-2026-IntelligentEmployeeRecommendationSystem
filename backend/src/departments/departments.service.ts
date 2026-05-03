@@ -14,8 +14,8 @@ import { User } from '../users/schema/user.schema';
 @Injectable()
 export class DepartmentsService {
   constructor(
-    @InjectModel(Department.name) private deptModel: Model<Department>,
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Department.name) private readonly deptModel: Model<Department>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
   private generateCode(name: string): string {

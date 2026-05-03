@@ -139,17 +139,15 @@ export class CvExtractionService {
 
       // Metadata extraction
       const headerText = sections.header || text.slice(0, 500);
-      const emailMatch = headerText.match(
-        /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
-      );
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+      const emailMatch = emailRegex.exec(headerText);
       const email = emailMatch
         ? emailMatch[0]
-        : text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] ||
+        : emailRegex.exec(text)?.[0] ||
           null;
 
-      const phoneMatch = text.match(
-        /(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{1,4}\)?[\s.-]?)?\d{2,4}[\s.-]?\d{2,4}[\s.-]?\d{2,6}/,
-      );
+      const phoneRegex = /\+?[\d\s\-()\.]{7,}/;
+      const phoneMatch = phoneRegex.exec(text);
       const telephone = phoneMatch ? phoneMatch[0] : null;
 
       // Improved Name Detection from Header
@@ -332,8 +330,8 @@ export class CvExtractionService {
 
   private extractSkillsSection(text: string): string {
     const skillsSectionRegex =
-      /(?:skills|compétences|technical\s+skills|technologies|hard\s+skills)[\s:]*\n([\s\S]*?)(?:\n\s*(?:experience|education|projects|certif|formation|langues|hobbies|interests|\d{4})|$)/i;
-    const match = text.match(skillsSectionRegex);
+      /(?:skills|compétences)\s*:?\s*\n([\s\S]*?)(?=\n(?:experience|education|projects|formation|$)|$)/i;
+    const match = skillsSectionRegex.exec(text);
     if (match && match[1] && match[1].length > 30) {
       this.logger.log('Targeting skills section for extraction');
       return match[1];
@@ -360,235 +358,24 @@ export class CvExtractionService {
       const suggestions: Set<string> = new Set();
       const normalizedCvText = this.normalizeForMatching(rawTextLower);
 
-      // Pass 1: Match against existing DB skills (Exact & Fuzzy)
-      for (const skill of availableSkills) {
-        const skillNameLower = skill.name.toLowerCase();
-        const normalizedSkillName = this.normalizeForMatching(skillNameLower);
-
-        // Exact Regex Match (Standard)
-        const escaped = this.escapeRegExp(skillNameLower);
-        const regex = new RegExp(`(?:^|\\W)${escaped}(?:$|\\W)`, 'i');
-
-        if (
-          regex.test(rawTextLower) ||
-          normalizedCvText.includes(normalizedSkillName)
-        ) {
-          matchedSkillIds.add(skill._id.toString());
-          continue;
-        }
-
-        // Fuzzy match for short/misspelled versions (only for 5+ chars for safety)
-        if (skillNameLower.length >= 5) {
-          for (const term of cvTerms) {
-            const t = term.toLowerCase();
-            if (
-              t.length >= 4 &&
-              this.calculateLevenshtein(t, skillNameLower) <= 1
-            ) {
-              matchedSkillIds.add(skill._id.toString());
-              break;
-            }
-          }
-        }
-      }
+      // Pass 1: Match against existing DB skills
+      this.matchSkillsAgainstDatabase(
+        availableSkills,
+        rawTextLower,
+        normalizedCvText,
+        cvTerms,
+        matchedSkillIds,
+      );
 
       // Pass 2: Dictionary-based discovery
-      const SKILL_DICTIONARIES = {
-        knowHow: [
-          'Java',
-          'C++',
-          'C#',
-          'Python',
-          'JavaScript',
-          'TypeScript',
-          'HTML',
-          'CSS',
-          'PHP',
-          'Ruby',
-          'Swift',
-          'Kotlin',
-          'Go',
-          'Rust',
-          'React',
-          'Angular',
-          'Vue',
-          'Svelte',
-          'Next.js',
-          'NestJS',
-          'Express',
-          'Django',
-          'Flask',
-          'Spring Boot',
-          'Laravel',
-          'Symfony',
-          'ASP.NET',
-          'MySQL',
-          'PostgreSQL',
-          'MongoDB',
-          'Oracle',
-          'SQL Server',
-          'Redis',
-          'Cassandra',
-          'Elasticsearch',
-          'Git',
-          'Docker',
-          'Kubernetes',
-          'Firebase',
-          'AWS',
-          'Azure',
-          'GCP',
-          'Jenkins',
-          'Terraform',
-          'Ansible',
-          'Linux',
-          'Unix',
-          'Bash',
-          'PowerShell',
-          'Jira',
-          'Confluence',
-          'Trello',
-          'Selenium',
-          'Cypress',
-          'Jest',
-          'Mocha',
-          'Excel',
-          'QuickBooks',
-          'SAP',
-          'Oracle Financials',
-          'Xero',
-          'Tableau',
-          'Power BI',
-          'SPSS',
-          'Bloomberg Terminal',
-          'Google Analytics',
-          'HubSpot',
-          'Salesforce',
-          'Mailchimp',
-          'Hootsuite',
-          'WordPress',
-          'Figma',
-          'Canva',
-          'Workday',
-          'BambooHR',
-          'ADP',
-          'Greenhouse',
-          'Lever',
-          'LinkedIn Recruiter',
-        ],
-        knowledge: [
-          'Agile',
-          'Scrum',
-          'Kanban',
-          'OOP',
-          'Algorithms',
-          'Data Structures',
-          'System Design',
-          'Machine Learning',
-          'Data Science',
-          'AI',
-          'NLP',
-          'Computer Vision',
-          'REST API',
-          'GraphQL',
-          'Microservices',
-          'CI/CD',
-          'TDD',
-          'BDD',
-          'Talent Acquisition',
-          'Employee Relations',
-          'Performance Management',
-          'Compensation',
-          'Benefits Administration',
-          'Onboarding',
-          'Labor Law',
-          'Diversity',
-          'Inclusion',
-          'Organizational Development',
-          'SEO',
-          'SEM',
-          'Content Marketing',
-          'Digital Marketing',
-          'Social Media Marketing',
-          'B2B Sales',
-          'B2C Sales',
-          'Market Research',
-          'Brand Management',
-          'Copywriting',
-          'Public Relations',
-          'Lead Generation',
-          'Accounting',
-          'Financial Analysis',
-          'Budgeting',
-          'Forecasting',
-          'Auditing',
-          'Taxation',
-          'IFRS',
-          'GAAP',
-          'Risk Management',
-          'Corporate Finance',
-          'Payroll',
-          'Underwriting',
-          'Claims Management',
-          'Actuarial Science',
-          'Regulatory Compliance',
-          'Policy Administration',
-          'Quality Assurance',
-        ],
-        softSkill: [
-          'Leadership',
-          'Communication',
-          'Teamwork',
-          'Problem Solving',
-          'Critical Thinking',
-          'Time Management',
-          'Adaptability',
-          'Creativity',
-          'Emotional Intelligence',
-          'Negotiation',
-          'Conflict Resolution',
-          'Project Management',
-          'Customer Service',
-          'Presentation Skills',
-          'Active Listening',
-          'Decision Making',
-          'Work Ethic',
-        ],
-      };
-
-      for (const [skillType, techList] of Object.entries(SKILL_DICTIONARIES)) {
-        for (const tech of techList) {
-          const techLower = tech.toLowerCase();
-          const existsInDb = availableSkills.some(
-            (s) => s.name.toLowerCase() === techLower,
-          );
-
-          if (!existsInDb) {
-            const escaped = this.escapeRegExp(techLower);
-            const regex = new RegExp(`(?<=^|\\W)${escaped}(?=$|\\W)`, 'i');
-
-            if (regex.test(rawTextLower) || cvTerms.includes(techLower)) {
-              if (options.createMissing) {
-                try {
-                  this.logger.log(`Auto-creating missing skill: ${tech}`);
-                  const newSkill = await this.skillsService.create({
-                    name: tech,
-                    category: 'Auto-Discovered',
-                    type: skillType,
-                  });
-                  matchedSkillIds.add(newSkill._id.toString());
-                  availableSkills.push(newSkill);
-                } catch (err: any) {
-                  this.logger.error(
-                    `Failed to auto-create ${tech}: ${err.message}`,
-                  );
-                }
-              } else {
-                suggestions.add(tech);
-              }
-            }
-          }
-        }
-      }
+      await this.matchSkillsAgainstDictionaries(
+        availableSkills,
+        rawTextLower,
+        cvTerms,
+        matchedSkillIds,
+        suggestions,
+        options,
+      );
 
       return {
         matchedSkillIds: Array.from(matchedSkillIds),
@@ -600,6 +387,314 @@ export class CvExtractionService {
       );
       return { matchedSkillIds: [], suggestions: [] };
     }
+  }
+
+  /**
+   * Match skills from database against CV text (Pass 1)
+   */
+  private matchSkillsAgainstDatabase(
+    availableSkills: any[],
+    rawTextLower: string,
+    normalizedCvText: string,
+    cvTerms: string[],
+    matchedSkillIds: Set<string>,
+  ): void {
+    for (const skill of availableSkills) {
+      const skillNameLower = skill.name.toLowerCase();
+      const normalizedSkillName = this.normalizeForMatching(skillNameLower);
+
+      // Exact match
+      const escaped = this.escapeRegExp(skillNameLower);
+      const regex = new RegExp(`(?:^|\\W)${escaped}(?:$|\\W)`, 'i');
+
+      if (
+        regex.test(rawTextLower) ||
+        normalizedCvText.includes(normalizedSkillName)
+      ) {
+        matchedSkillIds.add(skill._id.toString());
+        continue;
+      }
+
+      // Fuzzy match
+      if (this.fuzzyMatchTermInCvTerms(skillNameLower, cvTerms)) {
+        matchedSkillIds.add(skill._id.toString());
+      }
+    }
+  }
+
+  /**
+   * Fuzzy match skill against CV terms using Levenshtein distance
+   */
+  private fuzzyMatchTermInCvTerms(skillName: string, cvTerms: string[]): boolean {
+    if (skillName.length < 5) return false;
+
+    for (const term of cvTerms) {
+      const t = term.toLowerCase();
+      if (t.length >= 4 && this.calculateLevenshtein(t, skillName) <= 1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Match skills from dictionaries against CV text (Pass 2)
+   */
+  private async matchSkillsAgainstDictionaries(
+    availableSkills: any[],
+    rawTextLower: string,
+    cvTerms: string[],
+    matchedSkillIds: Set<string>,
+    suggestions: Set<string>,
+    options: { createMissing?: boolean },
+  ): Promise<void> {
+    const skillDictionaries = this.getSkillDictionaries();
+    const dbSkillNamesLower = new Set(
+      availableSkills.map((s) => s.name.toLowerCase()),
+    );
+
+    for (const [skillType, techList] of Object.entries(skillDictionaries)) {
+      for (const tech of techList) {
+        await this.processSkillFromDictionary(
+          tech,
+          skillType,
+          rawTextLower,
+          cvTerms,
+          dbSkillNamesLower,
+          availableSkills,
+          matchedSkillIds,
+          suggestions,
+          options,
+        );
+      }
+    }
+  }
+
+  /**
+   * Process a single skill from dictionary
+   */
+  private async processSkillFromDictionary(
+    tech: string,
+    skillType: string,
+    rawTextLower: string,
+    cvTerms: string[],
+    dbSkillNamesLower: Set<string>,
+    availableSkills: any[],
+    matchedSkillIds: Set<string>,
+    suggestions: Set<string>,
+    options: { createMissing?: boolean },
+  ): Promise<void> {
+    const techLower = tech.toLowerCase();
+
+    if (dbSkillNamesLower.has(techLower)) return;
+
+    const escaped = this.escapeRegExp(techLower);
+    const regex = new RegExp(`(?<=^|\\W)${escaped}(?=$|\\W)`, 'i');
+
+    if (regex.test(rawTextLower) || cvTerms.includes(techLower)) {
+      if (options.createMissing) {
+        await this.autoCreateSkill(
+          tech,
+          skillType,
+          availableSkills,
+          matchedSkillIds,
+        );
+      } else {
+        suggestions.add(tech);
+      }
+    }
+  }
+
+  /**
+   * Auto-create a missing skill
+   */
+  private async autoCreateSkill(
+    techName: string,
+    skillType: string,
+    availableSkills: any[],
+    matchedSkillIds: Set<string>,
+  ): Promise<void> {
+    try {
+      this.logger.log(`Auto-creating missing skill: ${techName}`);
+      const newSkill = await this.skillsService.create({
+        name: techName,
+        category: 'Auto-Discovered',
+        type: skillType,
+      });
+      matchedSkillIds.add(newSkill._id.toString());
+      availableSkills.push(newSkill);
+    } catch (err: any) {
+      this.logger.error(
+        `Failed to auto-create ${techName}: ${err.message}`,
+      );
+    }
+  }
+
+  /**
+   * Get skill dictionaries
+   */
+  private getSkillDictionaries(): Record<string, string[]> {
+    return {
+      knowHow: [
+        'Java',
+        'C++',
+        'C#',
+        'Python',
+        'JavaScript',
+        'TypeScript',
+        'HTML',
+        'CSS',
+        'PHP',
+        'Ruby',
+        'Swift',
+        'Kotlin',
+        'Go',
+        'Rust',
+        'React',
+        'Angular',
+        'Vue',
+        'Svelte',
+        'Next.js',
+        'NestJS',
+        'Express',
+        'Django',
+        'Flask',
+        'Spring Boot',
+        'Laravel',
+        'Symfony',
+        'ASP.NET',
+        'MySQL',
+        'PostgreSQL',
+        'MongoDB',
+        'Oracle',
+        'SQL Server',
+        'Redis',
+        'Cassandra',
+        'Elasticsearch',
+        'Git',
+        'Docker',
+        'Kubernetes',
+        'Firebase',
+        'AWS',
+        'Azure',
+        'GCP',
+        'Jenkins',
+        'Terraform',
+        'Ansible',
+        'Linux',
+        'Unix',
+        'Bash',
+        'PowerShell',
+        'Jira',
+        'Confluence',
+        'Trello',
+        'Selenium',
+        'Cypress',
+        'Jest',
+        'Mocha',
+        'Excel',
+        'QuickBooks',
+        'SAP',
+        'Oracle Financials',
+        'Xero',
+        'Tableau',
+        'Power BI',
+        'SPSS',
+        'Bloomberg Terminal',
+        'Google Analytics',
+        'HubSpot',
+        'Salesforce',
+        'Mailchimp',
+        'Hootsuite',
+        'WordPress',
+        'Figma',
+        'Canva',
+        'Workday',
+        'BambooHR',
+        'ADP',
+        'Greenhouse',
+        'Lever',
+        'LinkedIn Recruiter',
+      ],
+      knowledge: [
+        'Agile',
+        'Scrum',
+        'Kanban',
+        'OOP',
+        'Algorithms',
+        'Data Structures',
+        'System Design',
+        'Machine Learning',
+        'Data Science',
+        'AI',
+        'NLP',
+        'Computer Vision',
+        'REST API',
+        'GraphQL',
+        'Microservices',
+        'CI/CD',
+        'TDD',
+        'BDD',
+        'Talent Acquisition',
+        'Employee Relations',
+        'Performance Management',
+        'Compensation',
+        'Benefits Administration',
+        'Onboarding',
+        'Labor Law',
+        'Diversity',
+        'Inclusion',
+        'Organizational Development',
+        'SEO',
+        'SEM',
+        'Content Marketing',
+        'Digital Marketing',
+        'Social Media Marketing',
+        'B2B Sales',
+        'B2C Sales',
+        'Market Research',
+        'Brand Management',
+        'Copywriting',
+        'Public Relations',
+        'Lead Generation',
+        'Accounting',
+        'Financial Analysis',
+        'Budgeting',
+        'Forecasting',
+        'Auditing',
+        'Taxation',
+        'IFRS',
+        'GAAP',
+        'Risk Management',
+        'Corporate Finance',
+        'Payroll',
+        'Underwriting',
+        'Claims Management',
+        'Actuarial Science',
+        'Regulatory Compliance',
+        'Policy Administration',
+        'Quality Assurance',
+      ],
+      softSkill: [
+        'Leadership',
+        'Communication',
+        'Teamwork',
+        'Problem Solving',
+        'Critical Thinking',
+        'Time Management',
+        'Adaptability',
+        'Creativity',
+        'Emotional Intelligence',
+        'Negotiation',
+        'Conflict Resolution',
+        'Project Management',
+        'Customer Service',
+        'Presentation Skills',
+        'Active Listening',
+        'Decision Making',
+        'Work Ethic',
+      ],
+    };
   }
 
   private normalizeForMatching(text: string): string {

@@ -91,10 +91,7 @@ export class ParticipationsController {
     @Req() req: any,
     @Param('participationId') participationId: string,
   ) {
-    return this.participationsService.markCompleteByEmployee(
-      participationId,
-      req.user.userId,
-    );
+    return this.markCompleteByEmployee(req, participationId);
   }
 
   @Get('manager/pending-validations')

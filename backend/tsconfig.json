@@ -3,6 +3,7 @@
     "module": "Node16",
     "target": "ES2021",
     "moduleResolution": "node16",
+    "types": ["node", "jest"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strict": true,

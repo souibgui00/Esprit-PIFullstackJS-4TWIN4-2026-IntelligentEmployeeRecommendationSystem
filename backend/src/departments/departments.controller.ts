@@ -37,7 +37,7 @@ export class DepartmentsController {
   async findAll(@Query('limit') limit?: string) {
     const departments = await this.departmentsService.findAll();
     if (limit) {
-      const limitNum = parseInt(limit, 10);
+      const limitNum = Number.parseInt(limit, 10);
       return departments.slice(0, limitNum);
     }
     return departments;

@@ -200,15 +200,10 @@ export class AssignmentsService {
       `[ForwardToDepartmentManagers] START requesterId=${requesterId} activityId=${activityId} candidateIdsCount=${candidateIds?.length || 0} uniqueCandidateIdsCount=${uniqueCandidateIds.length}`,
     );
 
-    if (!activityId) {
-      throw new BadRequestException('activityId is required');
-    }
-    if (!uniqueCandidateIds.length) {
-      throw new BadRequestException(
-        'candidateIds must contain at least one employee',
-      );
-    }
-
+    // Validate input
+    this.validateForwardInput(activityId, uniqueCandidateIds);
+    
+    // Get and validate activity
     const activity = await this.activitiesService.findOne(activityId);
     if (!activity) {
       throw new NotFoundException(`Activity with ID ${activityId} not found`);
@@ -219,9 +214,66 @@ export class AssignmentsService {
       );
     }
 
+    // Process candidates and map to managers
+    const { candidateToManager, skippedCandidates, skippedBreakdown } =
+      await this.processCandidateToManagerMapping(uniqueCandidateIds);
+
+    // Create assignments and send notifications
+    const createdAssignments = await this.createAssignmentsAndNotify(
+      activityId,
+      requesterId,
+      candidateToManager,
+      activity,
+      { aiScore, skillGaps, reason: reason || 'Recommended for department' },
+      skippedCandidates,
+      skippedBreakdown,
+    );
+
+    const totalForwarded = createdAssignments.length;
+    const skipped =
+      skippedBreakdown.candidateNotFound +
+      skippedBreakdown.invalidDepartmentId +
+      skippedBreakdown.managerNotFoundOrInvalidRole +
+      skippedBreakdown.assignmentAlreadyExists;
+
+    this.logger.debug(
+      `[ForwardToDepartmentManagers] END totalForwarded=${totalForwarded} skipped=${skipped} breakdown=${JSON.stringify(skippedBreakdown)} detailsCount=${skippedCandidates.length}`,
+    );
+
+    return {
+      totalForwarded,
+      skipped,
+      skippedBreakdown,
+      skippedDetails: skippedCandidates,
+    };
+  }
+
+  /**
+   * Validate input parameters
+   */
+  private validateForwardInput(activityId: string, uniqueCandidateIds: string[]): void {
+    if (!activityId) {
+      throw new BadRequestException('activityId is required');
+    }
+    if (!uniqueCandidateIds.length) {
+      throw new BadRequestException(
+        'candidateIds must contain at least one employee',
+      );
+    }
+  }
+
+  /**
+   * Process candidates and build candidate-to-manager mapping
+   */
+  private async processCandidateToManagerMapping(
+    uniqueCandidateIds: string[],
+  ): Promise<{
+    candidateToManager: Map<string, string>;
+    skippedCandidates: Array<{ candidateId: string; reason: string }>;
+    skippedBreakdown: any;
+  }> {
     const candidateToManager = new Map<string, string>();
-    const skippedCandidates: Array<{ candidateId: string; reason: string }> =
-      [];
+    const skippedCandidates: Array<{ candidateId: string; reason: string }> = [];
     const skippedBreakdown = {
       candidateNotFound: 0,
       invalidDepartmentId: 0,
@@ -234,65 +286,23 @@ export class AssignmentsService {
         `[ForwardToDepartmentManagers] Employee treated candidateId=${candidateId}`,
       );
 
-      let candidate: any;
-      try {
-        candidate = await this.usersService.findOne(candidateId);
-      } catch {
-        skippedCandidates.push({ candidateId, reason: 'Candidate not found' });
-        skippedBreakdown.candidateNotFound += 1;
-        this.logger.warn(
-          `[ForwardToDepartmentManagers] Skipped: candidate not found candidateId=${candidateId}`,
-        );
-        continue;
-      }
-
-      // Use a raw lean query to get department_id – NOT the populated value from findOne.
-      // Mongoose silently returns null for department_id when populate can't resolve
-      // the referenced document, even if the raw ObjectId is stored correctly.
-      const departmentId =
-        await this.usersService.findRawDepartmentId(candidateId);
-
-      this.logger.debug(
-        `[ForwardToDepartmentManagers] Candidate: "${candidate.name}" (${candidateId}) → departmentId=${departmentId}`,
+      const { candidate, departmentId, valid } = await this.validateCandidate(
+        candidateId,
+        skippedCandidates,
+        skippedBreakdown,
       );
 
-      if (!departmentId || !Types.ObjectId.isValid(departmentId)) {
-        skippedCandidates.push({
-          candidateId,
-          reason: `"${candidate.name}" has no department assigned`,
-        });
-        skippedBreakdown.invalidDepartmentId += 1;
-        this.logger.warn(
-          `[ForwardToDepartmentManagers] Skipped: no valid departmentId for candidateId=${candidateId}`,
-        );
-        continue;
-      }
+      if (!valid) continue;
 
-      const manager =
-        await this.usersService.getManagerByDepartment(departmentId);
-      if (!manager) {
-        skippedCandidates.push({
-          candidateId,
-          reason: `No manager found for "${candidate.name}"'s department (deptId: ${departmentId})`,
-        });
-        skippedBreakdown.managerNotFoundOrInvalidRole += 1;
-        this.logger.warn(
-          `[ForwardToDepartmentManagers] Skipped: no manager for departmentId=${departmentId}`,
-        );
-        continue;
-      }
+      const { manager, managerValid } = await this.validateAndGetManager(
+        departmentId,
+        candidate,
+        candidateId,
+        skippedCandidates,
+        skippedBreakdown,
+      );
 
-      if (manager.role?.toUpperCase() !== Role.MANAGER) {
-        skippedCandidates.push({
-          candidateId,
-          reason: `Found ${manager.name} but role is "${manager.role}", not MANAGER`,
-        });
-        skippedBreakdown.managerNotFoundOrInvalidRole += 1;
-        this.logger.warn(
-          `[ForwardToDepartmentManagers] Skipped: role mismatch role=${manager.role}`,
-        );
-        continue;
-      }
+      if (!managerValid) continue;
 
       const managerId = String(manager._id || '');
       if (!managerId || managerId === 'undefined') {
@@ -310,6 +320,102 @@ export class AssignmentsService {
       candidateToManager.set(candidateId, managerId);
     }
 
+    return { candidateToManager, skippedCandidates, skippedBreakdown };
+  }
+
+  /**
+   * Validate candidate and retrieve department ID
+   */
+  private async validateCandidate(
+    candidateId: string,
+    skippedCandidates: Array<{ candidateId: string; reason: string }>,
+    skippedBreakdown: any,
+  ): Promise<{ candidate: any; departmentId: any; valid: boolean }> {
+    let candidate: any;
+    try {
+      candidate = await this.usersService.findOne(candidateId);
+    } catch {
+      skippedCandidates.push({ candidateId, reason: 'Candidate not found' });
+      skippedBreakdown.candidateNotFound += 1;
+      this.logger.warn(
+        `[ForwardToDepartmentManagers] Skipped: candidate not found candidateId=${candidateId}`,
+      );
+      return { candidate: null, departmentId: null, valid: false };
+    }
+
+    const departmentId =
+      await this.usersService.findRawDepartmentId(candidateId);
+
+    this.logger.debug(
+      `[ForwardToDepartmentManagers] Candidate: "${candidate.name}" (${candidateId}) → departmentId=${departmentId}`,
+    );
+
+    if (!departmentId || !Types.ObjectId.isValid(departmentId)) {
+      skippedCandidates.push({
+        candidateId,
+        reason: `"${candidate.name}" has no department assigned`,
+      });
+      skippedBreakdown.invalidDepartmentId += 1;
+      this.logger.warn(
+        `[ForwardToDepartmentManagers] Skipped: no valid departmentId for candidateId=${candidateId}`,
+      );
+      return { candidate: null, departmentId: null, valid: false };
+    }
+
+    return { candidate, departmentId, valid: true };
+  }
+
+  /**
+   * Validate manager for department and check role
+   */
+  private async validateAndGetManager(
+    departmentId: any,
+    candidate: any,
+    candidateId: string,
+    skippedCandidates: Array<{ candidateId: string; reason: string }>,
+    skippedBreakdown: any,
+  ): Promise<{ manager: any; managerValid: boolean }> {
+    const manager = await this.usersService.getManagerByDepartment(departmentId);
+
+    if (!manager) {
+      skippedCandidates.push({
+        candidateId,
+        reason: `No manager found for "${candidate.name}"'s department (deptId: ${departmentId})`,
+      });
+      skippedBreakdown.managerNotFoundOrInvalidRole += 1;
+      this.logger.warn(
+        `[ForwardToDepartmentManagers] Skipped: no manager for departmentId=${departmentId}`,
+      );
+      return { manager: null, managerValid: false };
+    }
+
+    if (manager.role?.toUpperCase() !== Role.MANAGER) {
+      skippedCandidates.push({
+        candidateId,
+        reason: `Found ${manager.name} but role is "${manager.role}", not MANAGER`,
+      });
+      skippedBreakdown.managerNotFoundOrInvalidRole += 1;
+      this.logger.warn(
+        `[ForwardToDepartmentManagers] Skipped: role mismatch role=${manager.role}`,
+      );
+      return { manager: null, managerValid: false };
+    }
+
+    return { manager, managerValid: true };
+  }
+
+  /**
+   * Create assignments and send notifications
+   */
+  private async createAssignmentsAndNotify(
+    activityId: string,
+    requesterId: string,
+    candidateToManager: Map<string, string>,
+    activity: any,
+    metadata: { aiScore: any; skillGaps: any; reason: string },
+    skippedCandidates: Array<{ candidateId: string; reason: string }>,
+    skippedBreakdown: any,
+  ): Promise<any[]> {
     const activityObjectId = new Types.ObjectId(activityId);
     const managerIds = [...new Set([...candidateToManager.values()])];
     const managerObjectIds = managerIds.map((id) => new Types.ObjectId(id));
@@ -368,9 +474,9 @@ export class AssignmentsService {
         type: 'recommendation',
         recommendedBy: new Types.ObjectId(requesterId),
         metadata: {
-          aiScore,
-          skillGaps: skillGaps || [],
-          reason: reason || 'Recommended by department-based routing',
+          aiScore: metadata.aiScore,
+          skillGaps: metadata.skillGaps || [],
+          reason: metadata.reason || 'Recommended by department-based routing',
         },
       });
 
@@ -393,7 +499,7 @@ export class AssignmentsService {
             candidateIds: singleCandidateIds,
             assignmentCount: 1,
             recommendedBy: requesterId,
-            aiScore: aiScore ?? null,
+            aiScore: metadata.aiScore ?? null,
           },
         },
         { emitRealtime: false },
@@ -404,7 +510,7 @@ export class AssignmentsService {
         title: 'New Skill Recommendations',
         activityId,
         candidateIds: singleCandidateIds,
-        aiScore: aiScore ?? null,
+        aiScore: metadata.aiScore ?? null,
         metadata: notification.metadata,
         url: `/manager/recommendations`,
       };
@@ -419,23 +525,8 @@ export class AssignmentsService {
       );
     }
 
-    const totalForwarded = createdAssignments.length;
-    const skipped =
-      skippedBreakdown.candidateNotFound +
-      skippedBreakdown.invalidDepartmentId +
-      skippedBreakdown.managerNotFoundOrInvalidRole +
-      skippedBreakdown.assignmentAlreadyExists;
 
-    this.logger.debug(
-      `[ForwardToDepartmentManagers] END totalForwarded=${totalForwarded} skipped=${skipped} breakdown=${JSON.stringify(skippedBreakdown)} detailsCount=${skippedCandidates.length}`,
-    );
-
-    return {
-      totalForwarded,
-      skipped,
-      skippedBreakdown,
-      skippedDetails: skippedCandidates,
-    };
+    return createdAssignments;
   }
 
   async forwardToDepartmentManager(
