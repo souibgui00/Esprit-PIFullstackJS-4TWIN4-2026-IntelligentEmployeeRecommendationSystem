@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ActivitiesController } from './activities.controller';
 import { ActivitiesService } from './activities.service';
 import { AuditService } from '../common/audit/audit.service';
-import { beforeEach, describe, it } from 'node:test';
 
 describe('ActivitiesController', () => {
   let controller: ActivitiesController;
@@ -121,5 +120,9 @@ describe('ActivitiesController', () => {
         { _id: '2', title: 'Activity 2' },
       ]);
     });
+  });
+
+  afterAll(async () => {
+    jest.clearAllMocks();
   });
 });

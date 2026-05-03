@@ -4,7 +4,6 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppController } from './../src/app.controller';
 import { AppService } from './../src/app.service';
-import { describe, beforeEach, it } from 'node:test';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -24,5 +23,10 @@ describe('AppController (e2e)', () => {
       .get('/')
       .expect(200)
       .expect('Hello World!');
+  });
+
+  afterAll(async () => {
+    await app?.close?.();
+    jest.clearAllMocks();
   });
 });
