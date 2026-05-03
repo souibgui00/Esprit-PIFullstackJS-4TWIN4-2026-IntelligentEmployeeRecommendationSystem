@@ -171,4 +171,21 @@ describe('ActivitiesService', () => {
       expect(mockActivityModel.findByIdAndUpdate).toHaveBeenCalled();
     });
   });
+
+  describe('findAll', () => {
+    it('should return all activities for non-employee roles', async () => {
+      const mockActivities = [
+        { _id: new Types.ObjectId(), title: 'Leadership Training' },
+      ];
+
+      mockActivityModel.find.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockActivities),
+      });
+
+      const result = await service.findAll('manager');
+
+      expect(result).toEqual(mockActivities);
+      expect(mockActivityModel.find).toHaveBeenCalledWith();
+    });
+  });
 });

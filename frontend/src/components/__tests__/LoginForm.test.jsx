@@ -13,7 +13,7 @@ jest.mock('../../services/api', () => ({
 const renderWithProviders = (component) => {
   return render(
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         {component}
       </BrowserRouter>
     </AuthProvider>

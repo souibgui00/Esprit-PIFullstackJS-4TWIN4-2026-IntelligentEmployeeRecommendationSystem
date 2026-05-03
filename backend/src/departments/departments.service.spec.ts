@@ -3,7 +3,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { DepartmentsService } from './departments.service';
 import { Department } from './schema/department.schema';
 import { User } from '../users/schema/user.schema';
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 
 describe('DepartmentsService', () => {
   let service: DepartmentsService;
@@ -63,6 +63,14 @@ describe('DepartmentsService', () => {
       
       const result = await service.create({ name: 'Finance' } as any);
       expect(result.name).toBe('Finance');
+    });
+  });
+
+  describe('remove', () => {
+    it('should block deletion when users are assigned', async () => {
+      mockUserModel.countDocuments.mockResolvedValue(2);
+
+      await expect(service.remove('dept-1')).rejects.toThrow(BadRequestException);
     });
   });
 });
