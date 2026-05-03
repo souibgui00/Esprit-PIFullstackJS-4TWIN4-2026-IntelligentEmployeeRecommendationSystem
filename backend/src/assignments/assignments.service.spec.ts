@@ -16,9 +16,9 @@ describe('AssignmentsService', () => {
   const mockNotificationCreate = jest.fn();
   const mockEmitToUser = jest.fn();
 
-  const mockAssignmentModel: any = jest.fn().mockImplementation((data) => ({
+  const mockAssignmentModel: any = jest.fn().mockImplementation((data: any) => ({
     ...data,
-    save: jest.fn().mockImplementation(function () {
+    save: jest.fn().mockImplementation(function (this: any) {
       return Promise.resolve(this);
     }),
   }));
@@ -119,7 +119,7 @@ describe('AssignmentsService', () => {
       workflowStatus: 'approved',
     });
     mockAssignmentModel.findOne.mockResolvedValue(null);
-    mockAssignmentModel.mockImplementation((data) => ({
+    mockAssignmentModel.mockImplementation((data: any) => ({
       ...data,
       save: jest.fn().mockResolvedValue(savedAssignment),
     }));
@@ -153,7 +153,7 @@ describe('AssignmentsService', () => {
     const managerId = new Types.ObjectId().toHexString();
     const candidateId = new Types.ObjectId().toHexString();
     const activityId = new Types.ObjectId().toHexString();
-    const saveMock = jest.fn().mockImplementation(function () {
+    const saveMock = jest.fn().mockImplementation(function (this: any) {
       return Promise.resolve(this);
     });
 

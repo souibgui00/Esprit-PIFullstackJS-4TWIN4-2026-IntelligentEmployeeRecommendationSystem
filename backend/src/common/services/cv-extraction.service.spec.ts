@@ -1,5 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CvExtractionService } from './cv-extraction.service';
+// Mock pdfreader used by the service to avoid parsing real PDFs in unit tests
+jest.mock('pdfreader', () => ({
+  PdfReader: jest.fn().mockImplementation(() => ({
+    parseBuffer: jest.fn((buf: Buffer, cb: Function) => {
+      // simulate callback-based parser; some implementations call cb(null, {text}) repeatedly
+      cb(null, { text: 'mocked text' });
+      return null;
+    }),
+  })),
+}));
 import { SkillsService } from '../../skills/skills.service';
 
 describe('CvExtractionService', () => {
@@ -69,7 +79,6 @@ describe('CvExtractionService', () => {
       const result = await service.extractProfileFromBuffer(
         mockCvBuffer,
         'pdf',
-        { createMissing: false },
       );
 
       expect(result).toHaveProperty('email');
@@ -89,7 +98,7 @@ describe('CvExtractionService', () => {
         { _id: '3', name: 'TypeScript', type: 'programming' },
       ]);
 
-      const result = await service.findSkillsInText(text, {
+      const result = await (service as any).findSkillsInText(text, {
         createMissing: false,
       });
 
@@ -111,12 +120,17 @@ describe('CvExtractionService', () => {
         { skillId: '2', name: 'Python', confidence: 0.87 },
       ];
 
-      const result = await service.matchSkillsAgainstDatabase(skills, {
-        createMissing: false,
-      });
+      // matchSkillsAgainstDatabase is private; test behavior via findSkillsInText
+      mockSkillsService.findAll.mockResolvedValueOnce([
+        { _id: '1', name: 'JavaScript', type: 'programming' },
+        { _id: '2', name: 'Python', type: 'programming' },
+      ]);
 
-      expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBeGreaterThanOrEqual(0);
+      const combined = 'JavaScript Python';
+      const r = await (service as any).findSkillsInText(combined, { createMissing: false });
+
+      expect(Array.isArray(r.matchedSkillIds)).toBe(true);
+      expect(r.matchedSkillIds.length).toBeGreaterThanOrEqual(0);
     });
   });
 

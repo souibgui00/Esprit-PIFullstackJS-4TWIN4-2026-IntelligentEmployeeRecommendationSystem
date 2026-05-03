@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { ActivityRequestService } from './activity-request.service';
 import { ActivitiesService } from './activities.service';
+import { AuditService } from '../common/audit/audit.service';
 import { Types } from 'mongoose';
 
 describe('ActivityRequestService', () => {
@@ -19,6 +20,16 @@ describe('ActivityRequestService', () => {
     findOne: jest.fn(),
     create: jest.fn(),
   };
+  const mockActivityModel = {
+    create: jest.fn(),
+    find: jest.fn(),
+    findById: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+  };
+
+  const mockAuditService = {
+    logAction: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -31,8 +42,16 @@ describe('ActivityRequestService', () => {
           useValue: mockActivityRequestModel,
         },
         {
+          provide: getModelToken('Activity'),
+          useValue: mockActivityModel,
+        },
+        {
           provide: ActivitiesService,
           useValue: mockActivitiesService,
+        },
+        {
+          provide: AuditService,
+          useValue: mockAuditService,
         },
       ],
     }).compile();

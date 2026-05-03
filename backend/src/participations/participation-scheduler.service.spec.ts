@@ -21,10 +21,13 @@ describe('ParticipationSchedulerService', () => {
   const mockUsersService = {
     findOne: jest.fn(),
     findManagedEmployeeIds: jest.fn(),
+    findAll: jest.fn(),
   };
 
   const mockActivitiesService = {
     findOne: jest.fn(),
+    findAll: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -63,15 +66,18 @@ describe('ParticipationSchedulerService', () => {
 
   describe('handleResponseDeadlines', () => {
     it('should process overdue employee responses', async () => {
-      mockParticipationModel.find.mockResolvedValueOnce([
-        {
-          _id: new Types.ObjectId(),
-          userId: new Types.ObjectId(),
-          activityId: new Types.ObjectId(),
-          responseDeadline: new Date(Date.now() - 86400000), // 1 day ago
-          status: 'pending',
-        },
-      ]);
+      mockParticipationModel.find.mockReturnValueOnce({
+        populate: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([
+          {
+            _id: new Types.ObjectId(),
+            userId: new Types.ObjectId(),
+            activityId: new Types.ObjectId(),
+            responseDeadline: new Date(Date.now() - 86400000), // 1 day ago
+            status: 'pending',
+          },
+        ]),
+      });
 
       mockParticipationModel.updateMany.mockResolvedValueOnce({
         modifiedCount: 1,
@@ -89,21 +95,44 @@ describe('ParticipationSchedulerService', () => {
 
   describe('handleCompletionDeadlines', () => {
     it('should process overdue activity completions', async () => {
-      mockParticipationModel.find.mockResolvedValueOnce([
-        {
-          _id: new Types.ObjectId(),
-          userId: new Types.ObjectId(),
-          activityId: new Types.ObjectId(),
-          completionDeadline: new Date(Date.now() - 86400000),
-          status: 'in_progress',
-        },
-      ]);
+      mockParticipationModel.find.mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue([
+          {
+            _id: new Types.ObjectId(),
+            userId: new Types.ObjectId(),
+            activityId: new Types.ObjectId(),
+            completionDeadline: new Date(Date.now() - 86400000),
+            status: 'in_progress',
+          },
+        ]),
+      });
 
       mockParticipationModel.updateMany.mockResolvedValueOnce({
         modifiedCount: 1,
       });
 
-      await service.handleCompletionDeadlines();
+      // Service exposes activity-end transition job which handles completions
+      mockActivitiesService.findAll = jest.fn().mockResolvedValueOnce([
+        {
+          _id: new Types.ObjectId(),
+          title: 'Ended Activity',
+          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          duration: '1 day',
+        },
+      ]);
+
+      mockParticipationModel.find.mockResolvedValueOnce([
+        {
+          _id: new Types.ObjectId(),
+          userId: new Types.ObjectId(),
+          activityId: new Types.ObjectId(),
+          status: 'accepted',
+        },
+      ]);
+
+      mockUsersService.findOne.mockResolvedValueOnce({ _id: new Types.ObjectId(), manager_id: new Types.ObjectId() });
+
+      await service.handleActivityEndTransitions();
 
       expect(mockParticipationModel.find).toHaveBeenCalled();
     });
@@ -111,22 +140,39 @@ describe('ParticipationSchedulerService', () => {
 
   describe('handleEvaluationReminders', () => {
     it('should send evaluation reminders to managers', async () => {
-      mockParticipationModel.find.mockResolvedValueOnce([
-        {
-          _id: new Types.ObjectId(),
-          userId: new Types.ObjectId(),
-          activityId: new Types.ObjectId(),
-          status: 'completed',
-          managerEvaluated: false,
-          completedAt: new Date(Date.now() - 432000000), // 5 days ago
-        },
-      ]);
+      mockParticipationModel.find.mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue([
+          {
+            _id: new Types.ObjectId(),
+            userId: new Types.ObjectId(),
+            activityId: new Types.ObjectId(),
+            status: 'completed',
+            managerEvaluated: false,
+            completedAt: new Date(Date.now() - 432000000), // 5 days ago
+          },
+        ]),
+      });
 
       mockNotificationsService.create.mockResolvedValueOnce({
         _id: new Types.ObjectId(),
       });
 
-      await service.handleEvaluationReminders();
+      // Use escalation job which handles overdue validations/reminders
+      mockUsersService.findAll = jest.fn().mockResolvedValueOnce([
+        { _id: new Types.ObjectId(), role: 'hr' },
+      ]);
+
+      mockParticipationModel.find.mockResolvedValueOnce([
+        {
+          _id: new Types.ObjectId(),
+          userId: new Types.ObjectId(),
+          activityId: new Types.ObjectId(),
+          status: 'awaiting_organizer',
+          awaitingOrganizerSince: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        },
+      ]);
+
+      await service.handleEscalations();
 
       expect(mockParticipationModel.find).toHaveBeenCalled();
     });

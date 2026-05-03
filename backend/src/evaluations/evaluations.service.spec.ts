@@ -8,9 +8,9 @@ import { UsersService } from '../users/users.service';
 describe('EvaluationsService', () => {
   let service: EvaluationsService;
 
-  const mockEvaluationModel: any = jest.fn().mockImplementation((data) => ({
+  const mockEvaluationModel: any = jest.fn().mockImplementation((data: any) => ({
     ...data,
-    save: jest.fn().mockImplementation(function () {
+    save: jest.fn().mockImplementation(function (this: any) {
       return Promise.resolve(this);
     }),
   }));
@@ -49,7 +49,7 @@ describe('EvaluationsService', () => {
     const evaluationId = new Types.ObjectId();
     const approveSpy = jest.spyOn(service, 'approve').mockResolvedValue();
 
-    mockEvaluationModel.mockImplementation((data) => ({
+    mockEvaluationModel.mockImplementation((data: any) => ({
       ...data,
       _id: evaluationId,
       save: jest.fn().mockResolvedValue({

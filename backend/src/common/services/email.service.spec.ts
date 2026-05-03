@@ -70,9 +70,10 @@ describe('EmailService', () => {
 
   describe('sendResetPasswordLink', () => {
     it('should attempt to send password reset email', async () => {
-      const result = await service.sendResetPasswordLink(
+      const result = await service.sendResetPasswordEmail(
         'user@example.com',
-        'reset-token-123',
+        'User',
+        'https://example.com/reset/reset-token-123',
       );
 
       expect(typeof result).toBe('boolean');
@@ -81,9 +82,11 @@ describe('EmailService', () => {
 
   describe('sendWelcomeEmail', () => {
     it('should send welcome email to new user', async () => {
-      const result = await service.sendWelcomeEmail(
+      const result = await service.sendNewUserCredentials(
         'user@example.com',
         'John Doe',
+        'password123',
+        'MAT123',
       );
 
       expect(typeof result).toBe('boolean');

@@ -61,7 +61,9 @@ describe('RecommendationModelService', () => {
 
   describe('predictScore', () => {
     it('should throw NotFoundException when user not found', async () => {
-      mockUserModel.findById.mockResolvedValueOnce(null);
+      mockUserModel.findById.mockReturnValueOnce({
+        populate: jest.fn().mockResolvedValue(null),
+      });
 
       await expect(
         service.predictScore('invalid-user-id', 'activity-id'),
@@ -69,10 +71,12 @@ describe('RecommendationModelService', () => {
     });
 
     it('should throw NotFoundException when activity not found', async () => {
-      mockUserModel.findById.mockResolvedValueOnce({
-        _id: new Types.ObjectId(),
-        name: 'Test User',
-        skills: [],
+      mockUserModel.findById.mockReturnValueOnce({
+        populate: jest.fn().mockResolvedValue({
+          _id: new Types.ObjectId(),
+          name: 'Test User',
+          skills: [],
+        }),
       });
       mockActivityModel.findById.mockResolvedValueOnce(null);
 
@@ -85,17 +89,19 @@ describe('RecommendationModelService', () => {
       const userId = new Types.ObjectId();
       const activityId = new Types.ObjectId();
 
-      mockUserModel.findById.mockResolvedValueOnce({
-        _id: userId,
-        name: 'Test User',
-        skills: [
-          {
-            skillId: { _id: new Types.ObjectId(), name: 'JavaScript' },
-            etat: 'validated',
-          },
-        ],
-        yearsOfExperience: 5,
-        rankScore: 0.8,
+      mockUserModel.findById.mockReturnValueOnce({
+        populate: jest.fn().mockResolvedValue({
+          _id: userId,
+          name: 'Test User',
+          skills: [
+            {
+              skillId: { _id: new Types.ObjectId(), name: 'JavaScript' },
+              etat: 'validated',
+            },
+          ],
+          yearsOfExperience: 5,
+          rankScore: 0.8,
+        }),
       });
 
       mockActivityModel.findById.mockResolvedValueOnce({
@@ -126,12 +132,14 @@ describe('RecommendationModelService', () => {
       const userId = new Types.ObjectId();
       const activityId = new Types.ObjectId();
 
-      mockUserModel.findById.mockResolvedValueOnce({
-        _id: userId,
-        name: 'Test User',
-        skills: [],
-        yearsOfExperience: 5,
-        rankScore: 0.8,
+      mockUserModel.findById.mockReturnValueOnce({
+        populate: jest.fn().mockResolvedValue({
+          _id: userId,
+          name: 'Test User',
+          skills: [],
+          yearsOfExperience: 5,
+          rankScore: 0.8,
+        }),
       });
 
       mockActivityModel.findById.mockResolvedValueOnce({

@@ -21,7 +21,7 @@ describe('SettingsService', () => {
       providers: [
         SettingsService,
         {
-          provide: getModelToken('Settings'),
+          provide: getModelToken('Setting'),
           useValue: mockSettingsModel,
         },
       ],

@@ -6,10 +6,12 @@ import { Types } from 'mongoose';
 describe('AuditService', () => {
   let service: AuditService;
 
-  const mockAuditLogModel = {
-    create: jest.fn(),
-    save: jest.fn(),
+  // Mock model as a constructor function that returns instances with a save() method
+  const mockAuditInstance = {
+    save: jest.fn().mockResolvedValue({}),
   };
+
+  const mockAuditLogModel: any = jest.fn().mockImplementation(() => mockAuditInstance);
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -41,22 +43,13 @@ describe('AuditService', () => {
         metadata: { source: 'admin' },
       };
 
-      const mockAuditLog = {
-        save: jest.fn().mockResolvedValueOnce({
-          _id: new Types.ObjectId(),
-          ...auditData,
-        }),
-      };
+      const mockSaved = { _id: new Types.ObjectId(), ...auditData };
+      mockAuditInstance.save.mockResolvedValueOnce(mockSaved);
 
-      jest
-        .spyOn(mockAuditLogModel, 'constructor' as any)
-        .mockImplementationOnce(() => mockAuditLog);
-
-      // Since the service creates a new model instance, we need to test the logic differently
       await service.logAction(auditData);
 
-      // The service should attempt to save the audit log
-      expect(service).toBeDefined();
+      expect(mockAuditLogModel).toHaveBeenCalled();
+      expect(mockAuditInstance.save).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', async () => {

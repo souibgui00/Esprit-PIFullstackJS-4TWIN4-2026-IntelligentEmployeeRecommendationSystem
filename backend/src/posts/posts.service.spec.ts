@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
+import { HttpService } from '@nestjs/axios';
 import { PostsService } from './posts.service';
 import { UsersService } from '../users/users.service';
 import { Types } from 'mongoose';
@@ -19,6 +20,11 @@ describe('PostsService', () => {
     findOne: jest.fn(),
   };
 
+  const mockHttpService = {
+    post: jest.fn(),
+    get: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -32,6 +38,10 @@ describe('PostsService', () => {
         {
           provide: UsersService,
           useValue: mockUsersService,
+        },
+        {
+          provide: HttpService,
+          useValue: mockHttpService,
         },
       ],
     }).compile();
