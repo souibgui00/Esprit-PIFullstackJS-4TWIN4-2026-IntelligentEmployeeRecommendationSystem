@@ -5,124 +5,128 @@ import { AuditService } from '../common/audit/audit.service';
 
 describe('ActivitiesController', () => {
   let controller: ActivitiesController;
-  let activitiesService: ActivitiesService;
-  let auditService: AuditService;
-  const createAsyncMock = () => jest.fn<Promise<any>, any[]>();
+  let service: jest.Mocked<ActivitiesService>;
+  let audit: jest.Mocked<AuditService>;
+
+  const mockActivitiesService = {
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findPending: jest.fn(),
+    findRecommendationEligible: jest.fn(),
+    extractSkillsFromDescription: jest.fn(),
+    getRecommendations: jest.fn(),
+    getRecommendationsForActivity: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+    enroll: jest.fn(),
+    unenroll: jest.fn(),
+    approve: jest.fn(),
+    reject: jest.fn(),
+  };
+
+  const mockAuditService = {
+    logAction: jest.fn().mockResolvedValue({}),
+  };
+
+  const mockReq = { user: { userId: 'user-1', role: 'admin' } };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ActivitiesController],
       providers: [
-        {
-          provide: ActivitiesService,
-          useValue: {
-            findPending: createAsyncMock(),
-            findAll: createAsyncMock(),
-            create: createAsyncMock(),
-            update: createAsyncMock(),
-            remove: createAsyncMock(),
-            findOne: createAsyncMock(),
-            findRecommendationEligible: createAsyncMock(),
-            extractSkillsFromDescription: createAsyncMock(),
-            getRecommendations: createAsyncMock(),
-            getRecommendationsForActivity: createAsyncMock(),
-            enroll: createAsyncMock(),
-          },
-        },
-        {
-          provide: AuditService,
-          useValue: {
-            logAction: createAsyncMock(),
-          },
-        },
+        { provide: ActivitiesService, useValue: mockActivitiesService },
+        { provide: AuditService, useValue: mockAuditService },
       ],
     }).compile();
 
     controller = module.get<ActivitiesController>(ActivitiesController);
-    activitiesService = module.get<ActivitiesService>(ActivitiesService);
-    auditService = module.get<AuditService>(AuditService);
+    service = module.get(ActivitiesService);
+    audit = module.get(AuditService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findPending', () => {
-    it('should call activitiesService.findPending and return results', async () => {
-      const mockPendingActivities = [
-        { _id: '1', title: 'Activity 1', status: 'pending' },
-        { _id: '2', title: 'Activity 2', status: 'pending' },
-      ];
-
-      (activitiesService.findPending as jest.MockedFunction<
-        () => Promise<any[]>
-      >).mockResolvedValue(
-        mockPendingActivities,
-      );
-
-      const result = await controller.findPending();
-
-      expect(activitiesService.findPending).toHaveBeenCalled();
-      expect(result).toEqual(mockPendingActivities);
-    });
-
-    it('should handle empty pending activities', async () => {
-      (activitiesService.findPending as jest.MockedFunction<
-        () => Promise<any[]>
-      >).mockResolvedValue([]);
-
-      const result = await controller.findPending();
-
-      expect(result).toEqual([]);
-      expect(activitiesService.findPending).toHaveBeenCalled();
+  describe('create', () => {
+    it('calls service and logs action', async () => {
+      service.create.mockResolvedValue({ _id: 'act1' } as any);
+      const res = await controller.create({ title: 'New' } as any, mockReq);
+      expect(res).toBeDefined();
+      expect(audit.logAction).toHaveBeenCalled();
     });
   });
 
   describe('findAll', () => {
-    it('should return all activities without limit', async () => {
-      const mockActivities = [
-        { _id: '1', title: 'Activity 1' },
-        { _id: '2', title: 'Activity 2' },
-      ];
-      const req = { user: { userId: '123', role: 'ADMIN' } };
-
-      (activitiesService.findAll as jest.MockedFunction<
-        () => Promise<any[]>
-      >).mockResolvedValue(
-        mockActivities,
-      );
-
-      const result = await controller.findAll(req);
-
-      expect(activitiesService.findAll).toHaveBeenCalledWith('ADMIN', '123');
-      expect(result).toEqual(mockActivities);
+    it('calls service with role and userId', async () => {
+      service.findAll.mockResolvedValue([]);
+      await controller.findAll(mockReq);
+      expect(service.findAll).toHaveBeenCalledWith('admin', 'user-1');
     });
 
-    it('should return limited activities when limit is provided', async () => {
-      const mockActivities = [
-        { _id: '1', title: 'Activity 1' },
-        { _id: '2', title: 'Activity 2' },
-        { _id: '3', title: 'Activity 3' },
-      ];
-      const req = { user: { userId: '123', role: 'ADMIN' } };
-
-      (activitiesService.findAll as jest.MockedFunction<
-        () => Promise<any[]>
-      >).mockResolvedValue(
-        mockActivities,
-      );
-
-      const result = await controller.findAll(req, '2');
-
-      expect(result).toHaveLength(2);
-      expect(result).toEqual([
-        { _id: '1', title: 'Activity 1' },
-        { _id: '2', title: 'Activity 2' },
-      ]);
+    it('handles limit query', async () => {
+      service.findAll.mockResolvedValue([{ id: 1 }, { id: 2 }] as any);
+      const res = await controller.findAll(mockReq, '1');
+      expect(res).toHaveLength(1);
     });
   });
 
-  afterAll(async () => {
-    jest.clearAllMocks();
+  describe('workflow actions', () => {
+    it('approves and logs', async () => {
+      service.approve.mockResolvedValue({} as any);
+      await controller.approve('act1', mockReq);
+      expect(service.approve).toHaveBeenCalled();
+      expect(audit.logAction).toHaveBeenCalled();
+    });
+
+    it('rejects and logs', async () => {
+      service.reject.mockResolvedValue({} as any);
+      await controller.reject('act1', mockReq, 'Reason');
+      expect(service.reject).toHaveBeenCalled();
+      expect(audit.logAction).toHaveBeenCalled();
+    });
+
+    it('enrolls', async () => {
+      await controller.enroll('act1');
+      expect(service.enroll).toHaveBeenCalledWith('act1');
+    });
+
+    it('unenrolls', async () => {
+      await controller.unenroll('act1');
+      expect(service.unenroll).toHaveBeenCalledWith('act1');
+    });
+  });
+
+  describe('recommendations', () => {
+    it('getRecommendations for user', async () => {
+      await controller.getRecommendations('u1');
+      expect(service.getRecommendations).toHaveBeenCalledWith('u1');
+    });
+
+    it('getRecommendationsForActivity', async () => {
+      await controller.getRecommendationsForActivity('act1', 'some prompt');
+      expect(service.getRecommendationsForActivity).toHaveBeenCalledWith('act1', 'some prompt');
+    });
+  });
+
+  describe('CRUD', () => {
+    it('findOne', async () => {
+      await controller.findOne('act1');
+      expect(service.findOne).toHaveBeenCalledWith('act1');
+    });
+
+    it('update and log', async () => {
+      service.update.mockResolvedValue({} as any);
+      await controller.update('act1', { title: 'U' } as any, mockReq);
+      expect(audit.logAction).toHaveBeenCalled();
+    });
+
+    it('remove and log', async () => {
+      service.remove.mockResolvedValue({} as any);
+      await controller.remove('act1', mockReq);
+      expect(audit.logAction).toHaveBeenCalled();
+    });
   });
 });

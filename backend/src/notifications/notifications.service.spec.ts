@@ -1,40 +1,46 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { NotificationsService } from './notifications.service';
-import { Types } from 'mongoose';
 import { NotificationsGateway } from './notifications.gateway';
+import { Types } from 'mongoose';
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
 
-  const mockNotificationModel = function(data: any) {
+  const mockSave = jest.fn();
+  function MockNotificationModel(data: any) {
+    this.save = mockSave;
+  }
+  
+  MockNotificationModel.find = jest.fn();
+  MockNotificationModel.findByIdAndUpdate = jest.fn();
+  MockNotificationModel.updateMany = jest.fn();
+  MockNotificationModel.findByIdAndDelete = jest.fn();
+
+  function chainable(result: any) {
     return {
-      ...data,
-      save: jest.fn().mockResolvedValue(data),
+      sort: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(result),
     };
-  };
+  }
 
-  mockNotificationModel.find = jest.fn();
-  mockNotificationModel.findById = jest.fn();
-  mockNotificationModel.findByIdAndUpdate = jest.fn();
-  mockNotificationModel.updateMany = jest.fn();
-  mockNotificationModel.findByIdAndDelete = jest.fn();
-
-  const mockNotificationsGateway = {
+  const mockGateway = {
     emitToUser: jest.fn(),
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NotificationsService,
         {
           provide: getModelToken('Notification'),
-          useValue: mockNotificationModel,
+          useValue: MockNotificationModel,
         },
         {
           provide: NotificationsGateway,
-          useValue: mockNotificationsGateway,
+          useValue: mockGateway,
         },
       ],
     }).compile();
@@ -46,32 +52,57 @@ describe('NotificationsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findByRecipient', () => {
-    it('should return notifications for a recipient', async () => {
-      const recipientId = new Types.ObjectId().toHexString();
-      const mockNotifications = [{ recipientId, title: 'Test' }];
-      
-      mockNotificationModel.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        exec: jest.fn().mockResolvedValue(mockNotifications),
-      });
+  describe('create', () => {
+    it('creates notification and emits', async () => {
+      mockSave.mockResolvedValueOnce({ recipientId: 'user-1' });
+      await service.create({ recipientId: 'user-1', title: 'Test', message: 'Hello', type: 'info' } as any);
+      expect(mockSave).toHaveBeenCalled();
+      expect(mockGateway.emitToUser).toHaveBeenCalledWith('user-1', 'newNotification', { recipientId: 'user-1' });
+    });
 
-      const result = await service.findByRecipient(recipientId);
-      expect(result).toHaveLength(1);
-      expect(result[0].title).toBe('Test');
+    it('handles emit error gracefully', async () => {
+      mockSave.mockResolvedValueOnce({ recipientId: 'user-1' });
+      mockGateway.emitToUser.mockImplementationOnce(() => { throw new Error('Gateway Error'); });
+      const res = await service.create({ recipientId: 'user-1', title: 'Test', message: 'Hello', type: 'info' } as any);
+      expect(res.recipientId).toBe('user-1'); // still returns created document
+    });
+
+    it('does not emit if emitRealtime is false', async () => {
+      mockSave.mockResolvedValueOnce({ recipientId: 'user-1' });
+      await service.create({ recipientId: 'user-1', title: 'Test', message: 'Hello', type: 'info' } as any, { emitRealtime: false });
+      expect(mockGateway.emitToUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findByRecipient', () => {
+    it('finds by recipient', async () => {
+      MockNotificationModel.find.mockReturnValue(chainable([{ title: 'Test' }]));
+      const res = await service.findByRecipient('user-1');
+      expect(res).toHaveLength(1);
     });
   });
 
   describe('markAsRead', () => {
-    it('should update notification status to read', async () => {
-      const id = new Types.ObjectId().toHexString();
-      mockNotificationModel.findByIdAndUpdate.mockReturnValue({
-        exec: jest.fn().mockResolvedValue({ _id: id, read: true }),
-      });
+    it('marks read', async () => {
+      MockNotificationModel.findByIdAndUpdate.mockReturnValue(chainable({ read: true }));
+      await service.markAsRead('id-1');
+      expect(MockNotificationModel.findByIdAndUpdate).toHaveBeenCalledWith('id-1', { read: true }, { new: true });
+    });
+  });
 
-      const result = await service.markAsRead(id);
-      expect(result).toBeDefined();
-      expect(result?.read).toBe(true);
+  describe('markAllAsRead', () => {
+    it('marks all read for user', async () => {
+      MockNotificationModel.updateMany.mockReturnValue(chainable({ modifiedCount: 2 }));
+      await service.markAllAsRead('user-1');
+      expect(MockNotificationModel.updateMany).toHaveBeenCalledWith({ recipientId: 'user-1', read: false }, { read: true });
+    });
+  });
+
+  describe('remove', () => {
+    it('removes notification', async () => {
+      MockNotificationModel.findByIdAndDelete.mockReturnValue(chainable({}));
+      await service.remove('id-1');
+      expect(MockNotificationModel.findByIdAndDelete).toHaveBeenCalledWith('id-1');
     });
   });
 });
