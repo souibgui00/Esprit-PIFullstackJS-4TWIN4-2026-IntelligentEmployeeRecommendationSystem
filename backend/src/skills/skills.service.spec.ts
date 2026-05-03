@@ -194,8 +194,74 @@ describe('SkillsService', () => {
   });
 
   describe('getGlobalSkillsDashboard', () => {
-    it('should have getGlobalSkillsDashboard method', () => {
-      expect(typeof service.getGlobalSkillsDashboard).toBe('function');
+    it('should aggregate global skills correctly', async () => {
+      // Mock Users
+      const mockUserModelFind = jest.fn().mockReturnValue({
+        select: jest.fn().mockResolvedValue([
+          {
+            _id: new Types.ObjectId(),
+            skills: [
+              { skillId: mockSkillId, score: 80, level: 'expert' },
+              { skillId: mockSkillId, score: 60, level: 'advanced' }, // Second occurrence for same user to test uniqueness logic
+              { skillId: new Types.ObjectId().toHexString(), score: 40, level: 'beginner' } // Another skill
+            ]
+          },
+          {
+            _id: new Types.ObjectId(),
+            skills: [
+              { skillId: mockSkillId, score: 50, level: 'intermediate' }
+            ]
+          }
+        ])
+      });
+
+      mockSkillModel.db.model.mockReturnValue({ find: mockUserModelFind });
+      mockSkillModel.countDocuments.mockResolvedValue(10);
+      
+      mockSkillModel.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([
+          { _id: mockSkillId, name: 'NestJS', category: 'Backend', type: 'Framework' }
+        ]),
+        exec: jest.fn()
+      });
+
+      const result = await service.getGlobalSkillsDashboard();
+
+      expect(result.totalSkillsConfigured).toBe(10);
+      expect(result.totalEvaluations).toBe(4);
+      expect(result.averageOrganizationScore).toBe(230 / 4); // 80+60+40+50 = 230
+      
+      // Top skills array
+      expect(result.topSkills.length).toBeGreaterThan(0);
+      const topSkill = result.topSkills.find((s: any) => s.skillId === mockSkillId);
+      expect(topSkill).toBeDefined();
+      expect(topSkill.employeeCount).toBe(2); // 2 distinct users
+      expect(topSkill.averageScore).toBe(190 / 2); // 80+60+50 = 190 total score / 2 users
+      
+      // Category Distribution
+      expect(result.categoryDistribution).toEqual(expect.arrayContaining([
+        expect.objectContaining({ category: 'Backend' })
+      ]));
+
+      // Level Distribution
+      expect(result.levelDistribution.expert).toBe(1);
+      expect(result.levelDistribution.advanced).toBe(1);
+      expect(result.levelDistribution.intermediate).toBe(1);
+      expect(result.levelDistribution.beginner).toBe(1);
+    });
+
+    it('should handle empty skills gracefully', async () => {
+      mockSkillModel.db.model.mockReturnValue({
+        find: jest.fn().mockReturnValue({
+          select: jest.fn().mockResolvedValue([])
+        })
+      });
+      mockSkillModel.countDocuments.mockResolvedValue(0);
+
+      const result = await service.getGlobalSkillsDashboard();
+      expect(result.totalEvaluations).toBe(0);
+      expect(result.averageOrganizationScore).toBe(0);
+      expect(result.topSkills).toHaveLength(0);
     });
   });
 });

@@ -64,7 +64,8 @@ describe('UsersService', () => {
   function chainable(result: any) {
     return {
       populate: jest.fn().mockReturnThis(),
-      select: jest.fn().mockResolvedValue(result),
+      select: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockReturnThis(),
       exec: jest.fn().mockResolvedValue(result),
       then: jest.fn().mockImplementation((onFulfilled: any) => Promise.resolve(onFulfilled ? onFulfilled(result) : result)),
       catch: jest.fn().mockImplementation((onRejected: any) => Promise.resolve()),
@@ -168,6 +169,106 @@ describe('UsersService', () => {
   describe('invalidateUsersCache', () => {
     it('runs without error', () => {
       expect(() => service.invalidateUsersCache()).not.toThrow();
+    });
+  });
+  describe('create', () => {
+    it('creates user successfully', async () => {
+      const mockSave = jest.fn().mockResolvedValue({ toObject: () => mockUser });
+      // override userModel temporarily
+      const OriginalModel = (service as any).userModel;
+      (service as any).userModel = function(data: any) {
+        this.save = mockSave;
+      };
+      
+      const res = await service.create({ name: 'New', email: 'new@test.com' });
+      expect(res).toBeDefined();
+
+      // restore
+      (service as any).userModel = OriginalModel;
+    });
+  });
+
+  describe('findAll and variants', () => {
+    it('findAll returns users', async () => {
+      mockUserModel.find.mockReturnValue(chainable([mockUser]));
+      const res = await service.findAll();
+      expect(res).toHaveLength(1);
+    });
+
+    it('findAllLightweight returns lean users', async () => {
+      mockUserModel.find.mockReturnValue(chainable([mockUser]));
+      const res = await service.findAllLightweight();
+      expect(res).toHaveLength(1);
+    });
+
+    it('findManagers returns managers', async () => {
+      mockUserModel.find.mockReturnValue(chainable([mockUser]));
+      const res = await service.findManagers();
+      expect(res).toHaveLength(1);
+    });
+  });
+
+  describe('update', () => {
+    it('updates user successfully', async () => {
+      mockUserModel.findByIdAndUpdate.mockReturnValue(chainable(mockUser));
+      const res = await service.update(mockUserId, { name: 'Updated' } as any);
+      expect(res.name).toBe('John Doe');
+    });
+
+    it('throws if not found', async () => {
+      mockUserModel.findByIdAndUpdate.mockReturnValue(chainable(null));
+      await expect(service.update('nope', {} as any)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('password reset tokens', () => {
+    it('saveResetToken', async () => {
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(true);
+      await service.saveResetToken(mockUserId, 'token', new Date());
+      expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalled();
+    });
+
+    it('findByResetToken', async () => {
+      mockUserModel.findOne.mockResolvedValue(mockUser);
+      const res = await service.findByResetToken('token');
+      expect(res).toEqual(mockUser);
+    });
+
+    it('updatePassword', async () => {
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(true);
+      await service.updatePassword(mockUserId, 'new');
+      expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalled();
+    });
+  });
+
+  describe('skill management', () => {
+    it('addSkillToUser', async () => {
+      const userDoc = { ...mockUser, save: jest.fn().mockResolvedValue(true), skills: [] };
+      mockUserModel.findById.mockReturnValue(chainable(userDoc));
+      await service.addSkillToUser(mockUserId, { skillId: mockSkillId });
+      expect(userDoc.save).toHaveBeenCalled();
+    });
+
+    it('calculateSkillScore', async () => {
+      const userDoc = { ...mockUser, markModified: jest.fn(), save: jest.fn().mockResolvedValue(true) };
+      mockUserModel.findById.mockReturnValue(chainable(userDoc));
+      await service.calculateSkillScore(mockUserId, mockSkillId);
+      expect(userDoc.save).toHaveBeenCalled();
+    });
+
+    it('updateUserSkill', async () => {
+      const userDoc = { ...mockUser, markModified: jest.fn(), save: jest.fn().mockResolvedValue(true) };
+      mockUserModel.findById.mockReturnValue(chainable(userDoc));
+      await service.updateUserSkill(mockUserId, mockSkillId, { score: 99 });
+      expect(userDoc.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('healSkillObjectIds', () => {
+    it('heals object ids', async () => {
+      mockUserModel.find.mockReturnValue({ select: jest.fn().mockResolvedValue([{ skills: [{ skillId: '5f9f1b9b9b9b9b9b9b9b9b9b' }], save: jest.fn(), markModified: jest.fn() }]) });
+      await service.healSkillObjectIds();
+      expect(mockUserModel.find).toHaveBeenCalled();
     });
   });
 });

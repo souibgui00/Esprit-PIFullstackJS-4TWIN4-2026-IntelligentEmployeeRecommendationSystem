@@ -3,187 +3,155 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { CvExtractionService } from '../common/services/cv-extraction.service';
 import { AuditService } from '../common/audit/audit.service';
-import { UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Request } from 'express';
 
 describe('UsersController', () => {
   let controller: UsersController;
-  let usersService: UsersService;
-
-  const mockUsersService = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn(),
-    addSkillToUser: jest.fn(),
-  };
-
-  const mockCvExtractionService = {
-    extractCvData: jest.fn(),
-  };
-
-  const mockAuditService = {
-    logAction: jest.fn(),
-  };
+  let usersService: jest.Mocked<UsersService>;
+  let cvExtractionService: jest.Mocked<CvExtractionService>;
+  let auditService: jest.Mocked<AuditService>;
 
   beforeEach(async () => {
+    const mockUsersService = {
+      update: jest.fn(),
+      findOne: jest.fn(),
+      addSkillToUser: jest.fn(),
+      changePassword: jest.fn(),
+      updateUserSkill: jest.fn(),
+      create: jest.fn(),
+      findAllLightweight: jest.fn(),
+      findAll: jest.fn(),
+      calculateAllEmployeesWeightedSkillScores: jest.fn(),
+      calculateEmployeeWeightedSkillScore: jest.fn(),
+      remove: jest.fn(),
+      updateRole: jest.fn(),
+      recomputeUserSkillScores: jest.fn(),
+      recomputeAllUsersSkillScores: jest.fn(),
+      healSkillObjectIds: jest.fn(),
+      removeSkillFromUser: jest.fn(),
+      calculateSkillScore: jest.fn(),
+      calculateGlobalActivityScore: jest.fn(),
+      getCombinedScore: jest.fn(),
+    };
+
+    const mockCvExtractionService = {
+      extractDataFromCV: jest.fn(),
+      extractProfileFromBuffer: jest.fn(),
+    };
+
+    const mockAuditService = {
+      logAction: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
-        {
-          provide: UsersService,
-          useValue: mockUsersService,
-        },
-        {
-          provide: CvExtractionService,
-          useValue: mockCvExtractionService,
-        },
-        {
-          provide: AuditService,
-          useValue: mockAuditService,
-        },
+        { provide: UsersService, useValue: mockUsersService },
+        { provide: CvExtractionService, useValue: mockCvExtractionService },
+        { provide: AuditService, useValue: mockAuditService },
       ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    usersService = module.get<UsersService>(UsersService);
+    usersService = module.get(UsersService);
+    cvExtractionService = module.get(CvExtractionService);
+    auditService = module.get(AuditService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findAll', () => {
-    it('should return array of users', async () => {
-      const mockUsers = [
-        {
-          id: '1',
-          name: 'Test User 1',
-          email: 'test1@example.com',
-          role: 'EMPLOYEE',
-        },
-        {
-          id: '2',
-          name: 'Test User 2',
-          email: 'test2@example.com',
-          role: 'MANAGER',
-        },
-      ];
+  describe('uploadAvatar', () => {
+    it('should upload avatar and update user', async () => {
+      const mockReq = { user: { userId: '1' } } as unknown as Request;
+      const mockFile = { filename: 'test.png' };
+      usersService.update.mockResolvedValue({ id: '1', avatar: 'url' } as any);
 
-      jest.spyOn(usersService, 'findAll').mockResolvedValue(mockUsers as any);
-
-      const result = await controller.findAll();
-
-      expect(result).toEqual(mockUsers);
-      expect(usersService.findAll).toHaveBeenCalled();
-    });
-
-    it('should return empty array when no users exist', async () => {
-      jest.spyOn(usersService, 'findAll').mockResolvedValue([]);
-
-      const result = await controller.findAll();
-
-      expect(result).toEqual([]);
-      expect(usersService.findAll).toHaveBeenCalled();
+      const result = await controller.uploadAvatar(mockReq, mockFile);
+      expect(usersService.update).toHaveBeenCalledWith('1', expect.objectContaining({ avatar: expect.stringContaining('test.png') }));
+      expect(result).toBeDefined();
     });
   });
 
-  describe('findOne', () => {
-    it('should return a user when found', async () => {
-      const mockUser = {
-        id: '1',
-        name: 'Test User',
-        email: 'test@example.com',
-        role: 'EMPLOYEE',
-      };
+  describe('uploadMyCv', () => {
+    it('should upload cv, extract skills and update user', async () => {
+      const mockReq = { user: { userId: '1' } } as unknown as Request;
+      const mockFile = { filename: 'test.pdf', path: '/path/test.pdf', originalname: 'test.pdf' };
+      
+      usersService.update.mockResolvedValue({} as any);
+      cvExtractionService.extractDataFromCV.mockResolvedValue(['skill1', 'skill2']);
+      usersService.findOne.mockResolvedValue({ yearsOfExperience: 5, skills: [] } as any);
+      usersService.addSkillToUser.mockResolvedValue({} as any);
 
-      jest.spyOn(usersService, 'findOne').mockResolvedValue(mockUser as any);
+      const result = await controller.uploadMyCv(mockReq, mockFile);
+      expect(cvExtractionService.extractDataFromCV).toHaveBeenCalled();
+      expect(usersService.addSkillToUser).toHaveBeenCalledTimes(2);
+      expect(result).toHaveProperty('message');
+    });
+  });
 
-      const result = await controller.findOne('1');
-
-      expect(result).toEqual(mockUser);
+  describe('getMe', () => {
+    it('should return current user', async () => {
+      const mockReq = { user: { userId: '1' } } as unknown as Request;
+      usersService.findOne.mockResolvedValue({ id: '1', name: 'Test' } as any);
+      
+      const result = await controller.getMe(mockReq);
       expect(usersService.findOne).toHaveBeenCalledWith('1');
-    });
-
-    it('should return null when user not found', async () => {
-      jest.spyOn(usersService, 'findOne').mockResolvedValue(null);
-
-      const result = await controller.findOne('999');
-
-      expect(result).toBeNull();
-      expect(usersService.findOne).toHaveBeenCalledWith('999');
+      expect(result.name).toBe('Test');
     });
   });
 
-  describe('update', () => {
-    it('should update user successfully', async () => {
-      const updateUserDto: UpdateUserDto = {
-        name: 'Updated Name',
-        telephone: '+1234567890',
-      };
-
-      const updatedUser = {
-        id: '1',
-        name: 'Updated Name',
-        email: 'test@example.com',
-        telephone: '+1234567890',
-        role: 'EMPLOYEE',
-      };
-
-      jest.spyOn(usersService, 'update').mockResolvedValue(updatedUser as any);
-
-      const mockRequest = { user: { userId: 'admin' } } as any;
-      const result = await controller.update(mockRequest, '1', updateUserDto);
-
-      expect(result).toEqual(updatedUser);
-      expect(usersService.update).toHaveBeenCalledWith('1', updateUserDto);
+  describe('CRUD operations', () => {
+    it('should create user', async () => {
+      const mockReq = { user: { userId: 'admin1' } } as unknown as Request;
+      const dto = { email: 'test@test.com', password: '123' } as any;
+      usersService.create.mockResolvedValue({ _id: '1', email: 'test@test.com' } as any);
+      
+      const result = await controller.create(mockReq, dto);
+      expect(usersService.create).toHaveBeenCalledWith(dto);
+      expect(auditService.logAction).toHaveBeenCalled();
+      expect(result?._id).toBe('1');
     });
 
-    it('should throw NotFoundException when updating non-existent user', async () => {
-      const updateUserDto: UpdateUserDto = {
-        name: 'Updated Name',
-      };
-
-      jest.spyOn(usersService, 'update').mockRejectedValue(
-        new NotFoundException('User not found')
-      );
-
-      const mockRequest = { user: { userId: 'admin' } } as any;
-      await expect(controller.update(mockRequest, '999', updateUserDto)).rejects.toThrow(
-        NotFoundException
-      );
+    it('should find all lightweight', async () => {
+      usersService.findAllLightweight.mockResolvedValue([]);
+      await controller.findAll(undefined, 'true');
+      expect(usersService.findAllLightweight).toHaveBeenCalled();
     });
-  });
 
-  describe('remove', () => {
-    it('should delete user successfully', async () => {
-      const mockUser = {
-        id: '1',
-        name: 'Test User',
-        email: 'test@example.com',
-      };
+    it('should update user', async () => {
+      const mockReq = { user: { userId: 'admin1' } } as unknown as Request;
+      usersService.findOne.mockResolvedValue({ _id: '1' } as any);
+      usersService.update.mockResolvedValue({ _id: '1', name: 'Updated' } as any);
+      
+      const result = await controller.update(mockReq, '1', { name: 'Updated' } as any);
+      expect(usersService.update).toHaveBeenCalledWith('1', { name: 'Updated' });
+      expect(auditService.logAction).toHaveBeenCalled();
+    });
 
-      jest.spyOn(usersService, 'findOne').mockResolvedValue(mockUser as any);
-      jest.spyOn(usersService, 'remove').mockResolvedValue(mockUser as any);
-
-      const mockRequest = { user: { userId: 'admin' } } as any;
-      const response = await controller.remove(mockRequest, '1');
-
-      expect(response).toEqual(mockUser);
+    it('should remove user', async () => {
+      const mockReq = { user: { userId: 'admin1' } } as unknown as Request;
+      usersService.findOne.mockResolvedValue({ _id: '1' } as any);
+      usersService.remove.mockResolvedValue({ deleted: true } as any);
+      
+      await controller.remove(mockReq, '1');
       expect(usersService.remove).toHaveBeenCalledWith('1');
+      expect(auditService.logAction).toHaveBeenCalled();
+    });
+  });
+
+  describe('Skill endpoints', () => {
+    it('should add skill to user', async () => {
+      usersService.addSkillToUser.mockResolvedValue({} as any);
+      await controller.addSkill('1', { skillId: 's1' });
+      expect(usersService.addSkillToUser).toHaveBeenCalledWith('1', { skillId: 's1' });
     });
 
-    it('should throw NotFoundException when deleting non-existent user', async () => {
-      jest.spyOn(usersService, 'findOne').mockResolvedValue(null);
-      jest.spyOn(usersService, 'remove').mockRejectedValue(
-        new Error('User not found')
-      );
-
-      const mockRequest = { user: { userId: 'admin' } } as any;
-      await expect(controller.remove(mockRequest, '999')).rejects.toThrow(
-        'User not found'
-      );
+    it('should calculate global activity score', async () => {
+      usersService.calculateGlobalActivityScore.mockResolvedValue(0.5);
+      const res = await controller.getGlobalActivityScore('1');
+      expect(res).toBe(0.5);
     });
   });
 });
