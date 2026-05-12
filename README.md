@@ -98,7 +98,7 @@ Built as a **Final Year Engineering Project at ESPRIT**, in direct partnership w
 - 🔐 **Role-based Access** — HR Manager · Employee · Admin
 - 🔔 **Smart Notifications** — real-time match alerts
 - ♿ **Accessibility Widget** — Screen Reader, Dyslexic Font, High Contrast & more
-- 🌍 **Multilingual** — French and Arabic
+- 🌍 **Multilingual** — French and English
 
 ---
 
@@ -117,7 +117,8 @@ Built-in accessibility widget including:
 > 📅 **Year** — 2025/2026 · Promo 25/26
 
 ---
-
+ Our Live link ; 
+ https://skillhr.netlify.app/
 <div align="center">
 
 **Built with ❤️ by TechBuilders @ ESPRIT**
