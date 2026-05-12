@@ -1,0 +1,3 @@
+// Déplacé depuis backend/scripts/simple-pdf-test.cjs
+// Test PDF simple
+// ...existing code...

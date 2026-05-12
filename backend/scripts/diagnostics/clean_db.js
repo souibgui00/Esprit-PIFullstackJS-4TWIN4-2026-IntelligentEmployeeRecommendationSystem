@@ -1,0 +1,3 @@
+// Déplacé depuis backend/clean_db.js
+// Script de nettoyage de la base de données
+// ...existing code...

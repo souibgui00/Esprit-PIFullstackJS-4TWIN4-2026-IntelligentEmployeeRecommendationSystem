@@ -1,0 +1,3 @@
+// Déplacé depuis backend/check-db-state.cjs
+// Script de diagnostic de l’état de la base de données
+// ...existing code...

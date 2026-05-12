@@ -1,0 +1,298 @@
+import { useData } from "@/lib/data-store"
+import { DashboardHeader } from "@/components/dashboard/header"`nimport { useAuth } from "@/lib/auth-context"
+import { DashboardHeader } from "@/components/dashboard/header"`nimport { Badge } from "@/components/ui/badge"
+import { DashboardHeader } from "@/components/dashboard/header"`nimport { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+import { useNavigate } from "react-router-dom"
+import { DashboardHeader } from "@/components/dashboard/header"`nimport {
+  Users, TrendingUp, Calendar, ClipboardCheck,
+  ArrowRight, BookOpen, AlertTriangle, Sparkles, Target, Zap, LayoutDashboard
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+
+export default function ManagerDashboard() {
+  const { employees, activities, evaluations, departments } = useData()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  const managerDept = departments.find(d => d.manager_id === user?.id)
+  const deptName = managerDept?.name || "Engineering"
+  const deptEmployees = employees.filter(e => e.department === deptName)
+
+  // Calculate department statistics
+  const avgSkillScore = deptEmployees.length > 0
+    ? Math.round(deptEmployees.reduce((sum, e) => {
+      const empAvg = e.skills.length > 0
+        ? e.skills.reduce((s, sk) => s + (sk.score || 0), 0) / e.skills.length
+        : 0
+      return sum + empAvg
+    }, 0) / deptEmployees.length)
+    : 0
+
+  const upcomingActivities = activities.filter(a => a.status === "upcoming" || a.status === "ongoing").slice(0, 3)
+  const deptEvaluations = evaluations.filter(ev =>
+    deptEmployees.some(e => e.id === ev.employeeId)
+  )
+
+  const employeesNeedingAttention = deptEmployees
+    .filter(e => {
+      const avgScore = e.skills.length > 0
+        ? e.skills.reduce((s, sk) => s + (sk.score || 0), 0) / e.skills.length
+        : 0
+      return avgScore < 60
+    })
+    .slice(0, 4)
+
+  return (
+    <div className="flex flex-col bg-background min-h-screen">
+      <DashboardHeader title="Dashboard" description="Professional workspace interface" />
+
+      <div className="flex-1 p-8 space-y-8 animate-in fade-in duration-500">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center border border-slate-200">
+              <LayoutDashboard className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                {deptName} Dashboard
+              </h1>
+              <p className="text-sm text-slate-500">Operational status overview for {deptName} department.</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate("/manager/assignments")}
+              className="bg-white text-slate-700 border border-slate-200 font-medium py-2.5 px-5 rounded-lg text-sm shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2"
+            >
+              <Target className="h-4 w-4 text-slate-400" />
+              View Assignments
+            </button>
+            <button
+              onClick={() => navigate("/manager/evaluations")}
+              className="bg-primary text-white font-medium py-2.5 px-5 rounded-lg text-sm shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              New Assessment
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid gap-6 md:grid-cols-4">
+          <StatCard
+            title="Total Employees"
+            value={deptEmployees.length}
+            sub="Active team members"
+            icon={Users}
+          />
+          <StatCard
+            title="Team Skill Score"
+            value={`${avgSkillScore}%`}
+            sub="Average department score"
+            icon={TrendingUp}
+            progress={avgSkillScore}
+          />
+          <StatCard
+            title="Active Training"
+            value={upcomingActivities.length}
+            sub="Current programs"
+            icon={BookOpen}
+          />
+          <StatCard
+            title="Pending Reviews"
+            value={deptEvaluations.filter(e => e.status === "submitted").length}
+            sub="Awaiting action"
+            icon={ClipboardCheck}
+          />
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Team Registry */}
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/30">
+              <div>
+                <h3 className="text-base font-bold text-slate-800">Team Roster</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Quick view of department personnel.</p>
+              </div>
+              <button
+                onClick={() => navigate("/manager/employees")}
+                className="text-sm font-semibold text-primary flex items-center gap-1.5 hover:gap-2 transition-all"
+              >
+                View all <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              {deptEmployees.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-sm text-slate-400 italic">No employees found in this department.</p>
+                </div>
+              )}
+              {deptEmployees.slice(0, 5).map((emp) => {
+                const score = emp.skills.length > 0
+                  ? Math.round(emp.skills.reduce((s, sk) => s + (sk.score || 0), 0) / emp.skills.length)
+                  : 0
+                return (
+                  <div key={emp.id} className="flex items-center gap-4 group p-2 rounded-lg hover:bg-slate-50 transition-all cursor-pointer" onClick={() => navigate("/manager/employees")}>
+                    <Avatar className="h-10 w-10 border border-slate-100 shadow-sm">
+                      <AvatarImage src={emp.avatar} className="object-cover" />
+                      <AvatarFallback className="bg-slate-100 text-slate-500 font-medium text-xs">
+                        {emp.name.split(" ").map(n => n[0]).join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-800 truncate leading-tight">{emp.name}</p>
+                      <p className="text-xs text-slate-500 leading-none mt-1">{emp.position}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary/70 transition-all duration-700" style={{ width: `${score}%` }} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-700 w-8 text-right">{score}%</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Performance Alerts */}
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+            <div className="p-6 border-b border-slate-100 bg-slate-50/30">
+              <h3 className="text-base font-bold text-slate-800">Performance Alerts</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Members identified for skill development support.</p>
+            </div>
+            <div className="p-6 space-y-4">
+              {employeesNeedingAttention.length === 0 ? (
+                <div className="text-center py-10 bg-emerald-50/30 border border-emerald-100 rounded-lg">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <p className="text-sm font-semibold text-emerald-700">All team members are performing well.</p>
+                </div>
+              ) : (
+                employeesNeedingAttention.map((emp) => {
+                  return (
+                    <div key={emp.id} className="flex items-center gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition-all group">
+                      <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-100 shrink-0">
+                        <AlertTriangle className="h-5 w-5 text-amber-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-slate-800 truncate">{emp.name}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Skill score below threshold</p>
+                      </div>
+                      <button
+                        onClick={() => navigate("/manager/employees")}
+                        className="text-xs font-semibold text-white bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 transition-all shadow-sm"
+                      >
+                        Details
+                      </button>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Training Programs */}
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/30">
+              <div>
+                <h3 className="text-base font-bold text-slate-800">Training Programs</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Current and upcoming team activities.</p>
+              </div>
+              <button
+                onClick={() => navigate("/manager/activities")}
+                className="text-sm font-semibold text-primary flex items-center gap-1.5 hover:gap-2 transition-all"
+              >
+                Full list <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              {upcomingActivities.length === 0 && (
+                <div className="text-center py-10">
+                  <p className="text-sm text-slate-400 italic">No active programs at this time.</p>
+                </div>
+              )}
+              {upcomingActivities.map(activity => (
+                <div key={activity.id} className="flex items-center gap-4 p-4 rounded-lg border border-slate-100 hover:border-primary/20 hover:bg-slate-50 transition-all bg-white shadow-sm">
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-100 shrink-0 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                    <BookOpen className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-800 truncate group-hover:text-primary transition-colors leading-tight">{activity.title}</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {new Date(activity.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} � {activity.duration}
+                    </p>
+                  </div>
+                  <Badge className={cn(
+                    "text-[10px] font-bold rounded-md border-none px-2.5 py-1",
+                    activity.status === "ongoing" ? "bg-emerald-100 text-emerald-700" : "bg-primary/10 text-primary"
+                  )}>
+                    {activity.status === "ongoing" ? "Active" : "Upcoming"}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Access */}
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+            <div className="p-6 border-b border-slate-100 bg-slate-50/30">
+              <h3 className="text-base font-bold text-slate-800">Quick Access</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Commonly used management tools.</p>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-4">
+              {[
+                { label: "New Assessment", icon: ClipboardCheck, path: "/manager/evaluations", color: "text-blue-500", bg: "bg-blue-50" },
+                { label: "Team Directory", icon: Users, path: "/manager/employees", color: "text-indigo-500", bg: "bg-indigo-50" },
+                { label: "Activity Logs", icon: Calendar, path: "/manager/activities", color: "text-amber-500", bg: "bg-amber-50" },
+                { label: "Skill Analytics", icon: TrendingUp, path: "/manager/skills", color: "text-emerald-500", bg: "bg-emerald-50" },
+              ].map(({ label, icon: Icon, path, color, bg }) => (
+                <button
+                  key={label}
+                  onClick={() => navigate(path)}
+                  className="group flex flex-col items-center gap-3 p-6 bg-white border border-slate-100 rounded-xl hover:border-primary/30 hover:shadow-md transition-all active:scale-95"
+                >
+                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center transition-all", bg)}>
+                    <Icon className={cn("h-6 w-6", color)} />
+                  </div>
+                  <span className="text-xs font-bold text-slate-700 group-hover:text-primary transition-colors text-center">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StatCard({ title, value, sub, icon: Icon, progress }) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm group hover:border-primary/30 transition-all flex flex-col justify-between h-full relative overflow-hidden">
+      <div className="flex items-center justify-between mb-4">
+        <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm">
+          <Icon className="h-5 w-5 text-primary" />
+        </div>
+      </div>
+      <div>
+        <div className="text-3xl font-bold text-slate-900 tracking-tight leading-none">{value}</div>
+        <p className="text-xs font-medium text-slate-500 mt-2">{sub}</p>
+        <div className="h-0.5 w-6 bg-primary mt-4 mb-2 group-hover:w-full transition-all duration-500 rounded-full" />
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{title}</p>
+      </div>
+      {progress !== undefined && (
+        <div className="mt-6 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${progress}%` }} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+
+
+
+
+
